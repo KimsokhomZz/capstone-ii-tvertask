@@ -18,6 +18,7 @@ import EmailVerification from "./Pages/Authentication/EmailVerification.jsx";
 import EmailSent from "./Pages/Authentication/EmailSent.jsx";
 // @ts-ignore
 import Dashboard from "./Pages/Dashboard/Dashboard.jsx";
+import TodoList from "./Pages/TaskList/TaskList.jsx";
 // @ts-ignore
 import { AuthProvider } from "./context/AuthContext.jsx";
 // @ts-ignore
@@ -74,7 +75,7 @@ function App() {
             path="/dashboard"
             element={
               <ProtectedRoute>
-                <Dashboard />
+                <TodoList />
               </ProtectedRoute>
             }
           />

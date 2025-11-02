@@ -58,7 +58,7 @@ export default function Dashboard() {
             </h2>
 
             {/* User Info Card */}
-            <div className="bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg p-6 text-white mb-6">
+            <div className="bg-linear-to-r from-purple-500 to-purple-600 rounded-lg p-6 text-white mb-6">
               <h3 className="text-lg font-semibold mb-2">Your Profile</h3>
               <div className="flex items-start space-x-4">
                 {user?.avatar_url && (
