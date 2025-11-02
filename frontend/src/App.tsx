@@ -17,6 +17,10 @@ import EmailVerification from "./Pages/Authentication/EmailVerification.jsx";
 // @ts-ignore
 import EmailSent from "./Pages/Authentication/EmailSent.jsx";
 // @ts-ignore
+import ForgetPassword from "./Pages/Authentication/ForgetPassword.jsx";
+// @ts-ignore
+import ResetPassword from "./Pages/Authentication/ResetPassword.jsx";
+// @ts-ignore
 import Dashboard from "./Pages/Dashboard/Dashboard.jsx";
 import TodoList from "./Pages/TaskList/TaskList.jsx";
 // @ts-ignore
@@ -72,7 +76,7 @@ function HomePage() {
 
   return (
     <div>
-      <h1>Questify Tasks</h1>
+      <h1>Tver Task</h1>
       <ul>
         {tasks.map((task) => (
           <li key={task.id}>{task.title}</li>
@@ -100,6 +104,8 @@ function App() {
           <Route path="/" element={<Login />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<SignUp />} />
+          <Route path="/forgot-password" element={<ForgetPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/email-sent" element={<EmailSent />} />
           <Route path="/verify-email" element={<EmailVerification />} />
           <Route path="/auth/callback" element={<AuthCallback />} />

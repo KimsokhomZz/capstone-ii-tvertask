@@ -479,3 +479,149 @@ exports.resendVerification = async (req, res) => {
     });
   }
 };
+
+// @desc    Request password reset
+// @route   POST /auth/forgot-password
+// @access  Public
+exports.forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: "Email is required",
+      });
+    }
+
+    // Find user by email
+    const user = await User.findOne({
+      where: {
+        email: email.toLowerCase(),
+      },
+    });
+
+    if (!user) {
+      // Don't reveal if email exists or not for security
+      return res.status(200).json({
+        success: true,
+        message:
+          "If an account with this email exists, you will receive a password reset link.",
+      });
+    }
+
+    // Generate password reset token
+    const resetPasswordToken = crypto.randomBytes(32).toString("hex");
+    const resetPasswordExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+    user.resetPasswordToken = resetPasswordToken;
+    user.resetPasswordExpires = resetPasswordExpires;
+    await user.save();
+
+    // Send password reset email
+    try {
+      await emailService.sendPasswordResetEmail(
+        user.email,
+        resetPasswordToken,
+        user.name
+      );
+    } catch (emailError) {
+      console.error("Error sending password reset email:", emailError);
+      // Clear the reset token if email sending fails
+      user.resetPasswordToken = null;
+      user.resetPasswordExpires = null;
+      await user.save();
+
+      return res.status(500).json({
+        success: false,
+        message: "Failed to send password reset email. Please try again.",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message:
+        "If an account with this email exists, you will receive a password reset link.",
+    });
+  } catch (error) {
+    console.error("Forgot password error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error processing password reset request",
+      error: error.message,
+    });
+  }
+};
+
+// @desc    Reset password
+// @route   POST /auth/reset-password
+// @access  Public
+exports.resetPassword = async (req, res) => {
+  try {
+    const { token, newPassword } = req.body;
+
+    if (!token || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Token and new password are required",
+      });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: "Password must be at least 6 characters long",
+      });
+    }
+
+    // Find user with this reset token
+    const user = await User.findOne({
+      where: {
+        resetPasswordToken: token,
+        resetPasswordExpires: {
+          [require("sequelize").Op.gt]: new Date(), // Token not expired
+        },
+      },
+    });
+
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid or expired reset token",
+      });
+    }
+
+    // Update password and clear reset token fields
+    user.password = newPassword;
+    user.resetPasswordToken = null;
+    user.resetPasswordExpires = null;
+    await user.save();
+
+    // Send password reset confirmation email
+    try {
+      await emailService.sendPasswordResetConfirmationEmail(
+        user.email,
+        user.name
+      );
+    } catch (emailError) {
+      console.error(
+        "Error sending password reset confirmation email:",
+        emailError
+      );
+      // Don't fail the reset if confirmation email fails
+    }
+
+    res.status(200).json({
+      success: true,
+      message:
+        "Password reset successful! You can now login with your new password.",
+    });
+  } catch (error) {
+    console.error("Reset password error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error resetting password",
+      error: error.message,
+    });
+  }
+};

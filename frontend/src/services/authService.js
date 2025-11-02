@@ -187,6 +187,57 @@ class AuthService {
       throw error;
     }
   }
+
+  async forgotPassword(email) {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/api/users/forgot-password`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.message || "Failed to process password reset request"
+        );
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Forgot password error:", error);
+      throw error;
+    }
+  }
+
+  async resetPassword(token, newPassword) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/users/reset-password`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ token, newPassword }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to reset password");
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Reset password error:", error);
+      throw error;
+    }
+  }
 }
 
 export default new AuthService();

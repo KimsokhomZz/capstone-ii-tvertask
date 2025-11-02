@@ -92,7 +92,7 @@ export default function EmailVerification() {
   return (
     <div className="h-screen w-screen bg-gradient-to-br from-purple-400 via-purple-500 to-purple-700 flex items-center justify-center px-4 overflow-hidden">
       <div className="max-w-md w-full">
-        {/* Questify Logo */}
+        {/* Tver Task Logo */}
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
             <div className="relative">
@@ -114,7 +114,7 @@ export default function EmailVerification() {
               </svg>
             </div>
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2">Questify</h1>
+          <h1 className="text-3xl font-bold text-white mb-2">Tver Task</h1>
           <p className="text-purple-100 text-sm">YOUR GOALS. YOUR GAME</p>
         </div>
 
@@ -138,8 +138,8 @@ export default function EmailVerification() {
             <div className="space-y-4">
               <div className="bg-green-50 border border-green-200 rounded-lg p-3">
                 <p className="text-green-700 text-sm">
-                  🎉 Welcome to Questify! You'll be redirected to your dashboard
-                  in a few seconds.
+                  🎉 Welcome to Tver Task! You'll be redirected to your
+                  dashboard in a few seconds.
                 </p>
               </div>
               <button
@@ -189,7 +189,7 @@ export default function EmailVerification() {
           <p className="text-purple-100 text-sm">
             Need help?{" "}
             <a
-              href="mailto:support@questify.com"
+              href="mailto:support@tvertask.com"
               className="text-yellow-400 hover:text-yellow-300 underline"
             >
               Contact Support
