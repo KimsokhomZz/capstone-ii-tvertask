@@ -31,13 +31,15 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
   return (
     <aside className="flex flex-col justify-between h-screen w-64 bg-white border-r shadow-sm">
       <div>
-        <div className="p-6 text-2xl font-bold text-yellow-500">Questify</div>
+        <div className="p-6 text-2xl font-bold text-yellow-500">Tver Task</div>
 
         <nav className="space-y-1 px-3">
           {menuItems.map((item) => {
             const isFocus = item.path === "/focus";
             const isPomodoro = location.pathname.startsWith("/pomodoro/");
-            const isActive = isFocus ? (location.pathname === "/focus" || isPomodoro) : location.pathname === item.path;
+            const isActive = isFocus
+              ? location.pathname === "/focus" || isPomodoro
+              : location.pathname === item.path;
             return (
               <button
                 key={item.name}

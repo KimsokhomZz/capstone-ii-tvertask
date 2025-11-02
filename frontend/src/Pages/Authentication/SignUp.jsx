@@ -101,7 +101,7 @@ export default function SignUp() {
 
   return (
     <div className="flex h-screen w-screen bg-white overflow-hidden">
-      {/* Left Side - Purple Background with Questify Branding */}
+      {/* Left Side - Purple Background with Tver Task Branding */}
       <div className="hidden lg:flex w-1/2 items-center justify-center bg-gradient-to-br from-purple-400 via-purple-500 to-purple-700 relative overflow-hidden animate-slideInLeft">
         {/* Decorative elements */}
         <div className="absolute inset-0 opacity-30 animate-float">
@@ -110,7 +110,7 @@ export default function SignUp() {
           <div className="absolute top-1/3 right-1/4 w-16 h-16 bg-purple-200 rounded-full"></div>
         </div>
 
-        {/* Questify Logo Card */}
+        {/* Tver Task Logo Card */}
         <div className="relative z-10 bg-white rounded-3xl shadow-2xl p-8 max-w-xs text-center animate-scaleIn">
           <div className="flex justify-center mb-4">
             <div className="relative">
@@ -132,7 +132,7 @@ export default function SignUp() {
               </svg>
             </div>
           </div>
-          <h2 className="text-3xl font-bold text-gray-900 mb-1">Questify</h2>
+          <h2 className="text-3xl font-bold text-gray-900 mb-1">Tver Task</h2>
           <p className="text-gray-600 text-sm">YOUR GOALS. YOUR GAME</p>
         </div>
       </div>
@@ -144,7 +144,7 @@ export default function SignUp() {
             Create Account
           </h1>
           <p className="text-gray-600 mb-8">
-            Sign up to get started with Questify
+            Sign up to get started with Tver Task
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-6">
