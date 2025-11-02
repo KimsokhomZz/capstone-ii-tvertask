@@ -15,6 +15,7 @@ import TaskList from "./Pages/TaskList/TaskList.js";
 import MainLayout from "./components/MainLayout";
 import Pomodoro from "./Pages/Focus/Focustask.js";
 import Leaderboard from "./Pages/Leaderboard/leaderboard";
+import DashboardTask from "./Pages/Dashboard/Dashboardtask.js";
 
 interface Task {
   id: number;
@@ -22,12 +23,7 @@ interface Task {
 }
 
 function DashboardPage() {
-  return (
-    <div className="bg-white p-8 md:p-10 rounded-[28px] shadow-xl w-full max-w-4xl border border-gray-100">
-      <h1 className="text-2xl font-bold mb-2">Dashboard</h1>
-      <p className="text-gray-500">Coming soon...</p>
-    </div>
-  );
+  return <DashboardTask />;
 }
 
 function LeaderboardPage() {
