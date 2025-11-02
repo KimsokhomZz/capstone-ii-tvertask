@@ -21,8 +21,7 @@ import ForgetPassword from "./Pages/Authentication/ForgetPassword.jsx";
 // @ts-ignore
 import ResetPassword from "./Pages/Authentication/ResetPassword.jsx";
 // @ts-ignore
-import Dashboard from "./Pages/Dashboard/Dashboard.jsx";
-import TodoList from "./Pages/TaskList/TaskList.jsx";
+import Dashboard from "./Pages/Dashboard/Dashboardtask.jsx";
 // @ts-ignore
 import { AuthProvider } from "./context/AuthContext.jsx";
 // @ts-ignore
@@ -32,6 +31,7 @@ import MainLayout from "./components/MainLayout.tsx";
 import Pomodoro from "./Pages/Focus/Focustask.js";
 import Leaderboard from "./Pages/Leaderboard/leaderboard";
 import DashboardTask from "./Pages/Dashboard/Dashboardtask.js";
+import { Navigate } from "react-router-dom";
 
 interface Task {
   id: number;
@@ -100,8 +100,8 @@ function App() {
     <AuthProvider>
       <Router>
         <Routes>
-          {/* <Route path="/" element={<HomePage />} /> */}
-          <Route path="/" element={<Login />} />
+          {/* Auth and utility routes */}
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/forgot-password" element={<ForgetPassword />} />
@@ -109,14 +109,26 @@ function App() {
           <Route path="/email-sent" element={<EmailSent />} />
           <Route path="/verify-email" element={<EmailVerification />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <TodoList />
-              </ProtectedRoute>
-            }
-          />
+
+          {/* Main app routes with layout */}
+          <Route element={<MainLayout />}>
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="/focus" element={<TaskList />} />
+            <Route path="/pomodoro/:id" element={<Pomodoro />} />
+            <Route path="/leaderboard" element={<LeaderboardPage />} />
+            <Route path="/avatar" element={<AvatarPage />} />
+            <Route path="/analytics" element={<AnalyticsPage />} />
+          </Route>
+
+          {/* Redirect /tasks to /focus */}
+          <Route path="/tasks" element={<Navigate to="/focus" replace />} />
         </Routes>
       </Router>
     </AuthProvider>

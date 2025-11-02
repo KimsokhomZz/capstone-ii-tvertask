@@ -3,8 +3,10 @@ import TaskBar from "@/components/taskbar";
 import { useNavigate } from "react-router-dom";
 import TaskForm, { type NewTask } from "@/components/TaskForm";
 import DeleteConfirmation from "@/components/DeleteConfirmation";
+import Header from "@/components/header";
 import { Toast } from "@/components/ConfirmDialog";
 import { fetchTask } from "../../api/taskApi";
+import { Target } from "lucide-react";
 
 // Use the Task type from your API if possible, otherwise define here:
 type Task = {
@@ -52,6 +54,11 @@ export default function TodoList() {
     <div className="bg-white p-8 md:p-10 rounded-[28px] shadow-xl w-full max-w-4xl border border-gray-100">
       <div className="flex items-center justify-between">
         {/* Add your Header component here if needed */}
+        <Header
+          title="Focus Session"
+          icon={<Target size={23} />}
+          titleClassName="text-xs md:text-md"
+        />
         <button
           onClick={() => setShowCreate(true)}
           className="rounded-xl bg-yellow-400 border border-gray-200 hover:bg-yellow-50 hover:shadow-md text-black px-3 py-2 text-sm cursor-pointer transition-colors"

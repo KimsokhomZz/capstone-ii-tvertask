@@ -2,9 +2,9 @@ const express = require("express");
 const router = express.Router();
 const pomodoroController = require("../controllers/pomodoroController");
 
-router.get("/", controller.getSessions);
-router.post("/start", controller.startSession);
-// router.patch("/:id/complete", controller.completeSession);
+router.get("/", pomodoroController.getSessions);
+router.post("/start", pomodoroController.startSession);
+// router.patch("/:id/complete", pomodoroController.completeSession);
 
 router.post("/complete", pomodoroController.completeSession);
 router.post("/pause", pomodoroController.pauseSession);

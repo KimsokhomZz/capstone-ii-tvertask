@@ -3,19 +3,17 @@ const cors = require("cors");
 const session = require("express-session");
 const passport = require("./config/passport");
 
-
 // routes register
 const userRoutes = require("./routes/userRoutes");
 const googleAuthRoutes = require("./controllers/googleController");
 const facebookAuthRoutes = require("./controllers/facebookController");
-const userRoutes = require('./routes/userRoutes');
-const authRoutes = require('./routes/authRoutes');
+// const authRoutes = require('./routes/authRoutes');
 const taskRoutes = require('./routes/taskRoutes');
 const pomodoroRoutes = require("./routes/pomodoroRoutes");
 
 const app = express();
 
-// Use a specific origin for development to avoid wildcard issues
+// CORS options for development
 const corsOptions = {
   origin: '*', // allow all origins (development only)
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
@@ -23,20 +21,17 @@ const corsOptions = {
   optionsSuccessStatus: 204,
 };
 
-// Enable CORS and preflight responses
+// Enable CORS
 app.use(cors(corsOptions));
-
 
 // Middleware
 app.use(express.json());
-<<<<<<< HEAD
 app.use(express.urlencoded({ extended: true }));
 
 // Session configuration (required for passport)
 app.use(
   session({
-    secret:
-      process.env.SESSION_SECRET || "your-secret-key-change-in-production",
+    secret: process.env.SESSION_SECRET || "your-secret-key-change-in-production",
     resave: false,
     saveUninitialized: false,
     cookie: {
@@ -50,37 +45,17 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Routes
-app.use("/api/users", userRoutes);
-app.use("/auth", googleAuthRoutes);
-app.use("/auth", facebookAuthRoutes);
-app.use('/api/auth', authRoutes);
-app.use('/api/tasks', taskRoutes);
-=======
-
-// Use a specific origin for development to avoid wildcard issues
-const corsOptions = {
-  origin: "*", // allow all origins (development only)
-  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  optionsSuccessStatus: 204,
-};
-
-// Enable CORS and preflight responses
-app.use(cors(corsOptions));
-
+// Health check endpoint
 app.use("/api/health", (req, res) => {
   res.status(200).send("OK");
 });
 
+// Routes
 app.use("/api/users", userRoutes);
+app.use("/auth", googleAuthRoutes);
+app.use("/auth", facebookAuthRoutes);
+// app.use('/api/auth', authRoutes);
+app.use('/api/tasks', taskRoutes);
 app.use("/api/pomodoro", pomodoroRoutes);
->>>>>>> Backent/Feature/PomodoroTimer
 
 module.exports = app;
-
-
-
-
-
-

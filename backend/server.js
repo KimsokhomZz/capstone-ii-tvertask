@@ -15,7 +15,7 @@ sequelize
 
 // Sync models with database (use alter instead of force to avoid data loss)
 sequelize
-  .sync({ force: true })
+  .sync({ force: false })
   .then(() => console.log("✅ Models synced"))
   .catch((err) => console.error("❌ Sync error:", err));
 
