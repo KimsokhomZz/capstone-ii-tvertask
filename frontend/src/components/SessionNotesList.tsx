@@ -1,5 +1,5 @@
-import DeleteConfirmation from "@Components/DeleteConfirmation";
-import { Toast } from "./ConfirmDialog";
+import DeleteConfirmation from "@/Components/DeleteConfirmation";
+import { Toast } from "@/Components/ConfirmDialog";
 import { useState } from "react";
 
 type Note = { id: number; text: string; editing?: boolean };

@@ -12,7 +12,7 @@ import Login from "./Pages/Authentication/Login.jsx";
 // @ts-ignore
 import SignUp from "./Pages/Authentication/SignUp.jsx";
 import TaskList from "./Pages/TaskList/TaskList.js";
-import MainLayout from "@/Components/MainLayout";
+import MainLayout from "@/Components/MainLayout.js";
 import Pomodoro from "./Pages/Focus/Focustask.js";
 
 interface Task {

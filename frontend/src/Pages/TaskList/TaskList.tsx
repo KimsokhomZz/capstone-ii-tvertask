@@ -1,28 +1,35 @@
-import Header from "../../components/header";
+import Header from "../../Components/header";
 import { Target } from "lucide-react";
 import { useEffect, useState } from "react";
-import TaskBar from "@/components/taskbar";
+import TaskBar from "@/Components/taskbar";
 import { useNavigate } from "react-router-dom";
-import TaskForm, { type NewTask } from "@/components/TaskForm";
-import DeleteConfirmation from "@/components/DeleteConfirmation";
-import { Toast } from "@/components/ConfirmDialog";
+import TaskForm, { type NewTask } from "@/Components/TaskForm";
+import DeleteConfirmation from "@/Components/DeleteConfirmation";
+import { Toast } from "@/Components/ConfirmDialog";
 
-type Task = { id: number; name: string; duration: string; description?: string };
+type Task = {
+  id: number;
+  name: string;
+  duration: string;
+  description?: string;
+};
 
 export default function TodoList() {
   const navigate = useNavigate();
   const [tasks, setTasks] = useState<Task[]>(() => {
     try {
       const raw = localStorage.getItem("tasks");
-      return raw ? (JSON.parse(raw) as Task[]) : [
-        { id: 1, name: "Task 1", duration: "25", description: "" },
-      ];
+      return raw
+        ? (JSON.parse(raw) as Task[])
+        : [{ id: 1, name: "Task 1", duration: "25", description: "" }];
     } catch {
       return [{ id: 1, name: "Task 1", duration: "25", description: "" }];
     }
   });
   useEffect(() => {
-    try { localStorage.setItem("tasks", JSON.stringify(tasks)); } catch {}
+    try {
+      localStorage.setItem("tasks", JSON.stringify(tasks));
+    } catch {}
   }, [tasks]);
 
   const [checkedMap, setCheckedMap] = useState<Record<number, boolean>>({});
@@ -30,9 +37,15 @@ export default function TodoList() {
   const [showCreate, setShowCreate] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [deleteId, setDeleteId] = useState<number | null>(null);
-  const [toast, setToast] = useState<{ message: string; type?: "success" | "error" } | null>(null);
+  const [toast, setToast] = useState<{
+    message: string;
+    type?: "success" | "error";
+  } | null>(null);
 
-  const showToast = (message: string, type: "success" | "error" = "success") => {
+  const showToast = (
+    message: string,
+    type: "success" | "error" = "success"
+  ) => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 2500);
   };
@@ -80,18 +93,30 @@ export default function TodoList() {
 
       {showCreate && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/30" onClick={() => setShowCreate(false)} />
+          <div
+            className="absolute inset-0 bg-black/30"
+            onClick={() => setShowCreate(false)}
+          />
           <div className="relative bg-white rounded-2xl shadow-2xl border border-gray-100 w-full max-w-lg p-6">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-lg font-semibold text-gray-900">Create Task</h3>
-              <button onClick={() => setShowCreate(false)} className="text-gray-500 hover:bg-yellow-50 rounded-md px-1 cursor-pointer">✕</button>
+              <h3 className="text-lg font-semibold text-gray-900">
+                Create Task
+              </h3>
+              <button
+                onClick={() => setShowCreate(false)}
+                className="text-gray-500 hover:bg-yellow-50 rounded-md px-1 cursor-pointer"
+              >
+                ✕
+              </button>
             </div>
             <TaskForm
               onSubmit={(t: NewTask) => {
                 setTasks((prev) => [
                   ...prev,
                   {
-                    id: prev.length ? Math.max(...prev.map((x) => x.id)) + 1 : 1,
+                    id: prev.length
+                      ? Math.max(...prev.map((x) => x.id)) + 1
+                      : 1,
                     name: t.title,
                     description: t.description,
                     duration: t.duration ?? "25",
@@ -108,16 +133,39 @@ export default function TodoList() {
 
       {editingTask && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/30" onClick={() => setEditingTask(null)} />
+          <div
+            className="absolute inset-0 bg-black/30"
+            onClick={() => setEditingTask(null)}
+          />
           <div className="relative bg-white rounded-2xl shadow-2xl border border-gray-100 w-full max-w-lg p-6">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-lg font-semibold text-gray-900">Edit Task</h3>
-              <button onClick={() => setEditingTask(null)} className="text-gray-500 hover:bg-yellow-50 rounded-md px-1 cursor-pointer">✕</button>
+              <button
+                onClick={() => setEditingTask(null)}
+                className="text-gray-500 hover:bg-yellow-50 rounded-md px-1 cursor-pointer"
+              >
+                ✕
+              </button>
             </div>
             <TaskForm
-              initial={{ title: editingTask.name, description: editingTask.description ?? "", duration: editingTask.duration }}
+              initial={{
+                title: editingTask.name,
+                description: editingTask.description ?? "",
+                duration: editingTask.duration,
+              }}
               onSubmit={(t: NewTask) => {
-                setTasks((prev) => prev.map((x) => (x.id === editingTask.id ? { ...x, name: t.title, description: t.description, duration: t.duration ?? x.duration } : x)));
+                setTasks((prev) =>
+                  prev.map((x) =>
+                    x.id === editingTask.id
+                      ? {
+                          ...x,
+                          name: t.title,
+                          description: t.description,
+                          duration: t.duration ?? x.duration,
+                        }
+                      : x
+                  )
+                );
                 setEditingTask(null);
                 showToast("Task updated successfully!", "success");
               }}
@@ -145,7 +193,13 @@ export default function TodoList() {
         }}
       />
 
-      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
     </div>
   );
 }
