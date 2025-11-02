@@ -21,11 +21,17 @@ interface Track {
   youtubeId?: string;
 }
 
-const FocusMusicApp: React.FC = () => {
+// added optional prop so parent can request embedded (inline) compact card
+const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
+  embedded = false,
+}) => {
   const [activeTab, setActiveTab] = useState<string>("lofi");
   const [playingTrack, setPlayingTrack] = useState<string | null>(null);
   const [time, setTime] = useState<number>(0); // current play time in seconds
   const [showCompact, setShowCompact] = useState<boolean>(false); // new state
+
+  // shared volume (0-100) used by MusicCard; parent keeps the value so compact/full versions stay in sync
+  const [volume, setVolume] = useState<number>(50);
 
   // simulate timer since we can’t read actual YouTube progress
   useEffect(() => {
@@ -111,11 +117,50 @@ const FocusMusicApp: React.FC = () => {
     return `${m}:${s}`;
   };
 
-  // when compact mode is active, render ONLY the compact MusicCard for the whole page
+  // find currently playing track (used to keep the audio iframe mounted)
+  const currentTrack = tracks.find((t) => t.id === playingTrack);
+
+  // when compact mode is active, render compact MusicCard inline if embedded,
+  // otherwise render the centered full-page compact view.
   if (showCompact) {
+    if (embedded) {
+      return (
+        // inline compact version — no min-h-screen, minimal spacing so parent layout isn't affected
+        <div className="mb-4">
+          <MusicCard
+            onOpenMusic={() => setShowCompact(false)}
+            volume={volume}
+            onVolumeChange={setVolume}
+          />
+          {/* keep audio iframe mounted so playback continues while compact is shown */}
+          {currentTrack?.youtubeId && (
+            <iframe
+              className="w-0 h-0 invisible"
+              src={`https://www.youtube.com/embed/${currentTrack.youtubeId}?autoplay=1`}
+              title={currentTrack.title}
+              allow="autoplay; encrypted-media"
+            />
+          )}
+        </div>
+      );
+    }
+
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-8 flex items-center justify-center">
-        <MusicCard onOpenMusic={() => setShowCompact(false)} />
+        <MusicCard
+          onOpenMusic={() => setShowCompact(false)}
+          volume={volume}
+          onVolumeChange={setVolume}
+        />
+        {/* keep audio iframe mounted so playback continues while compact is shown */}
+        {currentTrack?.youtubeId && (
+          <iframe
+            className="w-0 h-0 invisible"
+            src={`https://www.youtube.com/embed/${currentTrack.youtubeId}?autoplay=1`}
+            title={currentTrack.title}
+            allow="autoplay; encrypted-media"
+          />
+        )}
       </div>
     );
   }
@@ -216,21 +261,23 @@ const FocusMusicApp: React.FC = () => {
                     </div>
                   )}
 
-                  {/* YouTube (hidden, audio only) */}
-                  {isPlaying && track.youtubeId && (
-                    <iframe
-                      className="w-0 h-0 invisible"
-                      src={`https://www.youtube.com/embed/${track.youtubeId}?autoplay=1`}
-                      title={track.title}
-                      allow="autoplay; encrypted-media"
-                    ></iframe>
-                  )}
+                  {/* removed per-track iframe; a single persistent iframe is kept below */}
                 </div>
               );
             })
           )}
         </div>
       </div>
+
+      {/* persistent (hidden) YouTube iframe so audio keeps playing even when UI switches */}
+      {currentTrack?.youtubeId && (
+        <iframe
+          className="w-0 h-0 invisible"
+          src={`https://www.youtube.com/embed/${currentTrack.youtubeId}?autoplay=1`}
+          title={currentTrack.title}
+          allow="autoplay; encrypted-media"
+        />
+      )}
     </div>
   );
 };

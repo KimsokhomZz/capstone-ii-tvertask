@@ -19,7 +19,8 @@ export default function Focustask() {
 
       {/* render MusicCard or full Musictask when opened */}
       {showMusic ? (
-        <Musictask />
+        // request embedded (inline) compact behavior to avoid huge vertical spacing
+        <Musictask embedded />
       ) : (
         <MusicCard onOpenMusic={() => setShowMusic(true)} />
       )}
