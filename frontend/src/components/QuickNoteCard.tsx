@@ -21,7 +21,11 @@ export default function QuickNoteCard({ draft, setDraft, tags, setTags, onAdd }:
             <button
               key={t}
               onClick={() => setTags((prev) => (prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]))}
-              className={`px-3 py-1 rounded-full text-sm border ${active ? "bg-yellow-100 text-yellow-700 border-yellow-200" : "bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100"}`}
+              className={`px-3 py-1 rounded-full text-sm border ${
+                active
+                  ? "bg-yellow-100 text-yellow-700 border-yellow-200"
+                  : "bg-gray-50 text-gray-600 border-gray-200 hover:bg-yellow-50 hover:shadow-md"
+              }`}
             >
               {t}
             </button>
@@ -35,7 +39,7 @@ export default function QuickNoteCard({ draft, setDraft, tags, setTags, onAdd }:
           placeholder="Write down your thought, idea, breakthroughs or blocker..."
           className="w-full resize-none h-28 rounded-xl border border-gray-200 p-3 focus:outline-none focus:ring-2 focus:ring-yellow-200"
         />
-        <button onClick={onAdd} className="w-full rounded-xl bg-yellow-400 hover:bg-yellow-100 text-black py-2 cursor-pointer transition-colors">
+        <button onClick={onAdd} className="w-full rounded-xl bg-yellow-400 border border-gray-200 hover:bg-yellow-50 hover:shadow-md text-black py-2 cursor-pointer transition-colors">
           Add note
         </button>
       </div>

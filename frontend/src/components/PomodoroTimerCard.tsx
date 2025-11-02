@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import Header from "./header";
+import { Target } from "lucide-react";
 
 type PomodoroTimerCardProps = {
   taskTitle?: string;
@@ -113,16 +115,13 @@ export default function PomodoroTimerCard({ taskTitle = "Task 1", defaultFocus =
       }`}
     >
       <div className="flex items-start justify-between mb-4">
-        <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-          <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-yellow-100 text-yellow-600 border border-yellow-200">●</span>
-          Focus Session
-        </h2>
+        <Header title="Focus Session" icon={<Target size={23} />} titleClassName="text-xs md:text-md" />
         <div className="flex items-center gap-2 relative">
           {!isBreak && (
             <div>
               <button
                 onClick={() => setShowPicker((s) => !s)}
-                className="px-3 py-1 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 hover:bg-yellow-50 text-sm cursor-pointer"
+                className="px-3 py-1 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 hover:bg-yellow-50 hover:shadow-md text-sm cursor-pointer"
               >
                 Change time
               </button>
@@ -153,7 +152,7 @@ export default function PomodoroTimerCard({ taskTitle = "Task 1", defaultFocus =
                               setShowPicker(false);
                             }}
                             className={`w-full flex items-center justify-between px-2 py-1.5 rounded-lg text-left border ${
-                              active ? "bg-yellow-50 border-yellow-200" : "border-transparent hover:bg-gray-50"
+                              active ? "bg-yellow-50 border-yellow-200" : "border-gray-200 hover:bg-yellow-50 hover:shadow-md"
                             }`}
                           >
                             <div className="flex items-center gap-2">
@@ -237,7 +236,7 @@ export default function PomodoroTimerCard({ taskTitle = "Task 1", defaultFocus =
                         setShowPicker(false);
                         setSelectedPreset("custom");
                       }}
-                      className="w-full px-2.5 py-1 rounded-lg bg-yellow-400 text-black text-sm hover:bg-yellow-100 cursor-pointer transition-colors"
+                      className="w-full px-2.5 py-1 rounded-lg bg-yellow-400 border border-gray-200 text-black text-sm hover:bg-yellow-50 hover:shadow-md cursor-pointer transition-colors"
                     >
                       Apply
                     </button>
@@ -279,7 +278,7 @@ export default function PomodoroTimerCard({ taskTitle = "Task 1", defaultFocus =
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <button onClick={toggleTimer} className="px-4 py-2 rounded-xl bg-gray-100 hover:bg-yellow-50 text-gray-800 cursor-pointer transition-colors">
+          <button onClick={toggleTimer} className="px-4 py-2 rounded-xl bg-gray-100 border border-gray-200 hover:bg-yellow-50 hover:shadow-md text-gray-800 cursor-pointer transition-colors">
             {isRunning ? "Pause" : "Start"}
           </button>
           <button
@@ -304,11 +303,11 @@ export default function PomodoroTimerCard({ taskTitle = "Task 1", defaultFocus =
                 setTimeLeft(selectedFocus * 60);
               }
             }}
-            className="px-4 py-2 rounded-xl bg-gray-100 hover:bg-yellow-50 text-gray-800 cursor-pointer transition-colors"
+            className="px-4 py-2 rounded-xl bg-gray-100 border border-gray-200 hover:bg-yellow-50 hover:shadow-md text-gray-800 cursor-pointer transition-colors"
           >
             Complete
           </button>
-          <button onClick={resetTimer} className="px-4 py-2 rounded-xl bg-gray-100 hover:bg-yellow-50 text-gray-800 cursor-pointer transition-colors">
+          <button onClick={resetTimer} className="px-4 py-2 rounded-xl bg-gray-100 border border-gray-200 hover:bg-yellow-50 hover:shadow-md text-gray-800 cursor-pointer transition-colors">
             Reset
           </button>
           <button
@@ -319,7 +318,7 @@ export default function PomodoroTimerCard({ taskTitle = "Task 1", defaultFocus =
                 cardRef.current?.requestFullscreen?.();
               }
             }}
-            className="px-4 py-2 rounded-xl bg-gray-100 hover:bg-yellow-50 text-gray-800 cursor-pointer transition-colors"
+            className="px-4 py-2 rounded-xl bg-gray-100 border border-gray-200 hover:bg-yellow-50 hover:shadow-md text-gray-800 cursor-pointer transition-colors"
           >
             {isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
           </button>

@@ -39,7 +39,7 @@ export default function SessionNotesList({ notes, setNotes }: SessionNotesListPr
               {n.editing ? (
                 <>
                   <button
-                    className="text-xs px-2 py-1 rounded-lg bg-yellow-400 text-black hover:bg-yellow-100 cursor-pointer"
+                    className="text-xs px-2 py-1 rounded-lg bg-yellow-400 text-black hover:bg-yellow-50 cursor-pointer"
                     onClick={() => {
                       setNotes((prev) => prev.map((x) => (x.id === n.id ? { ...x, editing: false } : x)));
                       setToast({ message: "Note updated successfully!" });
