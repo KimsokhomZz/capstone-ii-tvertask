@@ -4,7 +4,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 type TaskBarProps = {
   id: number | string;
   label: string;
-  duration: string;
+  duration: number;
   checked?: boolean;
   onCheckedChange?: (checked: boolean) => void;
   highlighted?: boolean;
@@ -63,7 +63,7 @@ export default function TaskBar({
         }`}
       >
         <Clock size={16} />
-        {duration}
+        {duration} min
       </div>
     </div>
   );

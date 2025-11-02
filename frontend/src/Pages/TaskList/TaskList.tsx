@@ -1,18 +1,24 @@
 import Header from "../../components/header";
 import { Target } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import TaskBar from "@/components/taskbar";
 import { useNavigate } from "react-router-dom";
+import { fetchTask, type Task } from "../../api/taskApi";
 
 export default function TodoList() {
   const navigate = useNavigate();
-  const tasks = [
-    { id: 1, name: "Task 1", duration: "25m" },
-    { id: 2, name: "Task 2", duration: "45m" },
-    { id: 3, name: "Task 3", duration: "25m" },
-    { id: 4, name: "Task 4", duration: "45m" },
-    { id: 5, name: "Task 5", duration: "25m" },
-  ];
+  const [tasks, setTasks] = useState<Task[]>([]);
+
+  useEffect(() => {
+    const getTasks = async () => {
+      console.log("Fetching tasks...");
+      const fetchedTasks = await fetchTask();
+      if (fetchedTasks) {
+        setTasks(fetchedTasks);
+      }
+    };
+    getTasks();
+  }, []);
 
   const [checkedMap, setCheckedMap] = useState<Record<number, boolean>>({});
   const [selectedId, setSelectedId] = useState<number | null>(null);
@@ -27,8 +33,8 @@ export default function TodoList() {
           <TaskBar
             key={task.id}
             id={task.id}
-            label={task.name}
-            duration={task.duration}
+            label={task.title}
+            duration={task.focus_time}
             highlighted={selectedId === task.id}
             checked={!!checkedMap[task.id]}
             onCheckedChange={(v) => {

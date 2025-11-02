@@ -2,21 +2,29 @@ const express = require("express");
 const cors = require("cors");
 const session = require("express-session");
 const passport = require("./config/passport");
+
+
+// routes register
 const userRoutes = require("./routes/userRoutes");
 const googleAuthRoutes = require("./controllers/googleController");
 const facebookAuthRoutes = require("./controllers/facebookController");
+const userRoutes = require('./routes/userRoutes');
+const authRoutes = require('./routes/authRoutes');
+const taskRoutes = require('./routes/taskRoutes');
 
 const app = express();
 
-// CORS configuration
-app.use(
-  cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:5173", // Vite default port
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
-  })
-);
+// Use a specific origin for development to avoid wildcard issues
+const corsOptions = {
+  origin: '*', // allow all origins (development only)
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', "X-Requested-With"],
+  optionsSuccessStatus: 204,
+};
+
+// Enable CORS and preflight responses
+app.use(cors(corsOptions));
+
 
 // Middleware
 app.use(express.json());
@@ -44,5 +52,13 @@ app.use(passport.session());
 app.use("/api/users", userRoutes);
 app.use("/auth", googleAuthRoutes);
 app.use("/auth", facebookAuthRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/tasks', taskRoutes);
 
 module.exports = app;
+
+
+
+
+
+
