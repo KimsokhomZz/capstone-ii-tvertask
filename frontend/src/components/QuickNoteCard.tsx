@@ -11,7 +11,7 @@ export default function QuickNoteCard({ draft, setDraft, tags, setTags, onAdd }:
     <div className="bg-white rounded-[28px] shadow-xl border border-gray-100 p-6 md:p-8">
       <div className="flex items-start justify-between mb-4">
         <h3 className="text-xl font-semibold text-gray-900">Quick Note</h3>
-        <span className="text-xs bg-gray-100 text-gray-600 px-2.5 py-1 rounded-full">+5 XP</span>
+        <span className="text-xs bg-yellow-100 text-yellow-700 border border-yellow-200 px-2.5 py-1 rounded-full">+5 XP</span>
       </div>
       <div className="mb-3 text-sm text-gray-600">Add context tags</div>
       <div className="flex flex-wrap gap-2 mb-4">
@@ -35,7 +35,7 @@ export default function QuickNoteCard({ draft, setDraft, tags, setTags, onAdd }:
           placeholder="Write down your thought, idea, breakthroughs or blocker..."
           className="w-full resize-none h-28 rounded-xl border border-gray-200 p-3 focus:outline-none focus:ring-2 focus:ring-yellow-200"
         />
-        <button onClick={onAdd} className="w-full rounded-xl bg-yellow-400 hover:bg-yellow-500 text-black py-2">
+        <button onClick={onAdd} className="w-full rounded-xl bg-yellow-400 hover:bg-yellow-100 text-black py-2 cursor-pointer transition-colors">
           Add note
         </button>
       </div>
