@@ -23,10 +23,41 @@ import TodoList from "./Pages/TaskList/TaskList.jsx";
 import { AuthProvider } from "./context/AuthContext.jsx";
 // @ts-ignore
 import ProtectedRoute from "./components/ProtectedRoute.tsx";
+import TaskList from "./Pages/TaskList/TaskList.js";
+import MainLayout from "./components/MainLayout.tsx";
+import Pomodoro from "./Pages/Focus/Focustask.js";
+import Leaderboard from "./Pages/Leaderboard/leaderboard";
+import DashboardTask from "./Pages/Dashboard/Dashboardtask.js";
 
 interface Task {
   id: number;
   title: string;
+}
+
+function DashboardPage() {
+  return <DashboardTask />;
+}
+
+function LeaderboardPage() {
+  return <Leaderboard />;
+}
+
+function AvatarPage() {
+  return (
+    <div className="bg-white p-8 md:p-10 rounded-[28px] shadow-xl w-full max-w-4xl border border-gray-100">
+      <h1 className="text-2xl font-bold mb-2">Avatar</h1>
+      <p className="text-gray-500">Coming soon...</p>
+    </div>
+  );
+}
+
+function AnalyticsPage() {
+  return (
+    <div className="bg-white p-8 md:p-10 rounded-[28px] shadow-xl w-full max-w-4xl border border-gray-100">
+      <h1 className="text-2xl font-bold mb-2">Analytics</h1>
+      <p className="text-gray-500">Coming soon...</p>
+    </div>
+  );
 }
 
 function HomePage() {
