@@ -1,4 +1,4 @@
-import { Clock } from "lucide-react";
+import { Clock, Pencil, Trash2 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 
 type TaskBarProps = {
@@ -9,6 +9,8 @@ type TaskBarProps = {
   onCheckedChange?: (checked: boolean) => void;
   highlighted?: boolean;
   onClick?: () => void;
+  onEdit?: () => void;
+  onDelete?: () => void;
 };
 
 export default function TaskBar({
@@ -19,6 +21,8 @@ export default function TaskBar({
   onCheckedChange,
   highlighted = false,
   onClick,
+  onEdit,
+  onDelete,
 }: TaskBarProps) {
   return (
     <div
@@ -36,6 +40,7 @@ export default function TaskBar({
           ? "bg-yellow-50 border-yellow-100 shadow-sm"
           : "hover:bg-yellow-50 border-gray-200 hover:shadow-md"
       }`}
+      data-id={id}
     >
       <div className="flex items-center gap-3">
         <Checkbox
@@ -55,15 +60,41 @@ export default function TaskBar({
         </span>
       </div>
 
-      <div
-        className={`flex items-center gap-1 text-sm px-3 py-1 rounded-full ${
-          checked
-            ? "bg-gray-100 text-gray-400"
-            : "bg-yellow-100 text-yellow-600"
-        }`}
-      >
-        <Clock size={16} />
-        {duration} min
+      <div className="flex items-center gap-2">
+        <div
+          className={`flex items-center gap-1 text-sm px-3 py-1 rounded-full ${
+            checked
+              ? "bg-gray-100 text-gray-400"
+              : "bg-yellow-100 text-yellow-600"
+          }`}
+        >
+          <Clock size={16} />
+          {duration}
+        </div>
+        {onEdit && (
+          <button
+            aria-label="Edit task"
+            onClick={(e) => {
+              e.stopPropagation();
+              onEdit();
+            }}
+            className="p-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-yellow-50 hover:text-yellow-700 cursor-pointer"
+          >
+            <Pencil size={14} />
+          </button>
+        )}
+        {onDelete && (
+          <button
+            aria-label="Delete task"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete();
+            }}
+            className="p-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-red-100 hover:text-red-700 cursor-pointer"
+          >
+            <Trash2 size={14} />
+          </button>
+        )}
       </div>
     </div>
   );

@@ -45,8 +45,8 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
                 key={item.name}
                 onClick={() => navigate(item.path)}
                 aria-current={isActive ? "page" : undefined}
-                className={`flex items-center gap-3 w-full px-3 py-2 rounded-lg transition-colors text-gray-700 hover:bg-yellow-100 ${
-                  isActive ? "bg-yellow-100 text-yellow-700 font-medium" : ""
+                className={`flex items-center gap-3 w-full px-3 py-2 rounded-lg transition-colors text-gray-700 border border-gray-200 hover:bg-yellow-50 hover:shadow-md ${
+                  isActive ? "bg-yellow-50 text-yellow-700 font-medium" : "bg-white"
                 }`}
               >
                 {item.icon}
@@ -59,20 +59,20 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
 
       <div className="p-4 space-y-3">
         <div className="flex flex-col text-sm text-gray-500 space-y-2">
-          <button className="flex items-center gap-2">
+          <button className="flex items-center gap-2 border border-gray-200 rounded-lg px-2 py-1 hover:bg-yellow-50 hover:shadow-md">
             <Bell size={16} /> Notifications
           </button>
-          <button className="flex items-center gap-2">
+          <button className="flex items-center gap-2 border border-gray-200 rounded-lg px-2 py-1 hover:bg-yellow-50 hover:shadow-md">
             <Settings size={16} /> Settings
           </button>
-          <button className="flex items-center gap-2">
+          <button className="flex items-center gap-2 border border-gray-200 rounded-lg px-2 py-1 hover:bg-yellow-50 hover:shadow-md">
             <HelpCircle size={16} /> Support
           </button>
         </div>
 
         <button
           onClick={onLogout}
-          className="flex items-center justify-center gap-2 w-full bg-gray-100 py-2 rounded-lg hover:bg-gray-200 text-gray-600"
+          className="flex items-center justify-center gap-2 w-full bg-gray-100 py-2 rounded-lg border border-gray-200 hover:bg-yellow-50 hover:shadow-md text-gray-600"
         >
           <LogOut size={16} /> Logout
         </button>

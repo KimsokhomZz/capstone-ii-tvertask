@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import Header from "./header";
+import { Target } from "lucide-react";
 
 type PomodoroTimerCardProps = {
   taskTitle?: string;
@@ -11,14 +13,27 @@ export default function PomodoroTimerCard({ taskTitle = "Task 1", defaultFocus =
   const [isRunning, setIsRunning] = useState(false);
   const [isBreak, setIsBreak] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const timerContainerRef = useRef<HTMLDivElement | null>(null);
+  const cardRef = useRef<HTMLDivElement | null>(null);
   const [completedPomodoros, setCompletedPomodoros] = useState(0);
   const [completedRests, setCompletedRests] = useState(0);
   const [completedLongRests, setCompletedLongRests] = useState(0);
   const [shortsSinceLong, setShortsSinceLong] = useState(0);
-  const SHORT_BREAK = 5;
-  const LONG_BREAK = 15;
+  const [shortBreak, setShortBreak] = useState<number>(5);
+  const [longBreak, setLongBreak] = useState<number>(15);
   const [showPicker, setShowPicker] = useState(false);
-  const [customMinutes, setCustomMinutes] = useState("");
+  const [sliderMinutes, setSliderMinutes] = useState<number>(defaultFocus);
+  const [sliderShort, setSliderShort] = useState<number>(5);
+  const [sliderLong, setSliderLong] = useState<number>(15);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [selectedPreset, setSelectedPreset] = useState<"baby" | "popular" | "medium" | "extended" | "custom">("custom");
+
+  const presets = [
+    { key: "baby" as const, label: "Baby step", focus: 10, short: 5, long: 10 },
+    { key: "popular" as const, label: "Popular", focus: 20, short: 5, long: 15 },
+    { key: "medium" as const, label: "Medium", focus: 40, short: 8, long: 20 },
+    { key: "extended" as const, label: "Extended", focus: 60, short: 10, long: 25 },
+  ];
 
   const formatTime = (seconds: number): string => {
     const m = Math.floor(seconds / 60);
@@ -31,7 +46,7 @@ export default function PomodoroTimerCard({ taskTitle = "Task 1", defaultFocus =
   const resetTimer = () => {
     setIsRunning(false);
     const isLong = shortsSinceLong === 4;
-    const breakLen = isLong ? LONG_BREAK : SHORT_BREAK;
+    const breakLen = isLong ? longBreak : shortBreak;
     setTimeLeft((isBreak ? breakLen : selectedFocus) * 60);
   };
 
@@ -45,7 +60,7 @@ export default function PomodoroTimerCard({ taskTitle = "Task 1", defaultFocus =
             setCompletedPomodoros((v) => v + 1);
             setIsBreak(true);
             const isLong = shortsSinceLong === 4;
-            return (isLong ? LONG_BREAK : SHORT_BREAK) * 60;
+            return (isLong ? longBreak : shortBreak) * 60;
           } else {
             const wasLong = shortsSinceLong === 4;
             if (wasLong) {
@@ -66,17 +81,26 @@ export default function PomodoroTimerCard({ taskTitle = "Task 1", defaultFocus =
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [isRunning, isBreak, selectedFocus, shortsSinceLong]);
+  }, [isRunning, isBreak, selectedFocus, shortsSinceLong, shortBreak, longBreak]);
 
   useEffect(() => {
     const isLong = shortsSinceLong === 4;
-    setTimeLeft((isBreak ? (isLong ? LONG_BREAK : SHORT_BREAK) : selectedFocus) * 60);
-  }, [isBreak, selectedFocus, shortsSinceLong]);
+    setTimeLeft((isBreak ? (isLong ? longBreak : shortBreak) : selectedFocus) * 60);
+  }, [isBreak, selectedFocus, shortsSinceLong, shortBreak, longBreak]);
+
+  // Track fullscreen changes to update label and styles
+  useEffect(() => {
+    const handler = () => {
+      setIsFullscreen(document.fullscreenElement === cardRef.current);
+    };
+    document.addEventListener("fullscreenchange", handler);
+    return () => document.removeEventListener("fullscreenchange", handler);
+  }, []);
 
   const totalSeconds = useMemo(() => {
     const isLong = shortsSinceLong === 4;
-    return (isBreak ? (isLong ? LONG_BREAK : SHORT_BREAK) : selectedFocus) * 60;
-  }, [isBreak, selectedFocus, shortsSinceLong]);
+    return (isBreak ? (isLong ? longBreak : shortBreak) : selectedFocus) * 60;
+  }, [isBreak, selectedFocus, shortsSinceLong, shortBreak, longBreak]);
   const progress = useMemo(() => 1 - timeLeft / totalSeconds, [timeLeft, totalSeconds]);
 
   const radius = 90;
@@ -84,61 +108,135 @@ export default function PomodoroTimerCard({ taskTitle = "Task 1", defaultFocus =
   const dash = Math.max(0, Math.min(1, progress)) * circumference;
 
   return (
-    <div className="bg-white rounded-[28px] shadow-xl border border-gray-100 p-6 md:p-8">
+    <div
+      ref={cardRef}
+      className={`bg-white rounded-[28px] shadow-xl border border-gray-100 p-6 md:p-8 ${
+        isFullscreen ? "h-screen w-screen rounded-none border-0 flex flex-col items-center justify-center" : ""
+      }`}
+    >
       <div className="flex items-start justify-between mb-4">
-        <h2 className="text-2xl font-bold text-gray-900">Focus Session</h2>
+        <Header title="Focus Session" icon={<Target size={23} />} titleClassName="text-xs md:text-md" />
         <div className="flex items-center gap-2 relative">
           {!isBreak && (
             <div>
               <button
                 onClick={() => setShowPicker((s) => !s)}
-                className="px-3 py-1 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 hover:bg-gray-100 text-sm"
+                className="px-3 py-1 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 hover:bg-yellow-50 hover:shadow-md text-sm cursor-pointer"
               >
                 Change time
               </button>
               {showPicker && (
-                <div className="absolute right-0 mt-2 z-10 bg-white border border-gray-200 rounded-xl shadow-lg p-3 w-56">
-                  <div className="grid grid-cols-3 gap-2 mb-3">
-                    {[25, 30, 40].map((m) => (
-                      <button
-                        key={m}
-                        onClick={() => {
-                          setIsRunning(false);
-                          setIsBreak(false);
-                          setSelectedFocus(m);
-                          setTimeLeft(m * 60);
-                          setShowPicker(false);
-                        }}
-                        className={`px-2 py-1 rounded-lg text-sm border ${selectedFocus === m ? "bg-yellow-100 text-yellow-700 border-yellow-200" : "bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100"}`}
-                      >
-                        {m}m
-                      </button>
-                    ))}
+                <div className="absolute right-0 mt-2 z-10 bg-white border border-gray-200 rounded-xl shadow-lg p-3 w-64">
+                  <div className="mb-3">
+                    <div className="text-sm font-semibold text-gray-900 mb-2">Customize focus level</div>
+                    <div className="space-y-1">
+                      {presets.map((p) => {
+                        const active = selectedPreset === p.key;
+                        return (
+                          <button
+                            key={p.key}
+                            onClick={() => {
+                              const f = Math.min(100, p.focus);
+                              const s = Math.min(100, p.short);
+                              const l = Math.min(100, p.long);
+                              setSelectedPreset(p.key);
+                              setIsRunning(false);
+                              setIsBreak(false);
+                              setSelectedFocus(f);
+                              setShortBreak(s);
+                              setLongBreak(l);
+                              setSliderMinutes(f);
+                              setSliderShort(s);
+                              setSliderLong(l);
+                              setTimeLeft(f * 60);
+                              setShowPicker(false);
+                            }}
+                            className={`w-full flex items-center justify-between px-2 py-1.5 rounded-lg text-left border ${
+                              active ? "bg-yellow-50 border-yellow-200" : "border-gray-200 hover:bg-yellow-50 hover:shadow-md"
+                            }`}
+                          >
+                            <div className="flex items-center gap-2">
+                              <span
+                                className={`inline-block h-3.5 w-3.5 rounded-full border ${
+                                  active ? "border-yellow-500 ring-2 ring-yellow-200" : "border-gray-300"
+                                }`}
+                              />
+                              <span className="text-sm text-gray-800">{p.label}</span>
+                            </div>
+                            <span className="text-xs text-gray-500">{p.focus} • {p.short} • {p.long} min</span>
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
-                  <div className="text-xs text-gray-500 mb-1">Custom minutes</div>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="number"
-                      min={1}
-                      max={180}
-                      value={customMinutes}
-                      onChange={(e) => setCustomMinutes(e.target.value)}
-                      className="flex-1 rounded-lg border border-gray-300 px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-200"
-                      placeholder="e.g. 50"
-                    />
+                  <div className="text-sm font-medium text-gray-800 mb-2">Custom (1–100 min)</div>
+                  <div className="space-y-3">
+                    <div>
+                      <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
+                        <span>Pomodoro</span>
+                        <span>{sliderMinutes} min</span>
+                      </div>
+                      <input
+                        type="range"
+                        min={1}
+                        max={100}
+                        value={sliderMinutes}
+                        onChange={(e) => {
+                          setSelectedPreset("custom");
+                          setSliderMinutes(Math.min(100, Math.max(1, Number(e.target.value))));
+                        }}
+                        className="w-full"
+                      />
+                    </div>
+                    <div>
+                      <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
+                        <span>Rest</span>
+                        <span>{sliderShort} min</span>
+                      </div>
+                      <input
+                        type="range"
+                        min={1}
+                        max={100}
+                        value={sliderShort}
+                        onChange={(e) => {
+                          setSelectedPreset("custom");
+                          setSliderShort(Math.min(100, Math.max(1, Number(e.target.value))));
+                        }}
+                        className="w-full"
+                      />
+                    </div>
+                    <div>
+                      <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
+                        <span>Long Rest</span>
+                        <span>{sliderLong} min</span>
+                      </div>
+                      <input
+                        type="range"
+                        min={1}
+                        max={100}
+                        value={sliderLong}
+                        onChange={(e) => {
+                          setSelectedPreset("custom");
+                          setSliderLong(Math.min(100, Math.max(1, Number(e.target.value))));
+                        }}
+                        className="w-full"
+                      />
+                    </div>
                     <button
                       onClick={() => {
-                        const val = parseInt(customMinutes, 10);
-                        if (!Number.isNaN(val) && val > 0) {
-                          setIsRunning(false);
-                          setIsBreak(false);
-                          setSelectedFocus(val);
-                          setTimeLeft(val * 60);
-                          setShowPicker(false);
-                          setCustomMinutes("");
-                        }
+                        const focusVal = Math.min(100, Math.max(1, sliderMinutes));
+                        const restVal = Math.min(100, Math.max(1, sliderShort));
+                        const longVal = Math.min(100, Math.max(1, sliderLong));
+                        setIsRunning(false);
+                        setIsBreak(false);
+                        setSelectedFocus(focusVal);
+                        setShortBreak(restVal);
+                        setLongBreak(longVal);
+                        setTimeLeft(focusVal * 60);
+                        setShowPicker(false);
+                        setSelectedPreset("custom");
                       }}
-                      className="px-2.5 py-1 rounded-lg bg-yellow-400 text-white text-sm hover:bg-yellow-500"
+                      className="w-full px-2.5 py-1 rounded-lg bg-yellow-400 border border-gray-200 text-black text-sm hover:bg-yellow-50 hover:shadow-md cursor-pointer transition-colors"
                     >
                       Apply
                     </button>
@@ -148,13 +246,13 @@ export default function PomodoroTimerCard({ taskTitle = "Task 1", defaultFocus =
             </div>
           )}
           <span className="text-sm bg-yellow-100 text-yellow-600 px-3 py-1 rounded-full">
-            {isBreak ? (shortsSinceLong === 4 ? `${LONG_BREAK}m` : `${SHORT_BREAK}m`) : `${selectedFocus}m`}
+            {isBreak ? (shortsSinceLong === 4 ? `${longBreak}m` : `${shortBreak}m`) : `${selectedFocus}m`}
           </span>
         </div>
       </div>
 
       <div className="flex flex-col items-center">
-        <div className="relative h-56 w-56 mb-6">
+        <div ref={timerContainerRef} className={`relative mb-6 ${isFullscreen ? "h-72 w-72" : "h-56 w-56"}`}>
           <svg className="h-full w-full rotate-[-90deg]" viewBox="0 0 200 200">
             <circle cx="100" cy="100" r={radius} stroke="#FFF7D6" strokeWidth="14" fill="none" />
             <circle
@@ -180,7 +278,7 @@ export default function PomodoroTimerCard({ taskTitle = "Task 1", defaultFocus =
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <button onClick={toggleTimer} className="px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-800">
+          <button onClick={toggleTimer} className="px-4 py-2 rounded-xl bg-gray-100 border border-gray-200 hover:bg-yellow-50 hover:shadow-md text-gray-800 cursor-pointer transition-colors">
             {isRunning ? "Pause" : "Start"}
           </button>
           <button
@@ -190,7 +288,7 @@ export default function PomodoroTimerCard({ taskTitle = "Task 1", defaultFocus =
                 setIsBreak(true);
                 setIsRunning(false);
                 const isLong = shortsSinceLong === 4;
-                setTimeLeft((isLong ? LONG_BREAK : SHORT_BREAK) * 60);
+                setTimeLeft((isLong ? longBreak : shortBreak) * 60);
               } else {
                 const wasLong = shortsSinceLong === 4;
                 if (wasLong) {
@@ -205,15 +303,24 @@ export default function PomodoroTimerCard({ taskTitle = "Task 1", defaultFocus =
                 setTimeLeft(selectedFocus * 60);
               }
             }}
-            className="px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-800"
+            className="px-4 py-2 rounded-xl bg-gray-100 border border-gray-200 hover:bg-yellow-50 hover:shadow-md text-gray-800 cursor-pointer transition-colors"
           >
             Complete
           </button>
-          <button onClick={resetTimer} className="px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-800">
+          <button onClick={resetTimer} className="px-4 py-2 rounded-xl bg-gray-100 border border-gray-200 hover:bg-yellow-50 hover:shadow-md text-gray-800 cursor-pointer transition-colors">
             Reset
           </button>
-          <button onClick={() => document.documentElement.requestFullscreen?.()} className="px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-800">
-            Fullscreen
+          <button
+            onClick={() => {
+              if (document.fullscreenElement) {
+                document.exitFullscreen?.();
+              } else {
+                cardRef.current?.requestFullscreen?.();
+              }
+            }}
+            className="px-4 py-2 rounded-xl bg-gray-100 border border-gray-200 hover:bg-yellow-50 hover:shadow-md text-gray-800 cursor-pointer transition-colors"
+          >
+            {isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
           </button>
         </div>
       </div>
