@@ -4,56 +4,28 @@ import {
   Routes,
   Route,
   useNavigate,
-  Navigate,
 } from "react-router-dom";
 
 // @ts-ignore
 import Login from "./Pages/Authentication/Login.jsx";
 // @ts-ignore
 import SignUp from "./Pages/Authentication/SignUp.jsx";
-import TaskList from "./Pages/TaskList/TaskList.js";
-import MainLayout from "./components/MainLayout";
-import Pomodoro from "./Pages/Focus/Focustask.js";
+// @ts-ignore
+import AuthCallback from "./Pages/Authentication/AuthCallback.jsx";
+// @ts-ignore
+import EmailVerification from "./Pages/Authentication/EmailVerification.jsx";
+// @ts-ignore
+import EmailSent from "./Pages/Authentication/EmailSent.jsx";
+// @ts-ignore
+import Dashboard from "./Pages/Dashboard/Dashboard.jsx";
+// @ts-ignore
+import { AuthProvider } from "./context/AuthContext.jsx";
+// @ts-ignore
+import ProtectedRoute from "./components/ProtectedRoute.tsx";
 
 interface Task {
   id: number;
   title: string;
-}
-
-function DashboardPage() {
-  return (
-    <div className="bg-white p-8 md:p-10 rounded-[28px] shadow-xl w-full max-w-4xl border border-gray-100">
-      <h1 className="text-2xl font-bold mb-2">Dashboard</h1>
-      <p className="text-gray-500">Coming soon...</p>
-    </div>
-  );
-}
-
-function LeaderboardPage() {
-  return (
-    <div className="bg-white p-8 md:p-10 rounded-[28px] shadow-xl w-full max-w-4xl border border-gray-100">
-      <h1 className="text-2xl font-bold mb-2">Leaderboard</h1>
-      <p className="text-gray-500">Coming soon...</p>
-    </div>
-  );
-}
-
-function AvatarPage() {
-  return (
-    <div className="bg-white p-8 md:p-10 rounded-[28px] shadow-xl w-full max-w-4xl border border-gray-100">
-      <h1 className="text-2xl font-bold mb-2">Avatar</h1>
-      <p className="text-gray-500">Coming soon...</p>
-    </div>
-  );
-}
-
-function AnalyticsPage() {
-  return (
-    <div className="bg-white p-8 md:p-10 rounded-[28px] shadow-xl w-full max-w-4xl border border-gray-100">
-      <h1 className="text-2xl font-bold mb-2">Analytics</h1>
-      <p className="text-gray-500">Coming soon...</p>
-    </div>
-  );
 }
 
 function HomePage() {
@@ -89,24 +61,26 @@ function HomePage() {
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<SignUp />} />
-
-        <Route element={<MainLayout />}>
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/focus" element={<TaskList />} />
-          <Route path="/pomodoro/:id" element={<Pomodoro />} />
-          <Route path="/leaderboard" element={<LeaderboardPage />} />
-          <Route path="/avatar" element={<AvatarPage />} />
-          <Route path="/analytics" element={<AnalyticsPage />} />
-        </Route>
-
-        <Route path="/tasks" element={<Navigate to="/focus" replace />} />
-      </Routes>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<SignUp />} />
+          <Route path="/email-sent" element={<EmailSent />} />
+          <Route path="/verify-email" element={<EmailVerification />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 }
 

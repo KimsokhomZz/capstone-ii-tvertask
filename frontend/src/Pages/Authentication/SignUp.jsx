@@ -1,6 +1,8 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import { Mail, Lock, Eye, EyeOff, User } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { User, Mail, Lock, Eye, EyeOff, AlertCircle } from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
+import authService from "../../services/authService";
 
 export default function SignUp() {
   const [username, setUsername] = useState("");
@@ -10,11 +12,92 @@ export default function SignUp() {
   const [remember, setRemember] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [formErrors, setFormErrors] = useState({});
+  const [isSuccess, setIsSuccess] = useState(false);
 
-  function handleSubmit(e) {
+  const { register, isLoading, error, clearError } = useAuth();
+  const navigate = useNavigate();
+
+  // Form validation
+  const validateForm = () => {
+    const errors = {};
+
+    if (!username.trim()) {
+      errors.username = "Username is required";
+    } else if (username.length < 3) {
+      errors.username = "Username must be at least 3 characters";
+    } else if (username.length > 50) {
+      errors.username = "Username must be less than 50 characters";
+    }
+
+    if (!email.trim()) {
+      errors.email = "Email is required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      errors.email = "Please enter a valid email address";
+    }
+
+    if (!password) {
+      errors.password = "Password is required";
+    } else if (password.length < 6) {
+      errors.password = "Password must be at least 6 characters";
+    }
+
+    if (!confirmPassword) {
+      errors.confirmPassword = "Please confirm your password";
+    } else if (password !== confirmPassword) {
+      errors.confirmPassword = "Passwords do not match";
+    }
+
+    return errors;
+  };
+
+  const handleGoogleLogin = () => {
+    authService.loginWithGoogle();
+  };
+
+  const handleFacebookLogin = () => {
+    authService.loginWithFacebook();
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log({ username, email, password, confirmPassword, remember });
-  }
+
+    // Clear previous errors
+    clearError();
+    setFormErrors({});
+
+    // Validate form
+    const errors = validateForm();
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      return;
+    }
+
+    try {
+      const result = await register({
+        username: username.trim(),
+        email: email.trim().toLowerCase(),
+        password,
+      });
+
+      if (result?.data?.requiresVerification) {
+        // Redirect to email sent page instead of showing message on signup page
+        navigate("/email-sent", {
+          state: { email: email.trim().toLowerCase() },
+        });
+      } else {
+        // Show success state (for social auth, auto-verification, or if verification is bypassed)
+        setIsSuccess(true);
+
+        // Wait a moment to show success animation before redirecting
+        setTimeout(() => {
+          navigate("/dashboard");
+        }, 1500);
+      }
+    } catch (error) {
+      // Error is handled by the auth context
+    }
+  };
 
   return (
     <div className="flex h-screen w-screen bg-white overflow-hidden">
@@ -64,7 +147,42 @@ export default function SignUp() {
             Sign up to get started with Questify
           </p>
 
-          <div onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Success Message */}
+            {isSuccess && (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center gap-3">
+                <div className="flex-shrink-0">
+                  <svg
+                    className="w-5 h-5 text-green-500 animate-bounce"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-green-800 font-medium">
+                    Account created successfully!
+                  </p>
+                  <p className="text-green-600 text-sm">
+                    Redirecting you to dashboard...
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Global Error Message */}
+            {error && !isSuccess && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0" />
+                <span className="text-red-700 text-sm">{error}</span>
+              </div>
+            )}
+
             {/* Username */}
             <div>
               <label
@@ -79,11 +197,26 @@ export default function SignUp() {
                   type="text"
                   id="username"
                   placeholder="Enter your username"
-                  className="w-full border border-gray-300 rounded-lg py-2.5 px-10 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400 text-gray-900"
+                  className={`w-full border rounded-lg py-2.5 px-10 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400 text-gray-900 ${
+                    formErrors.username
+                      ? "border-red-300 bg-red-50"
+                      : "border-gray-300"
+                  }`}
                   value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  onChange={(e) => {
+                    setUsername(e.target.value);
+                    if (formErrors.username) {
+                      setFormErrors((prev) => ({ ...prev, username: "" }));
+                    }
+                  }}
+                  disabled={isLoading || isSuccess}
                 />
               </div>
+              {formErrors.username && (
+                <p className="text-red-500 text-xs mt-1">
+                  {formErrors.username}
+                </p>
+              )}
             </div>
 
             {/* Email */}
@@ -100,11 +233,24 @@ export default function SignUp() {
                   type="email"
                   id="email"
                   placeholder="Enter your email"
-                  className="w-full border border-gray-300 rounded-lg py-2.5 px-10 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400 text-gray-900"
+                  className={`w-full border rounded-lg py-2.5 px-10 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400 text-gray-900 ${
+                    formErrors.email
+                      ? "border-red-300 bg-red-50"
+                      : "border-gray-300"
+                  }`}
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (formErrors.email) {
+                      setFormErrors((prev) => ({ ...prev, email: "" }));
+                    }
+                  }}
+                  disabled={isLoading || isSuccess}
                 />
               </div>
+              {formErrors.email && (
+                <p className="text-red-500 text-xs mt-1">{formErrors.email}</p>
+              )}
             </div>
 
             {/* Password */}
@@ -121,14 +267,25 @@ export default function SignUp() {
                   type={showPassword ? "text" : "password"}
                   id="password"
                   placeholder="Password"
-                  className="w-full border border-gray-300 rounded-lg py-2.5 px-10 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400 text-gray-900"
+                  className={`w-full border rounded-lg py-2.5 px-10 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400 text-gray-900 ${
+                    formErrors.password
+                      ? "border-red-300 bg-red-50"
+                      : "border-gray-300"
+                  }`}
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    if (formErrors.password) {
+                      setFormErrors((prev) => ({ ...prev, password: "" }));
+                    }
+                  }}
+                  disabled={isLoading || isSuccess}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
+                  disabled={isLoading}
                 >
                   {showPassword ? (
                     <EyeOff className="w-5 h-5" />
@@ -137,6 +294,11 @@ export default function SignUp() {
                   )}
                 </button>
               </div>
+              {formErrors.password && (
+                <p className="text-red-500 text-xs mt-1">
+                  {formErrors.password}
+                </p>
+              )}
             </div>
 
             {/* Confirm Password */}
@@ -153,14 +315,28 @@ export default function SignUp() {
                   type={showConfirmPassword ? "text" : "password"}
                   id="con-password"
                   placeholder="Confirm password"
-                  className="w-full border border-gray-300 rounded-lg py-2.5 px-10 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400 text-gray-900"
+                  className={`w-full border rounded-lg py-2.5 px-10 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400 text-gray-900 ${
+                    formErrors.confirmPassword
+                      ? "border-red-300 bg-red-50"
+                      : "border-gray-300"
+                  }`}
                   value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  onChange={(e) => {
+                    setConfirmPassword(e.target.value);
+                    if (formErrors.confirmPassword) {
+                      setFormErrors((prev) => ({
+                        ...prev,
+                        confirmPassword: "",
+                      }));
+                    }
+                  }}
+                  disabled={isLoading || isSuccess}
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
+                  disabled={isLoading}
                 >
                   {showConfirmPassword ? (
                     <EyeOff className="w-5 h-5" />
@@ -169,6 +345,11 @@ export default function SignUp() {
                   )}
                 </button>
               </div>
+              {formErrors.confirmPassword && (
+                <p className="text-red-500 text-xs mt-1">
+                  {formErrors.confirmPassword}
+                </p>
+              )}
             </div>
 
             {/* Remember me */}
@@ -178,16 +359,46 @@ export default function SignUp() {
                 checked={remember}
                 onChange={(e) => setRemember(e.target.checked)}
                 className="w-4 h-4 accent-yellow-400 cursor-pointer"
+                disabled={isLoading || isSuccess}
               />
               <span>Remember for 30 days</span>
             </label>
 
             {/* Sign Up Button */}
             <button
-              onClick={handleSubmit}
-              className="w-full bg-[#F9C80E] hover:bg-[#e0b50d] text-white font-bold py-3 rounded-lg transition duration-200 text-base"
+              type="submit"
+              disabled={isLoading || isSuccess}
+              className={`w-full font-bold py-3 rounded-lg transition duration-200 text-base ${
+                isSuccess
+                  ? "bg-green-500 text-white cursor-default"
+                  : isLoading
+                  ? "bg-gray-400 cursor-not-allowed text-gray-600"
+                  : "bg-[#F9C80E] hover:bg-[#e0b50d] text-white"
+              }`}
             >
-              Sign Up
+              {isSuccess ? (
+                <div className="flex items-center justify-center gap-2">
+                  <svg
+                    className="w-5 h-5 animate-bounce"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  Account Created!
+                </div>
+              ) : isLoading ? (
+                <div className="flex items-center justify-center gap-2">
+                  <div className="w-4 h-4 border-2 border-gray-600 border-t-transparent rounded-full animate-spin"></div>
+                  Creating Account...
+                </div>
+              ) : (
+                "Sign Up"
+              )}
             </button>
 
             {/* Divider */}
@@ -201,7 +412,9 @@ export default function SignUp() {
             <div className="flex gap-3">
               <button
                 type="button"
+                onClick={handleGoogleLogin}
                 className="flex-1 border border-gray-300 rounded-lg py-2.5 flex items-center justify-center gap-2 hover:bg-gray-50 transition text-sm font-medium text-gray-700"
+                disabled={isLoading || isSuccess}
               >
                 <svg
                   className="w-5 h-5"
@@ -229,30 +442,35 @@ export default function SignUp() {
               </button>
               <button
                 type="button"
+                onClick={handleFacebookLogin}
                 className="flex-1 border border-gray-300 rounded-lg py-2.5 flex items-center justify-center gap-2 hover:bg-gray-50 transition text-sm font-medium text-gray-700"
+                disabled={isLoading || isSuccess}
               >
                 <svg
                   className="w-5 h-5"
                   fill="currentColor"
                   viewBox="0 0 24 24"
                 >
-                  <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l-.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
+                  <path
+                    d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"
+                    fill="#1877F2"
+                  />
                 </svg>
-                <span>Apple</span>
+                <span>Facebook</span>
               </button>
             </div>
+          </form>
 
-            {/* Login link */}
-            <p className="text-center text-gray-600 text-sm mt-6">
-              Already have an account?{" "}
-              <Link
-                to="/login"
-                className="text-blue-500 hover:text-blue-600 font-semibold"
-              >
-                Login
-              </Link>
-            </p>
-          </div>
+          {/* Login link */}
+          <p className="text-center text-gray-600 text-sm mt-6">
+            Already have an account?{" "}
+            <Link
+              to="/login"
+              className="text-blue-500 hover:text-blue-600 font-semibold"
+            >
+              Login
+            </Link>
+          </p>
         </div>
       </div>
     </div>
