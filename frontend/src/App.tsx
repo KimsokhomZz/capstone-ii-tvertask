@@ -63,6 +63,30 @@ function AnalyticsPage() {
     </div>
   );
 }
+function NotificationsPage() {
+  return (
+    <div className="bg-white p-8 md:p-10 rounded-[28px] shadow-xl w-full max-w-4xl border border-gray-100">
+      <h1 className="text-2xl font-bold mb-2">Notifications</h1>
+      <p className="text-gray-500">Coming soon...</p>
+    </div>
+  );
+}
+function SettingsPage() {
+  return (
+    <div className="bg-white p-8 md:p-10 rounded-[28px] shadow-xl w-full max-w-4xl border border-gray-100">
+      <h1 className="text-2xl font-bold mb-2">Settings</h1>
+      <p className="text-gray-500">Coming soon...</p>
+    </div>
+  );
+}
+function SupportPage() {
+  return (
+    <div className="bg-white p-8 md:p-10 rounded-[28px] shadow-xl w-full max-w-4xl border border-gray-100">
+      <h1 className="text-2xl font-bold mb-2">Support</h1>
+      <p className="text-gray-500">Coming soon...</p>
+    </div>
+  );
+}
 
 function HomePage() {
   const navigate = useNavigate();
@@ -125,6 +149,9 @@ function App() {
             <Route path="/leaderboard" element={<LeaderboardPage />} />
             <Route path="/avatar" element={<AvatarPage />} />
             <Route path="/analytics" element={<AnalyticsPage />} />
+            <Route path="/notifications" element={<NotificationsPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/support" element={<SupportPage />} />
           </Route>
 
           {/* Redirect /tasks to /focus */}

@@ -90,15 +90,24 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
       <div className="p-4 space-y-4">
         {/* Bottom Actions */}
         <div className="space-y-1">
-          <button className="flex items-center gap-3 w-full px-4 py-2 text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded-lg transition-all text-sm">
+          <button
+            onClick={() => navigate("/notifications")}
+            className="flex items-center gap-3 w-full px-4 py-2 text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded-lg transition-all text-sm"
+          >
             <Bell size={18} />
             <span>Notifications</span>
           </button>
-          <button className="flex items-center gap-3 w-full px-4 py-2 text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded-lg transition-all text-sm">
+          <button
+            onClick={() => navigate("/settings")}
+            className="flex items-center gap-3 w-full px-4 py-2 text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded-lg transition-all text-sm"
+          >
             <Settings size={18} />
             <span>Settings</span>
           </button>
-          <button className="flex items-center gap-3 w-full px-4 py-2 text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded-lg transition-all text-sm">
+          <button
+            onClick={() => navigate("/support")}
+            className="flex items-center gap-3 w-full px-4 py-2 text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded-lg transition-all text-sm"
+          >
             <HelpCircle size={18} />
             <span>Support</span>
           </button>
