@@ -135,7 +135,7 @@ export default function TodoList() {
               })
             }
             onEdit={() => setEditingTask(task)}
-            onDelete={() => handleDeleteTask(task.id)}
+            onDelete={() => setDeleteId(task.id)}
           />
         ))}
       </div>
