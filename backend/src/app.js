@@ -11,6 +11,10 @@ const facebookAuthRoutes = require("./controllers/facebookController");
 const taskRoutes = require('./routes/taskRoutes');
 const pomodoroRoutes = require("./routes/pomodoroRoutes");
 
+// for get all users testing
+const { User } = require("./models");
+const router = express.Router();
+
 const app = express();
 
 // CORS options for development
@@ -49,6 +53,17 @@ app.use(passport.session());
 app.use("/api/health", (req, res) => {
   res.status(200).send("OK");
 });
+
+// testing get all users
+router.get("/users", async (req, res) => {
+  try {
+    const users = await User.findAll();
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+app.use("/", router);
 
 // Routes
 app.use("/api/users", userRoutes);
