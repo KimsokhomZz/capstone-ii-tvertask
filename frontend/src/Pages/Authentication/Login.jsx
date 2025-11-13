@@ -99,24 +99,24 @@ export default function Login() {
   };
 
   return (
-    <div className="flex h-screen w-screen bg-white overflow-hidden">
+    <div className="flex min-h-screen w-screen bg-white overflow-hidden">
       {/* Left Side - Login Form */}
-      <div className="w-full lg:w-1/2 flex flex-col justify-center items-center px-8 sm:px-12 md:px-20 animate-slideInLeft">
+      <div className="w-full lg:w-1/2 flex flex-col justify-center items-center px-4 sm:px-8 md:px-12 lg:px-20 py-8 animate-slideInLeft">
         <div className="w-full max-w-sm animate-fadeIn">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
             Welcome back!
           </h1>
-          <p className="text-gray-600 mb-8">
+          <p className="text-gray-600 mb-6 sm:mb-8 text-sm sm:text-base">
             Enter your Credentials to access your account
           </p>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
             {/* Success Message */}
             {isSuccess && (
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center gap-3">
+              <div className="bg-green-50 border border-green-200 rounded-lg p-3 sm:p-4 flex items-center gap-3">
                 <div className="flex-shrink-0">
                   <svg
-                    className="w-5 h-5 text-green-500 animate-bounce"
+                    className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 animate-bounce"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -128,8 +128,10 @@ export default function Login() {
                   </svg>
                 </div>
                 <div>
-                  <p className="text-green-800 font-medium">Welcome back!</p>
-                  <p className="text-green-600 text-sm">
+                  <p className="text-green-800 font-medium text-sm sm:text-base">
+                    Welcome back!
+                  </p>
+                  <p className="text-green-600 text-xs sm:text-sm">
                     Login successful, redirecting...
                   </p>
                 </div>
@@ -138,19 +140,19 @@ export default function Login() {
 
             {/* Global Error Message */}
             {error && !isSuccess && !showVerificationError && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0" />
-                <span className="text-red-700 text-sm">{error}</span>
+              <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-start gap-2">
+                <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
+                <span className="text-red-700 text-xs sm:text-sm">{error}</span>
               </div>
             )}
 
             {/* Email Verification Error */}
             {showVerificationError && (
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 sm:p-4">
                 <div className="flex items-start gap-3">
                   <div className="flex-shrink-0">
                     <svg
-                      className="w-5 h-5 text-yellow-500 mt-0.5"
+                      className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-500 mt-0.5"
                       fill="currentColor"
                       viewBox="0 0 20 20"
                     >
@@ -159,10 +161,10 @@ export default function Login() {
                     </svg>
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-yellow-800 font-medium text-sm mb-1">
+                    <h3 className="text-yellow-800 font-medium text-xs sm:text-sm mb-1">
                       Email Verification Required
                     </h3>
-                    <p className="text-yellow-700 text-sm mb-3">
+                    <p className="text-yellow-700 text-xs sm:text-sm mb-3">
                       Please verify your email address before logging in. Check
                       your inbox for the verification link.
                     </p>
@@ -170,7 +172,7 @@ export default function Login() {
                       type="button"
                       onClick={handleResendVerification}
                       disabled={isResendingVerification}
-                      className="text-yellow-600 hover:text-yellow-800 underline text-sm font-medium disabled:opacity-50"
+                      className="text-yellow-600 hover:text-yellow-800 underline text-xs sm:text-sm font-medium disabled:opacity-50"
                     >
                       {isResendingVerification
                         ? "Sending..."
@@ -185,17 +187,17 @@ export default function Login() {
             <div>
               <label
                 htmlFor="email"
-                className="block text-gray-700 font-medium text-sm mb-2"
+                className="block text-gray-700 font-medium text-xs sm:text-sm mb-2"
               >
                 Email
               </label>
               <div className="relative">
-                <Mail className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+                <Mail className="absolute left-3 top-3 w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
                 <input
                   type="email"
                   id="email"
                   placeholder="Enter your email"
-                  className={`w-full border rounded-lg py-2.5 px-10 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400 text-gray-900 ${
+                  className={`w-full border rounded-lg py-2.5 px-9 sm:px-10 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400 text-gray-900 text-sm sm:text-base ${
                     formErrors.email
                       ? "border-red-300 bg-red-50"
                       : "border-gray-300"
@@ -220,24 +222,24 @@ export default function Login() {
               <div className="flex justify-between items-center mb-2">
                 <label
                   htmlFor="password"
-                  className="block text-gray-700 font-medium text-sm"
+                  className="block text-gray-700 font-medium text-xs sm:text-sm"
                 >
                   Password
                 </label>
                 <Link
                   to="/forgot-password"
-                  className="text-blue-500 hover:text-blue-600 text-sm font-medium underline"
+                  className="text-blue-500 hover:text-blue-600 text-xs sm:text-sm font-medium underline"
                 >
                   forgot password
                 </Link>
               </div>
               <div className="relative">
-                <Lock className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+                <Lock className="absolute left-3 top-3 w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
                 <input
                   type={showPassword ? "text" : "password"}
                   id="password"
                   placeholder="Password"
-                  className={`w-full border rounded-lg py-2.5 px-10 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400 text-gray-900 ${
+                  className={`w-full border rounded-lg py-2.5 px-9 sm:px-10 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400 text-gray-900 text-sm sm:text-base ${
                     formErrors.password
                       ? "border-red-300 bg-red-50"
                       : "border-gray-300"
@@ -258,9 +260,9 @@ export default function Login() {
                   disabled={isLoading || isSuccess}
                 >
                   {showPassword ? (
-                    <EyeOff className="w-5 h-5" />
+                    <EyeOff className="w-4 h-4 sm:w-5 sm:h-5" />
                   ) : (
-                    <Eye className="w-5 h-5" />
+                    <Eye className="w-4 h-4 sm:w-5 sm:h-5" />
                   )}
                 </button>
               </div>
@@ -272,12 +274,12 @@ export default function Login() {
             </div>
 
             {/* Remember me */}
-            <label className="flex items-center space-x-2 text-gray-700 text-sm">
+            <label className="flex items-center space-x-2 text-gray-700 text-xs sm:text-sm">
               <input
                 type="checkbox"
                 checked={remember}
                 onChange={(e) => setRemember(e.target.checked)}
-                className="w-4 h-4 accent-yellow-400 cursor-pointer"
+                className="w-3 h-3 sm:w-4 sm:h-4 accent-yellow-400 cursor-pointer"
                 disabled={isLoading || isSuccess}
               />
               <span>Remember for 30 days</span>
@@ -287,7 +289,7 @@ export default function Login() {
             <button
               type="submit"
               disabled={isLoading || isSuccess}
-              className={`w-full font-bold py-3 rounded-lg transition duration-200 text-base ${
+              className={`w-full font-bold py-2.5 sm:py-3 rounded-lg transition duration-200 text-sm sm:text-base ${
                 isSuccess
                   ? "bg-green-500 text-white cursor-default"
                   : isLoading
@@ -298,7 +300,7 @@ export default function Login() {
               {isSuccess ? (
                 <div className="flex items-center justify-center gap-2">
                   <svg
-                    className="w-5 h-5 animate-bounce"
+                    className="w-4 h-4 sm:w-5 sm:h-5 animate-bounce"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -312,7 +314,7 @@ export default function Login() {
                 </div>
               ) : isLoading ? (
                 <div className="flex items-center justify-center gap-2">
-                  <div className="w-4 h-4 border-2 border-gray-600 border-t-transparent rounded-full animate-spin"></div>
+                  <div className="w-3 h-3 sm:w-4 sm:h-4 border-2 border-gray-600 border-t-transparent rounded-full animate-spin"></div>
                   Signing In...
                 </div>
               ) : (
@@ -321,22 +323,22 @@ export default function Login() {
             </button>
 
             {/* Divider */}
-            <div className="flex items-center gap-3 my-6">
+            <div className="flex items-center gap-3 my-4 sm:my-6">
               <div className="flex-1 h-px bg-gray-300"></div>
-              <span className="text-gray-500 text-sm">Or</span>
+              <span className="text-gray-500 text-xs sm:text-sm">Or</span>
               <div className="flex-1 h-px bg-gray-300"></div>
             </div>
 
             {/* Social Login */}
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-3">
               <button
                 type="button"
                 onClick={handleGoogleLogin}
-                className="flex-1 border border-gray-300 rounded-lg py-2.5 flex items-center justify-center gap-2 hover:bg-gray-50 transition text-sm font-medium text-gray-700"
+                className="flex-1 border border-gray-300 rounded-lg py-2 sm:py-2.5 flex items-center justify-center gap-2 hover:bg-gray-50 transition text-xs sm:text-sm font-medium text-gray-700"
                 disabled={isLoading || isSuccess}
               >
                 <svg
-                  className="w-5 h-5"
+                  className="w-4 h-4 sm:w-5 sm:h-5"
                   viewBox="0 0 24 24"
                   fill="currentColor"
                 >
@@ -362,11 +364,11 @@ export default function Login() {
               <button
                 type="button"
                 onClick={handleFacebookLogin}
-                className="flex-1 border border-gray-300 rounded-lg py-2.5 flex items-center justify-center gap-2 hover:bg-gray-50 transition text-sm font-medium text-gray-700"
+                className="flex-1 border border-gray-300 rounded-lg py-2 sm:py-2.5 flex items-center justify-center gap-2 hover:bg-gray-50 transition text-xs sm:text-sm font-medium text-gray-700"
                 disabled={isLoading || isSuccess}
               >
                 <svg
-                  className="w-5 h-5"
+                  className="w-4 h-4 sm:w-5 sm:h-5"
                   fill="currentColor"
                   viewBox="0 0 24 24"
                 >
@@ -381,7 +383,7 @@ export default function Login() {
           </form>
 
           {/* Sign up link */}
-          <p className="text-center text-gray-600 text-sm mt-6">
+          <p className="text-center text-gray-600 text-xs sm:text-sm mt-4 sm:mt-6">
             Don't have an account?{" "}
             <Link
               to="/signup"
@@ -397,17 +399,17 @@ export default function Login() {
       <div className="hidden lg:flex w-1/2 items-center justify-center bg-gradient-to-br from-purple-400 via-purple-500 to-purple-700 relative overflow-hidden animate-slideInRight">
         {/* Decorative elements */}
         <div className="absolute inset-0 opacity-30 animate-float">
-          <div className="absolute top-10 left-10 w-24 h-24 bg-purple-300 rounded-full"></div>
-          <div className="absolute bottom-20 right-20 w-32 h-32 bg-purple-300 rounded-full"></div>
-          <div className="absolute top-1/3 right-1/4 w-16 h-16 bg-purple-200 rounded-full"></div>
+          <div className="absolute top-10 left-10 w-16 h-16 lg:w-24 lg:h-24 bg-purple-300 rounded-full"></div>
+          <div className="absolute bottom-20 right-20 w-24 h-24 lg:w-32 lg:h-32 bg-purple-300 rounded-full"></div>
+          <div className="absolute top-1/3 right-1/4 w-12 h-12 lg:w-16 lg:h-16 bg-purple-200 rounded-full"></div>
         </div>
 
         {/* Tver Task Logo Card */}
-        <div className="relative z-10 bg-white rounded-3xl shadow-2xl p-8 max-w-xs text-center animate-scaleIn">
-          <div className="flex justify-center mb-4">
+        <div className="relative z-10 bg-white rounded-2xl lg:rounded-3xl shadow-2xl p-6 lg:p-8 max-w-xs w-full mx-4 text-center animate-scaleIn">
+          <div className="flex justify-center mb-3 lg:mb-4">
             <div className="relative">
               <svg
-                className="w-20 h-20 text-yellow-400"
+                className="w-16 h-16 lg:w-20 lg:h-20 text-yellow-400"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -416,7 +418,7 @@ export default function Login() {
                 <path strokeWidth="2" d="M12 6v6m3-3H9" />
               </svg>
               <svg
-                className="absolute top-0 right-0 w-6 h-6 text-gray-600"
+                className="absolute top-0 right-0 w-5 h-5 lg:w-6 lg:h-6 text-gray-600"
                 fill="currentColor"
                 viewBox="0 0 24 24"
               >
@@ -424,8 +426,12 @@ export default function Login() {
               </svg>
             </div>
           </div>
-          <h2 className="text-3xl font-bold text-gray-900 mb-1">Tver Task</h2>
-          <p className="text-gray-600 text-sm">YOUR GOALS. YOUR GAME</p>
+          <h2 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-1">
+            Tver Task
+          </h2>
+          <p className="text-gray-600 text-xs lg:text-sm">
+            YOUR GOALS. YOUR GAME
+          </p>
         </div>
       </div>
     </div>

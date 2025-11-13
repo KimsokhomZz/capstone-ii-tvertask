@@ -43,10 +43,24 @@ export default function AuthCallback() {
   }, [searchParams]);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="text-center">
-        <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-        <p className="text-gray-600">Completing Google sign in...</p>
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 sm:px-6 lg:px-8">
+      <div className="text-center max-w-md w-full">
+        <div className="bg-white rounded-2xl shadow-lg p-8 sm:p-12">
+          <div className="w-12 h-12 sm:w-16 sm:h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">
+            Almost there!
+          </h2>
+          <p className="text-gray-600 text-sm sm:text-base">
+            Completing Google sign in...
+          </p>
+          <div className="mt-6 flex items-center justify-center">
+            <div className="flex space-x-1">
+              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse animation-delay-100"></div>
+              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse animation-delay-200"></div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
