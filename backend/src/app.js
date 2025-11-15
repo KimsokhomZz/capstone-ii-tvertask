@@ -3,15 +3,15 @@ const cors = require("cors");
 const session = require("express-session");
 const passport = require("./config/passport");
 
-// routes register
+// routes imports
 const userRoutes = require("./routes/userRoutes");
+const xpRoutes = require("./routes/xpRoutes");
 const googleAuthRoutes = require("./controllers/googleController");
 const facebookAuthRoutes = require("./controllers/facebookController");
-// const authRoutes = require('./routes/authRoutes');
 const taskRoutes = require('./routes/taskRoutes');
 const pomodoroRoutes = require("./routes/pomodoroRoutes");
 
-// for get all users testing
+//! for get all users testing
 const { User } = require("./models");
 const router = express.Router();
 
@@ -65,11 +65,11 @@ router.get("/users", async (req, res) => {
 });
 app.use("/", router);
 
-// Routes
+// Routes registeration
 app.use("/api/users", userRoutes);
+app.use("/api/user", xpRoutes);
 app.use("/auth", googleAuthRoutes);
 app.use("/auth", facebookAuthRoutes);
-// app.use('/api/auth', authRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use("/api/pomodoro", pomodoroRoutes);
 
