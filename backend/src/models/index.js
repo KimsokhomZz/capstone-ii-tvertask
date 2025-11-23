@@ -6,6 +6,10 @@ const Task = require('./taskModel');
 const PomodoroSession = require('./pomodoroSessionModel');
 const UserXP = require('./userXPModel');
 const XPLog = require('./xpLogModel');
+const Badge = require('./badgeModel');
+const UserBadge = require('./userBadgeModel');
+const UserQuest = require('./userQuestModel');
+const Quest = require('./questModel');
 
 
 // USER → TASKS
@@ -28,11 +32,26 @@ UserXP.belongsTo(User, { foreignKey: 'user_id' });
 User.hasMany(XPLog, { foreignKey: 'user_id', onDelete: 'CASCADE' });
 XPLog.belongsTo(User, { foreignKey: 'user_id' });
 
+// USER → BADGES (M:N)
+User.belongsToMany(Badge, { through: UserBadge, foreignKey: 'user_id' });
+Badge.belongsToMany(User, { through: UserBadge, foreignKey: 'badge_id' });
+
+// USER → USER_QUESTS (M:N)
+User.hasMany(UserQuest, { foreignKey: "userId" });
+UserQuest.belongsTo(User, { foreignKey: "userId" });
+
+Quest.hasMany(UserQuest, { foreignKey: "questId" });
+UserQuest.belongsTo(Quest, { foreignKey: "questId" });
+
 module.exports = {
     sequelize,
     User,
     Task,
     PomodoroSession,
     UserXP,
-    XPLog
+    XPLog,
+    Badge,
+    UserBadge,
+    Quest,
+    UserQuest
 };

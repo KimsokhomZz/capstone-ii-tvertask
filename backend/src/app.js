@@ -10,6 +10,7 @@ const googleAuthRoutes = require("./controllers/googleController");
 const facebookAuthRoutes = require("./controllers/facebookController");
 const taskRoutes = require('./routes/taskRoutes');
 const pomodoroRoutes = require("./routes/pomodoroRoutes");
+const questRoutes = require("./routes/questRoutes");
 
 //! for get all users testing
 const { User } = require("./models");
@@ -72,5 +73,6 @@ app.use("/auth", googleAuthRoutes);
 app.use("/auth", facebookAuthRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use("/api/pomodoro", pomodoroRoutes);
+app.use("/api/quests", questRoutes);
 
 module.exports = app;

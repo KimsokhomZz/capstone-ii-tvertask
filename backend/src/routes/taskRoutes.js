@@ -7,5 +7,6 @@ router.post('/', taskController.createTask);
 router.put('/:id', taskController.updateTask);
 router.patch('/:id/status', taskController.updateTaskStatus);
 router.delete('/:id', taskController.deleteTask);
+router.post("/complete", taskController.completeTask);
 
 module.exports = router;

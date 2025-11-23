@@ -7,7 +7,7 @@ const XPLog = sequelize.define("XPLog", {
     amount: { type: DataTypes.INTEGER },
     created_at: { type: DataTypes.DATE }
 }, {
-    timestamps: false
+    timestamps: true
 });
 
 module.exports = XPLog;

@@ -1,78 +1,82 @@
-const { UserXP, XPLog } = require("../models");
-const { calculateLevel, updateStreak } = require("../utils/xpUtils");
+const xpService = require("../services/xpService");
 
-// POST /user/xp → add XP
 exports.addXP = async (req, res) => {
     try {
-        const { userId, amount, source } = req.body;
+        const { userId, xpAmount, source } = req.body;
 
-        let userXP = await UserXP.findOne({ where: { user_id: userId } });
-
-        if (!userXP) {
-            userXP = await UserXP.create({ user_id: userId });
+        if (!userId || !xpAmount) {
+            return res.status(400).json({ message: "userId and xpAmount are required" });
         }
 
-        userXP.total_xp += amount;
-        userXP.level = calculateLevel(userXP.total_xp);
+        const result = await xpService.addXP({ userId, amount: xpAmount, source });
 
-        updateStreak(userXP);
-        await userXP.save();
-
-        await XPLog.create({
-            user_id: userId,
-            source: source || "manual",
-            amount,
-            created_at: new Date()
+        return res.json({
+            success: true,
+            data: {
+                xp: result.xp,
+                gainedXp: xpAmount,          // frontend animation uses this
+                level: result.level,
+                gainedLevel: result.gainedLevel,
+                nextLevelXp: result.nextLevelXp,
+                newBadges: result.newBadges
+            }
         });
-
-        res.json({
-            message: "XP added successfully",
-            total_xp: userXP.total_xp,
-            level: userXP.level,
-            streak: userXP.current_streak
-        });
-
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        console.error("Error adding XP:", err);
+        return res.status(400).json({
+            success: false,
+            message: err.message
+        });
     }
 };
 
-// GET /user/xp → fetch XP + level
 exports.getXP = async (req, res) => {
     try {
-        const { userId } = req.query;
+        const userId = req.query.userId;
 
-        const userXP = await UserXP.findOne({ where: { user_id: userId } });
+        if (!userId) {
+            return res.status(400).json({ message: "userId is required" });
+        }
 
-        if (!userXP)
-            return res.json({ total_xp: 0, level: 1 });
+        const xpData = await xpService.getUserXP(userId);
 
-        res.json({
-            total_xp: userXP.total_xp,
-            level: userXP.level
-        });
-
+        res.status(200).json(xpData);
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ message: err.message });
     }
 };
 
-// GET /user/streak → fetch streak
-exports.getStreak = async (req, res) => {
+exports.getStatus = async (req, res) => {
     try {
         const { userId } = req.query;
 
-        const userXP = await UserXP.findOne({ where: { user_id: userId } });
+        if (!userId) {
+            return res.status(400).json({ success: false, message: "userId is required" });
+        }
 
-        if (!userXP)
-            return res.json({ current_streak: 0 });
+        const result = await xpService.getStatus(userId);
 
-        res.json({
-            streak: userXP.current_streak,
-            last_active_date: userXP.last_active_date
-        });
+        res.status(200).json({ success: true, data: result });
+    } catch (err) {
+        console.error("Error fetching XP status:", err);
+        res.status(500).json({ success: false, message: err.message });
+    }
+};
+
+exports.getHistory = async (req, res) => {
+    try {
+        const { userId } = req.query;
+
+        if (!userId) {
+            return res.status(400).json({ success: false, message: "userId is required" });
+        }
+
+        const result = await xpService.getHistory(userId);
+
+        res.status(200).json({ success: true, data: result });
 
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        console.error("Error fetching XP history:", err);
+        res.status(500).json({ success: false, message: err.message });
     }
 };

@@ -1,12 +1,13 @@
 const PomodoroSession = require("../models/pomodoroSessionModel");
-const Task = require("../models/taskModel");
-const User = require("../models/userModel");
+const xpService = require("../services/xpService");
+const { UserXP, Task, User } = require("../models");
 
 
 /**
  * POST /api/pomodoro/start
  * body: { user_id, task_id, duration? (minutes) }
  */
+// Start session
 exports.startSession = async (req, res) => {
   try {
     const { user_id, task_id, duration } = req.body;
@@ -39,54 +40,6 @@ exports.startSession = async (req, res) => {
 };
 
 /**
- * PATCH /api/pomodoro/:id/complete
- * marks session completed, sets end_time, computes duration (if not provided), adds xp
- */
-// exports.completeSession = async (req, res) => {
-//   try {
-//     const sessionId = req.params.id;
-//     const session = await PomodoroSession.findOne({ where: { id: sessionId } });
-
-//     if (!session) {
-//       return res.status(404).json({ success: false, message: "Pomodoro session not found" });
-//     }
-
-//     if (session.completed) {
-//       return res.status(400).json({ success: false, message: "Session already completed" });
-//     }
-
-//     const endTime = new Date();
-//     session.end_time = endTime;
-//     // compute duration in minutes if start_time exists
-//     if (session.start_time) {
-//       const diffMs = new Date(endTime) - new Date(session.start_time);
-//       session.duration = Math.max(0, Math.round(diffMs / 60000));
-//     }
-//     session.completed = true;
-//     session.status = "completed";
-
-//     // award XP on completion
-//     session.xp_earned = (session.xp_earned || 0) + 5;
-
-//     await session.save();
-
-//     // If User model has an 'xp' column, increment user's total xp by 5
-//     if (User.rawAttributes && User.rawAttributes.xp) {
-//       await User.increment("xp", { by: 5, where: { id: session.user_id } });
-//     }
-
-//     return res.status(200).json({
-//       success: true,
-//       message: "Pomodoro session completed successfully",
-//       data: session,
-//     });
-//   } catch (error) {
-//     console.error("Error completing Pomodoro session:", error);
-//     return res.status(500).json({ success: false, message: "Internal server error" });
-//   }
-// };
-
-/**
  * GET /api/pomodoro?user_id=#
  * returns sessions for a user (or all sessions if user_id not provided)
  */
@@ -112,36 +65,7 @@ exports.getSessions = async (req, res) => {
   }
 };
 
-exports.completeSession = async (req, res) => {
-  const { sessionId } = req.body;
-
-  try {
-    const session = await PomodoroSession.findOne({ where: { id: sessionId } });
-
-    if (!session) {
-      return res.status(404).json({
-        success: false,
-        message: "Pomodoro session not found",
-      });
-    }
-
-    session.xp_earned += 5; // Award 5 XP for completing the session
-    await session.save();
-
-    return res.status(200).json({
-      success: true,
-      message: "Pomodoro session completed successfully",
-      data: session,
-    });
-  } catch (error) {
-    console.error("Error completing Pomodoro session:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Internal server error",
-    });
-  }
-};
-
+// Pause session
 exports.pauseSession = async (req, res) => {
   const { sessionId } = req.body;
 
@@ -171,6 +95,7 @@ exports.pauseSession = async (req, res) => {
   }
 };
 
+// Reset session
 exports.resetSession = async (req, res) => {
   const { sessionId } = req.body;
 
@@ -197,5 +122,98 @@ exports.resetSession = async (req, res) => {
     return res
       .status(500)
       .json({ success: false, message: "Internal server error" });
+  }
+};
+
+
+// Complete session
+exports.completeSession = async (req, res) => {
+  try {
+    const { sessionId, xp } = req.body;
+
+    const session = await PomodoroSession.findOne({ where: { id: sessionId } });
+
+    if (!session) {
+      return res.status(404).json({ success: false, message: "Session not found" });
+    }
+
+    if (session.completed) {
+      return res.status(400).json({ success: false, message: "Session already completed" });
+    }
+
+    // --- 1. Update Session Data ---
+    const endTime = new Date();
+    session.end_time = endTime;
+
+    if (session.start_time) {
+      const diffMs = endTime - new Date(session.start_time);
+      session.duration = Math.max(0, Math.round(diffMs / 60000)); // minutes
+    }
+
+    session.completed = true;
+    session.status = "completed";
+    session.xp_earned = xp;
+    await session.save();
+
+    // --- 2. Store XP as pending (no direct XP award) ---
+    const userXP = await UserXP.findOne({ where: { user_id: session.user_id } });
+    userXP.pendingXP += xp;
+    await userXP.save();
+
+    // --- 3. Log event in XP Service (source only, no XP increment) ---
+    await XPLog.create({
+      user_id: session.user_id,
+      amount: xp,
+      source: "pomodoro-complete"
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Pomodoro completed. XP added to pending.",
+      pendingXP: userXP.pendingXP,
+      session
+    });
+
+  } catch (error) {
+    console.error("Error completing Pomodoro:", error);
+    return res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+// Claim pending XP from pomodoros (reward popup)
+exports.claimPomodoroXP = async (req, res) => {
+  try {
+    const { userId } = req.body;
+
+    const userXP = await UserXP.findOne({ where: { user_id: userId } });
+    if (!userXP) {
+      return res.status(404).json({ message: "UserXP row not found." });
+    }
+
+    const pending = Number(userXP.pendingXP ?? 0);
+    if (pending <= 0) {
+      return res.status(400).json({ message: "No XP to claim." });
+    }
+
+    const amount = userXP.pendingXP;
+
+    // reset pending XP
+    userXP.pendingXP = 0;
+    await userXP.save();
+
+    // award XP using XP service
+    await xpService.addXP({
+      user_id: userId,
+      amount,
+      source: "pomodoro-claim"
+    });
+
+    res.status(200).json({
+      message: "Pomodoro XP claimed.",
+      awardedXP: amount
+    });
+
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 };

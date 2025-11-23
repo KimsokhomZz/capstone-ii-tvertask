@@ -1,4 +1,5 @@
 const Task = require('../models/taskModel');
+const xpService = require("../services/xpService");
 
 // Get all tasks
 exports.getAllTasks = async (req, res) => {
@@ -77,5 +78,25 @@ exports.deleteTask = async (req, res) => {
         res.json({ message: 'Task deleted' });
     } catch (error) {
         res.status(500).json({ message: error.message });
+    }
+};
+
+// 
+exports.completeTask = async (req, res) => {
+    try {
+        const { userId, taskId, xp } = req.body;
+
+        // call XP service
+        await xpService.addXP({
+            userId,
+            amount: xp,
+            source: "task",
+            metadata: { taskId }
+        });
+
+        res.status(200).json({ message: "Task completed and XP added." });
+
+    } catch (err) {
+        res.status(500).json({ error: err.message });
     }
 };
