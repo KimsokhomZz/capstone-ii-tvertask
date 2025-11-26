@@ -13,7 +13,7 @@ function Checkbox({
       data-slot="checkbox"
       className={cn(
         // Base
-        "peer size-4 shrink-0 rounded-[4px] border shadow-xs transition-shadow outline-none disabled:cursor-not-allowed disabled:opacity-50 bg-white",
+        "peer size-4 shrink-0 rounded-lg border shadow-xs transition-shadow outline-none disabled:cursor-not-allowed disabled:opacity-50 bg-white",
         // Default colors
         "border-input dark:bg-input/30",
         // Checked state: use blue theme

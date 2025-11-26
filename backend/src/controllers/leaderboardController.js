@@ -52,13 +52,13 @@ exports.getUserXP = async (req, res) => {
       include: [
         {
           model: UserXP,
-          attributes: ["level", "currentStreak"],
+          attributes: ["level", "current_streak"],
           where: {
-            currentStreak: { [Op.gt]: 0 },
+            current_streak: { [Op.gt]: 0 },
           },
         },
       ],
-      order: [[UserXP, "currentStreak", "DESC"]],
+      order: [[UserXP, "current_streak", "DESC"]],
       limit,
       offset,
     });
@@ -67,7 +67,7 @@ exports.getUserXP = async (req, res) => {
     const leaderboardXP = topUserXPs.map((user, index) => ({
       rank: offset + index + 1,
       user: user.name,
-      currentStreak: user.UserXP?.currentStreak || 0,
+      current_streak: user.UserXP?.current_streak || 0,
     }));
 
     res.status(200).json({ success: true, leaderboardXP });

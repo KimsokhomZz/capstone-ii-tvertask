@@ -17,16 +17,75 @@ import EmailVerification from "./Pages/Authentication/EmailVerification.jsx";
 // @ts-ignore
 import EmailSent from "./Pages/Authentication/EmailSent.jsx";
 // @ts-ignore
-import Dashboard from "./Pages/Dashboard/Dashboard.jsx";
-import TodoList from "./Pages/TaskList/TaskList.jsx";
+import ForgetPassword from "./Pages/Authentication/ForgetPassword.jsx";
+// @ts-ignore
+import ResetPassword from "./Pages/Authentication/ResetPassword.jsx";
+// @ts-ignore
+import Dashboard from "./Pages/Dashboard/Dashboardtask.jsx";
 // @ts-ignore
 import { AuthProvider } from "./context/AuthContext.jsx";
 // @ts-ignore
 import ProtectedRoute from "./components/ProtectedRoute.tsx";
+import TaskList from "./Pages/TaskList/TaskList.js";
+import MainLayout from "./components/MainLayout.tsx";
+import Pomodoro from "./Pages/Focus/Focustask.js";
+import Leaderboard from "./Pages/Leaderboard/leaderboard";
+import DashboardTask from "./Pages/Dashboard/Dashboardtask.js";
+import { Navigate } from "react-router-dom";
 
 interface Task {
   id: number;
   title: string;
+}
+
+function DashboardPage() {
+  return <DashboardTask />;
+}
+
+function LeaderboardPage() {
+  return <Leaderboard />;
+}
+
+function AvatarPage() {
+  return (
+    <div className="bg-white p-8 md:p-10 rounded-[28px] shadow-xl w-full max-w-4xl border border-gray-100">
+      <h1 className="text-2xl font-bold mb-2">Avatar</h1>
+      <p className="text-gray-500">Coming soon...</p>
+    </div>
+  );
+}
+
+function AnalyticsPage() {
+  return (
+    <div className="bg-white p-8 md:p-10 rounded-[28px] shadow-xl w-full max-w-4xl border border-gray-100">
+      <h1 className="text-2xl font-bold mb-2">Analytics</h1>
+      <p className="text-gray-500">Coming soon...</p>
+    </div>
+  );
+}
+function NotificationsPage() {
+  return (
+    <div className="bg-white p-8 md:p-10 rounded-[28px] shadow-xl w-full max-w-4xl border border-gray-100">
+      <h1 className="text-2xl font-bold mb-2">Notifications</h1>
+      <p className="text-gray-500">Coming soon...</p>
+    </div>
+  );
+}
+function SettingsPage() {
+  return (
+    <div className="bg-white p-8 md:p-10 rounded-[28px] shadow-xl w-full max-w-4xl border border-gray-100">
+      <h1 className="text-2xl font-bold mb-2">Settings</h1>
+      <p className="text-gray-500">Coming soon...</p>
+    </div>
+  );
+}
+function SupportPage() {
+  return (
+    <div className="bg-white p-8 md:p-10 rounded-[28px] shadow-xl w-full max-w-4xl border border-gray-100">
+      <h1 className="text-2xl font-bold mb-2">Support</h1>
+      <p className="text-gray-500">Coming soon...</p>
+    </div>
+  );
 }
 
 function HomePage() {
@@ -41,7 +100,7 @@ function HomePage() {
 
   return (
     <div>
-      <h1>Questify Tasks</h1>
+      <h1>Tver Task</h1>
       <ul>
         {tasks.map((task) => (
           <li key={task.id}>{task.title}</li>
@@ -65,20 +124,37 @@ function App() {
     <AuthProvider>
       <Router>
         <Routes>
-          <Route path="/" element={<HomePage />} />
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<SignUp />} />
+          <Route path="/forgot-password" element={<ForgetPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/email-sent" element={<EmailSent />} />
           <Route path="/verify-email" element={<EmailVerification />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <TodoList />
-              </ProtectedRoute>
-            }
-          />
+
+          {/* Main app routes with layout */}
+          <Route element={<MainLayout />}>
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="/focus" element={<TaskList />} />
+            <Route path="/pomodoro/:id" element={<Pomodoro />} />
+            <Route path="/leaderboard" element={<LeaderboardPage />} />
+            <Route path="/avatar" element={<AvatarPage />} />
+            <Route path="/analytics" element={<AnalyticsPage />} />
+            <Route path="/notifications" element={<NotificationsPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/support" element={<SupportPage />} />
+          </Route>
+
+          {/* Redirect /tasks to /focus */}
+          <Route path="/tasks" element={<Navigate to="/focus" replace />} />
         </Routes>
       </Router>
     </AuthProvider>

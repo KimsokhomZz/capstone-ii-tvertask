@@ -11,8 +11,8 @@ const User = sequelize.define(
       primaryKey: true,
     },
     name: {
-      type: DataTypes.STRING,
-      allowNull: false,
+        type: DataTypes.STRING,
+        allowNull: false,
     },
     email: {
       type: DataTypes.STRING,
@@ -59,6 +59,14 @@ const User = sequelize.define(
       allowNull: true,
     },
     emailVerificationExpires: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    resetPasswordToken: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    resetPasswordExpires: {
       type: DataTypes.DATE,
       allowNull: true,
     },

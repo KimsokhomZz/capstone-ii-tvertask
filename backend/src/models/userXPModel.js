@@ -4,31 +4,15 @@ const sequelize = require("../config/database");
 const UserXP = sequelize.define(
   "UserXP",
   {
-    userId: {
-      type: DataTypes.INTEGER,
-      references: {
-        model: "Users",
-        key: "id",
-      },
-      onDelete: "CASCADE",
-      onUpdate: "CASCADE",
-    },
-    totalXP: {
+    user_id: { type: DataTypes.INTEGER },
+    total_xp: { type: DataTypes.INTEGER, defaultValue: 0 },
+    pendingXP: {
       type: DataTypes.INTEGER,
       defaultValue: 0,
     },
-    level: {
-      type: DataTypes.INTEGER,
-      defaultValue: 0,
-    },
-    currentStreak: {
-      type: DataTypes.INTEGER,
-      defaultValue: 0,
-    },
-    lastActiveDate: {
-      type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
-    },
+    level: { type: DataTypes.INTEGER, defaultValue: 1 },
+    current_streak: { type: DataTypes.INTEGER, defaultValue: 0 },
+    last_active_date: { type: DataTypes.DATE, allowNull: true },
   },
   {
     timestamps: false,

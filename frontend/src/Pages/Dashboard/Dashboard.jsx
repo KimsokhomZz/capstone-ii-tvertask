@@ -29,7 +29,7 @@ export default function Dashboard() {
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center">
               <h1 className="text-2xl font-bold text-gray-900">
-                Questify Dashboard
+                Tver Task Dashboard
               </h1>
             </div>
             <div className="flex items-center space-x-4">
@@ -54,7 +54,7 @@ export default function Dashboard() {
         <div className="px-4 py-6 sm:px-0">
           <div className="bg-white rounded-lg shadow p-6">
             <h2 className="text-xl font-semibold text-gray-900 mb-4">
-              Welcome to Questify!
+              Welcome to Tver Task!
             </h2>
 
             {/* User Info Card */}
@@ -128,7 +128,7 @@ export default function Dashboard() {
             <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
               <p className="text-green-800 text-sm">
                 🎉 Authentication is working! You have successfully logged in to
-                Questify.
+                Tver Task.
                 {user?.googleId && (
                   <span className="block mt-1 font-medium">
                     ✅ Google OAuth login successful! Welcome, {user.name}!

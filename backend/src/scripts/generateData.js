@@ -68,10 +68,10 @@ async function generateData() {
 
       // 5. Create a UserXP for the user
       await UserXP.create({
-        userId: user.id,
+        user_id: user.id,
         level: faker.number.int({ min: 1, max: 100 }),
-        currentStreak: faker.number.int({ min: 1, max: 100 }),
-        lastActiveDate: new Date(Date.parse("2025-10-31")),
+        current_stack: faker.number.int({ min: 1, max: 100 }),
+        last_active_date: new Date(Date.parse("2025-10-31")),
       });
 
       console.log(`Generated user ${i}: ${user.name}`);

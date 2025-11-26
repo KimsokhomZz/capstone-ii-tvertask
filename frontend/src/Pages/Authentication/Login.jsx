@@ -393,7 +393,7 @@ export default function Login() {
         </div>
       </div>
 
-      {/* Right Side - Purple Background with Questify Branding */}
+      {/* Right Side - Purple Background with Tver Task Branding */}
       <div className="hidden lg:flex w-1/2 items-center justify-center bg-gradient-to-br from-purple-400 via-purple-500 to-purple-700 relative overflow-hidden animate-slideInRight">
         {/* Decorative elements */}
         <div className="absolute inset-0 opacity-30 animate-float">
@@ -402,7 +402,7 @@ export default function Login() {
           <div className="absolute top-1/3 right-1/4 w-16 h-16 bg-purple-200 rounded-full"></div>
         </div>
 
-        {/* Questify Logo Card */}
+        {/* Tver Task Logo Card */}
         <div className="relative z-10 bg-white rounded-3xl shadow-2xl p-8 max-w-xs text-center animate-scaleIn">
           <div className="flex justify-center mb-4">
             <div className="relative">
@@ -424,7 +424,7 @@ export default function Login() {
               </svg>
             </div>
           </div>
-          <h2 className="text-3xl font-bold text-gray-900 mb-1">Questify</h2>
+          <h2 className="text-3xl font-bold text-gray-900 mb-1">Tver Task</h2>
           <p className="text-gray-600 text-sm">YOUR GOALS. YOUR GAME</p>
         </div>
       </div>
