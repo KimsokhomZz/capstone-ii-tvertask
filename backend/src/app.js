@@ -1,17 +1,23 @@
 const express = require("express");
 const cors = require("cors");
+<<<<<<< HEAD
 const session = require("express-session");
 const passport = require("./config/passport");
 const path = require("path");
+=======
+// const session = require("express-session");
+// const passport = require("./config/passport");
+>>>>>>> Backend/Feature/Leaderboard
 
 // routes imports
-const userRoutes = require("./routes/userRoutes");
+// const userRoutes = require("./routes/userRoutes");
 const xpRoutes = require("./routes/xpRoutes");
-const googleAuthRoutes = require("./controllers/googleController");
-const facebookAuthRoutes = require("./controllers/facebookController");
+// const googleAuthRoutes = require("./controllers/googleController");
+// const facebookAuthRoutes = require("./controllers/facebookController");
 const taskRoutes = require('./routes/taskRoutes');
 const pomodoroRoutes = require("./routes/pomodoroRoutes");
 const questRoutes = require("./routes/questRoutes");
+const leaderboardRoutes = require("./routes/leaderboardRoutes")
 
 //! for get all users testing
 const { User } = require("./models");
@@ -57,8 +63,8 @@ app.use(
 );
 
 // Passport middleware
-app.use(passport.initialize());
-app.use(passport.session());
+// app.use(passport.initialize());
+// app.use(passport.session());
 
 // Health check endpoint
 app.use("/api/health", (req, res) => {
@@ -77,12 +83,13 @@ router.get("/users", async (req, res) => {
 app.use("/", router);
 
 // Routes registeration
-app.use("/api/users", userRoutes);
+// app.use("/api/users", userRoutes);
 app.use("/api/user", xpRoutes);
-app.use("/auth", googleAuthRoutes);
-app.use("/auth", facebookAuthRoutes);
+// app.use("/auth", googleAuthRoutes);
+// app.use("/auth", facebookAuthRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use("/api/pomodoro", pomodoroRoutes);
 app.use("/api/quests", questRoutes);
+app.use("/api/leaderboard", leaderboardRoutes)
 
 module.exports = app;
