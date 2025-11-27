@@ -1,21 +1,5 @@
 import React, { useState } from "react";
 
-// Reusable SVG for lock icon
-const LockIcon: React.FC = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    className="h-8 w-8 text-white opacity-70"
-    viewBox="0 0 20 20"
-    fill="currentColor"
-  >
-    <path
-      fillRule="evenodd"
-      d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
-      clipRule="evenodd"
-    />
-  </svg>
-);
-
 // Reusable SVG for checkmark icon
 const CheckmarkIcon: React.FC = () => (
   <svg
@@ -32,7 +16,7 @@ const CheckmarkIcon: React.FC = () => (
   </svg>
 );
 
-// Reusable SVG for fire icon (streak) - Corrected path
+// Reusable SVG for fire icon (streak)
 const FireIcon: React.FC = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -54,46 +38,36 @@ interface AvatarItem {
   locked: boolean;
 }
 
-const mainAvatarImageUrl =
-  "https://i.pinimg.com/1200x/9d/7c/40/9d7c40e80f917dae1fa1e325e1e1fae4.jpg";
-
-const newAvatarUrls = [
-  "https://i.pinimg.com/736x/4a/cb/10/4acb1008048558922b51b136770cc5aa.jpg",
-  "https://i.pinimg.com/736x/e7/c6/89/e7c689d41a93d8e89c840ddbc75f4904.jpg",
-  "https://i.pinimg.com/736x/0f/4c/01/0f4c01e437c589ed1f1a60d0e1ca2b0c.jpg",
-  "https://i.pinimg.com/736x/f1/7e/7d/f17e7d80e167f07a82461b0ed30f283f.jpg",
-  "https://i.pinimg.com/1200x/8f/bd/e0/8fbde0bd4a18292d910262ef44259d9f.jpg",
-  "https://i.pinimg.com/736x/c7/08/dd/c708dde07422fc32950faa7a822ec388.jpg",
-  "https://i.pinimg.com/736x/9d/02/39/9d02399eb330e0976b46296fa598d087.jpg",
+// User-provided new image URLs
+const userProvidedImages = [
+  "https://i.pinimg.com/736x/52/33/97/5233974dd3669971eb3c2e177ec6d209.jpg",
+  "https://i.pinimg.com/736x/de/4b/62/de4b62bca6855837a0341da6af7f4cb5.jpg",
+  "https://i.pinimg.com/1200x/01/1f/08/011f0877c32df9f4402146f9205e4ba5.jpg",
+  "https://i.pinimg.com/736x/20/b9/2d/20b92d0cf87f5f88418d075f8fd4c506.jpg",
 ];
 
-const avatars: AvatarItem[] = [
-  { id: 1, image: mainAvatarImageUrl, locked: false }, // Selected: Sparky robot
-  { id: 2, image: newAvatarUrls[0], locked: true },
-  { id: 3, image: newAvatarUrls[1], locked: true },
-  { id: 4, image: newAvatarUrls[2], locked: true },
-  { id: 5, image: newAvatarUrls[3], locked: true },
-  { id: 6, image: newAvatarUrls[4], locked: true },
-  { id: 7, image: newAvatarUrls[5], locked: true },
-  { id: 8, image: newAvatarUrls[6], locked: true },
-  { id: 9, image: newAvatarUrls[0], locked: true }, // Cycling through the provided images
-  { id: 10, image: newAvatarUrls[1], locked: true },
-  { id: 11, image: newAvatarUrls[2], locked: true },
-  { id: 12, image: newAvatarUrls[3], locked: true },
-  { id: 13, image: newAvatarUrls[4], locked: true },
-  { id: 14, image: newAvatarUrls[5], locked: true },
-  { id: 15, image: newAvatarUrls[6], locked: true },
-  { id: 16, image: newAvatarUrls[0], locked: true },
-  { id: 17, image: newAvatarUrls[1], locked: true },
-  { id: 18, image: newAvatarUrls[2], locked: true },
-];
+// Initial set of avatars, using the new images and unlocking the first 5
+const initialAvatars: AvatarItem[] = Array.from({ length: 18 }, (_, i) => ({
+  id: i + 1,
+  image: userProvidedImages[i % userProvidedImages.length], // Cycle through the 4 provided images
+  locked: i >= 5, // Unlock avatars with ID 1 to 5 (0-indexed 0-4)
+}));
 
 const Avatar: React.FC = () => {
+  const [avatars] = useState<AvatarItem[]>(initialAvatars);
   const [selectedAvatarId, setSelectedAvatarId] = useState<number>(1);
+  const [mainDisplayAvatar, setMainDisplayAvatar] = useState<string>(
+    avatars[0].image
+  ); // Initialize with the first avatar's image
 
-  const handleAvatarClick = (id: number, locked: boolean) => {
+  const handleAvatarClick = (
+    id: number,
+    clickedImage: string,
+    locked: boolean
+  ) => {
     if (!locked) {
       setSelectedAvatarId(id);
+      setMainDisplayAvatar(clickedImage);
     }
   };
 
@@ -103,21 +77,23 @@ const Avatar: React.FC = () => {
 
   return (
     <div className="w-full max-w-6xl bg-white rounded-2xl shadow-lg p-6 sm:p-8 md:p-10 font-sans">
-      {/* Top section: Main Avatar Display (Sparky) and Recent Activities */}
+      {/* Top section: Main Avatar Display and Recent Activities */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 mb-8">
-        {/* Sparky Card (md:col-span-2) */}
+        {/* Main Display Avatar Card (md:col-span-2) */}
         <div className="md:col-span-2 bg-gray-50 rounded-2xl relative overflow-hidden shadow-md">
           <img
-            src={mainAvatarImageUrl}
-            alt="Main Avatar Sparky"
+            src={mainDisplayAvatar} // Use the dynamic mainDisplayAvatar state
+            alt="Main Avatar"
             className="w-full h-auto object-cover rounded-2xl aspect-[16/9]"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-70 rounded-2xl"></div>
           <div className="absolute bottom-6 left-6 text-white space-y-1">
-            <h1 className="text-3xl sm:text-4xl font-bold">Sparky</h1>
+            <h1 className="text-3xl sm:text-4xl font-bold">Sparky</h1>{" "}
+            {/* Kept static as requested */}
             <p className="text-lg sm:text-xl font-medium opacity-80">
               Level 4 Adventurer
-            </p>
+            </p>{" "}
+            {/* Kept static as requested */}
           </div>
           <div className="absolute bottom-6 right-6 bg-yellow-500 text-white px-4 py-2 rounded-full text-sm font-semibold flex items-center gap-2 shadow-lg">
             <FireIcon />
@@ -158,18 +134,18 @@ const Avatar: React.FC = () => {
             {avatars.map((avatar) => (
               <div
                 key={avatar.id}
-                className={`relative w-28 h-28 sm:w-32 sm:h-32 lg:w-32 lg:h-32 bg-gray-200 rounded-xl flex items-center justify-center overflow-hidden transition-all duration-200 ease-in-out
-                  ${
-                    selectedAvatarId === avatar.id
-                      ? "border-4 border-green-500 shadow-lg"
-                      : "border border-gray-200 hover:border-gray-300"
-                  }
-                  ${
-                    avatar.locked
-                      ? "cursor-not-allowed grayscale opacity-75"
-                      : "cursor-pointer"
-                  }`}
-                onClick={() => handleAvatarClick(avatar.id, avatar.locked)}
+                className={`relative w-28 h-28 sm:w-32 sm:h-32 lg:w-32 lg:h-32 bg-gray-200 rounded-xl flex items-center justify-center overflow-hidden transition-all duration-200 ease-in-out ${
+                  selectedAvatarId === avatar.id
+                    ? "border-4 border-green-500 shadow-lg"
+                    : "border border-gray-200 hover:border-gray-300"
+                } ${
+                  avatar.locked
+                    ? "cursor-not-allowed grayscale opacity-75"
+                    : "cursor-pointer"
+                }`}
+                onClick={() =>
+                  handleAvatarClick(avatar.id, avatar.image, avatar.locked)
+                }
                 role="button"
                 aria-pressed={selectedAvatarId === avatar.id}
                 aria-label={`Select avatar ${avatar.id}`}
@@ -180,8 +156,11 @@ const Avatar: React.FC = () => {
                   className="w-full h-full object-cover"
                 />
                 {avatar.locked && (
-                  <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-xl">
-                    <LockIcon />
+                  <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center rounded-xl">
+                    {" "}
+                    {/* Changed opacity to 30% */}
+                    <i className="fa-solid fa-lock text-white text-3xl opacity-90"></i>{" "}
+                    {/* Font Awesome lock icon */}
                   </div>
                 )}
                 {selectedAvatarId === avatar.id && !avatar.locked && (
