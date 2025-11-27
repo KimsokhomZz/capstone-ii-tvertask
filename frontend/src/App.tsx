@@ -27,7 +27,7 @@ import { AuthProvider } from "./context/AuthContext.jsx";
 // @ts-ignore
 import ProtectedRoute from "./components/ProtectedRoute.tsx";
 import TaskList from "./Pages/TaskList/TaskList.js";
-import MainLayout from "./components/MainLayout.tsx";
+import MainLayout from "./Components/MainLayout.tsx";
 import Pomodoro from "./Pages/Focus/Focustask.js";
 import Leaderboard from "./Pages/Leaderboard/leaderboard";
 import DashboardTask from "./Pages/Dashboard/Dashboardtask.js";
