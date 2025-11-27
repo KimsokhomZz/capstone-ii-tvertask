@@ -5,11 +5,13 @@ import Header from "../Components/header";
 type PomodoroTimerCardProps = {
   taskTitle?: string;
   defaultFocus?: number;
+  onComplete?: () => void;
 };
 
 export default function PomodoroTimerCard({
   taskTitle = "Task 1",
   defaultFocus = 25,
+  onComplete,
 }: PomodoroTimerCardProps) {
   const [selectedFocus, setSelectedFocus] = useState<number>(defaultFocus);
   const [timeLeft, setTimeLeft] = useState(defaultFocus * 60);
@@ -75,6 +77,12 @@ export default function PomodoroTimerCard({
           if (timerRef.current) clearInterval(timerRef.current);
           if (!isBreak) {
             setCompletedPomodoros((v) => v + 1);
+            // notify parent that a pomodoro completed
+            try {
+              onComplete?.();
+            } catch (e) {
+              console.warn("PomodoroTimerCard: onComplete threw:", e);
+            }
             setIsBreak(true);
             const isLong = shortsSinceLong === 4;
             return (isLong ? longBreak : shortBreak) * 60;
@@ -370,6 +378,11 @@ export default function PomodoroTimerCard({
             onClick={() => {
               if (!isBreak) {
                 setCompletedPomodoros((v) => v + 1);
+                try {
+                  onComplete?.();
+                } catch (e) {
+                  console.warn("PomodoroTimerCard: onComplete threw:", e);
+                }
                 setIsBreak(true);
                 setIsRunning(false);
                 const isLong = shortsSinceLong === 4;
