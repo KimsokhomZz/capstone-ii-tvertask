@@ -39,7 +39,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
     { name: "Dashboard", icon: <Home size={20} />, path: "/dashboard" },
     { name: "Focus", icon: <Target size={20} />, path: "/focus" },
     { name: "Leaderboard", icon: <Trophy size={20} />, path: "/leaderboard" },
-    { name: "Avatar", icon: <User size={20} />, path: "/avatar" },
+    { name: "Profile", icon: <User size={20} />, path: "/profile" },
     { name: "Analytics", icon: <BarChart2 size={20} />, path: "/analytics" },
   ];
 
