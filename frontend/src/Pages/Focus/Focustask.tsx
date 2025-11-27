@@ -1,8 +1,8 @@
 import { useState } from "react";
-import PomodoroTimerCard from "../../components/PomodoroTimerCard";
-import MusicCard from "../../components/MusicCard";
-import QuickNoteCard from "../../components/QuickNoteCard";
-import SessionNotesList from "../../components/SessionNotesList";
+import PomodoroTimerCard from "../../Components/PomodoroTimerCard";
+import MusicCard from "../../Components/MusicCard";
+import QuickNoteCard from "../../Components/QuickNoteCard";
+import SessionNotesList from "../../Components/SessionNotesList";
 import Musictask from "../music/Musictask"; // added import
 import { Link, useLocation } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
