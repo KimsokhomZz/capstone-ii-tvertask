@@ -29,6 +29,9 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
   const handleLogout = async () => {
     try {
       await logout();
+      if (onLogout) {
+        onLogout();
+      }
       navigate("/login");
     } catch (error) {
       console.error("Logout failed:", error);
@@ -75,7 +78,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
                 aria-current={isActive ? "page" : undefined}
                 className={`flex items-center gap-3 w-full px-4 py-3 rounded-2xl transition-all duration-200 ${
                   isActive
-                    ? "bg-gradient-to-r from-yellow-400 to-yellow-300 text-white font-semibold shadow-lg shadow-yellow-200"
+                    ? "bg-linear-to-r from-yellow-400 to-yellow-300 text-white font-semibold shadow-lg shadow-yellow-200"
                     : "text-gray-600 hover:bg-yellow-50 hover:text-yellow-600"
                 }`}
               >
