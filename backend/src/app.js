@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const session = require("express-session");
 const passport = require("./config/passport");
+const path = require("path");
 
 // routes imports
 const userRoutes = require("./routes/userRoutes");
@@ -20,10 +21,15 @@ const app = express();
 
 // CORS options for development
 const corsOptions = {
-  origin: '*', // allow all origins (development only)
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', "X-Requested-With"],
+  origin: [
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "http://127.0.0.1:5173",
+  ], // Add common dev ports
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
   optionsSuccessStatus: 204,
+  credentials: true,
 };
 
 // Enable CORS
@@ -33,10 +39,14 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Serve static files for uploads
+app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
+
 // Session configuration (required for passport)
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || "your-secret-key-change-in-production",
+    secret:
+      process.env.SESSION_SECRET || "your-secret-key-change-in-production",
     resave: false,
     saveUninitialized: false,
     cookie: {
@@ -71,7 +81,12 @@ app.use("/api/users", userRoutes);
 app.use("/api/user", xpRoutes);
 app.use("/auth", googleAuthRoutes);
 app.use("/auth", facebookAuthRoutes);
+<<<<<<< HEAD
 app.use('/api/tasks', taskRoutes);
+=======
+// app.use('/api/auth', authRoutes);
+app.use("/api/tasks", taskRoutes);
+>>>>>>> Frontend/Feature/Profile_Management
 app.use("/api/pomodoro", pomodoroRoutes);
 app.use("/api/quests", questRoutes);
 

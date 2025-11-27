@@ -36,6 +36,7 @@ class AuthService {
 
       // Store token in localStorage (for social auth, auto-verification, or if verification is bypassed)
       if (data.data?.token) {
+        localStorage.removeItem("hasLoggedOut"); // Clear logout flag on successful login
         localStorage.setItem("token", data.data.token);
         localStorage.setItem("user", JSON.stringify(data.data.user));
       }
@@ -64,6 +65,7 @@ class AuthService {
 
       // Store token in localStorage
       if (data.data?.token) {
+        localStorage.removeItem("hasLoggedOut"); // Clear logout flag on successful login
         localStorage.setItem("token", data.data.token);
         localStorage.setItem("user", JSON.stringify(data.data.user));
       }
@@ -77,6 +79,9 @@ class AuthService {
 
   async logout() {
     try {
+      // Set logout flag to prevent auto-login on page reload
+      localStorage.setItem("hasLoggedOut", "true");
+
       // Clear local storage
       localStorage.removeItem("token");
       localStorage.removeItem("user");
@@ -84,6 +89,10 @@ class AuthService {
       return { success: true, message: "Logged out successfully" };
     } catch (error) {
       console.error("Logout error:", error);
+      // Still clear data even if there's an error
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      localStorage.setItem("hasLoggedOut", "true");
       throw error;
     }
   }
@@ -112,8 +121,8 @@ class AuthService {
       return data;
     } catch (error) {
       console.error("Get current user error:", error);
-      // If token is invalid, clear it
-      this.logout();
+      // If token is invalid, clear it (but don't set logout flag since this is automatic cleanup)
+      this.clearAuthData();
       throw error;
     }
   }
@@ -130,7 +139,22 @@ class AuthService {
   isAuthenticated() {
     const token = this.getToken();
     const user = this.getUser();
-    return !!(token && user);
+    const hasLoggedOut = this.hasLoggedOut();
+    return !!(token && user && !hasLoggedOut);
+  }
+
+  hasLoggedOut() {
+    return localStorage.getItem("hasLoggedOut") === "true";
+  }
+
+  clearLogoutFlag() {
+    localStorage.removeItem("hasLoggedOut");
+  }
+
+  clearAuthData() {
+    // Clear auth data without setting logout flag (for automatic cleanup)
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
   }
 
   async verifyEmail(token) {
@@ -151,6 +175,7 @@ class AuthService {
 
       // Store token and user data after successful verification
       if (data.data?.token) {
+        localStorage.removeItem("hasLoggedOut"); // Clear logout flag on successful login
         localStorage.setItem("token", data.data.token);
         localStorage.setItem("user", JSON.stringify(data.data.user));
       }

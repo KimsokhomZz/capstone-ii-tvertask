@@ -11,8 +11,8 @@ const User = sequelize.define(
       primaryKey: true,
     },
     name: {
-        type: DataTypes.STRING,
-        allowNull: false,
+      type: DataTypes.STRING,
+      allowNull: false,
     },
     email: {
       type: DataTypes.STRING,
@@ -67,6 +67,31 @@ const User = sequelize.define(
       allowNull: true,
     },
     resetPasswordExpires: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    // Profile fields
+    bio: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    location: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    username: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    isActive: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true,
+    },
+    deactivatedAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    deletedAt: {
       type: DataTypes.DATE,
       allowNull: true,
     },

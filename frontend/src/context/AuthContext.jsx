@@ -88,21 +88,39 @@ export const AuthProvider = ({ children }) => {
 
   // Initialize authentication state on app load
   useEffect(() => {
-    const initializeAuth = () => {
+    const initializeAuth = async () => {
       try {
         const token = authService.getToken();
         const user = authService.getUser();
+        const hasLoggedOut = authService.hasLoggedOut();
+
+        // If user has explicitly logged out, don't auto-login
+        if (hasLoggedOut) {
+          authService.clearLogoutFlag();
+          dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: false });
+          return;
+        }
 
         if (token && user) {
-          dispatch({
-            type: AUTH_ACTIONS.LOGIN_SUCCESS,
-            payload: { user, token },
-          });
+          // Validate token by making a request to the server
+          try {
+            await authService.getCurrentUser();
+            dispatch({
+              type: AUTH_ACTIONS.LOGIN_SUCCESS,
+              payload: { user, token },
+            });
+          } catch (error) {
+            // Token is invalid, clear it
+            console.log("Token validation failed, clearing auth data");
+            authService.clearAuthData();
+            dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: false });
+          }
         } else {
           dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: false });
         }
       } catch (error) {
         console.error("Error initializing auth:", error);
+        authService.clearAuthData();
         dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: false });
       }
     };
@@ -176,6 +194,7 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       console.error("Logout error:", error);
       // Even if logout fails, clear local state
+      authService.logout(); // Ensure cleanup
       dispatch({ type: AUTH_ACTIONS.LOGOUT });
     }
   };

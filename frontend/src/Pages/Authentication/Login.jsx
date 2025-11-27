@@ -114,7 +114,7 @@ export default function Login() {
             {/* Success Message */}
             {isSuccess && (
               <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center gap-3">
-                <div className="flex-shrink-0">
+                <div className="shrink-0">
                   <svg
                     className="w-5 h-5 text-green-500 animate-bounce"
                     fill="currentColor"
@@ -139,7 +139,7 @@ export default function Login() {
             {/* Global Error Message */}
             {error && !isSuccess && !showVerificationError && (
               <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0" />
+                <AlertCircle className="w-4 h-4 text-red-500 shrink-0" />
                 <span className="text-red-700 text-sm">{error}</span>
               </div>
             )}
@@ -148,7 +148,7 @@ export default function Login() {
             {showVerificationError && (
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                 <div className="flex items-start gap-3">
-                  <div className="flex-shrink-0">
+                  <div className="shrink-0">
                     <svg
                       className="w-5 h-5 text-yellow-500 mt-0.5"
                       fill="currentColor"
@@ -394,7 +394,7 @@ export default function Login() {
       </div>
 
       {/* Right Side - Purple Background with Tver Task Branding */}
-      <div className="hidden lg:flex w-1/2 items-center justify-center bg-gradient-to-br from-purple-400 via-purple-500 to-purple-700 relative overflow-hidden animate-slideInRight">
+      <div className="hidden lg:flex w-1/2 items-center justify-center bg-linear-to-br from-purple-400 via-purple-500 to-purple-700 relative overflow-hidden animate-slideInRight">
         {/* Decorative elements */}
         <div className="absolute inset-0 opacity-30 animate-float">
           <div className="absolute top-10 left-10 w-24 h-24 bg-purple-300 rounded-full"></div>

@@ -1,8 +1,12 @@
 import React, { useEffect, useRef } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
+// @ts-ignore
+import { useAuth } from "../../context/AuthContext.jsx";
 
 export default function AuthCallback() {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const { setAuthState } = useAuth();
   const hasProcessed = useRef(false);
 
   useEffect(() => {
@@ -16,7 +20,7 @@ export default function AuthCallback() {
 
     if (error) {
       // Handle authentication error
-      window.location.replace("/login?error=Google authentication failed");
+      navigate("/login?error=OAuth authentication failed", { replace: true });
       return;
     }
 
@@ -25,28 +29,33 @@ export default function AuthCallback() {
         // Parse user data
         const userData = JSON.parse(decodeURIComponent(userString));
 
-        // Store token and user data in localStorage
-        localStorage.setItem("token", token);
-        localStorage.setItem("user", JSON.stringify(userData));
+        // Clear any logout flags since this is a successful OAuth login
+        localStorage.removeItem("hasLoggedOut");
 
-        // Redirect to dashboard using window.location.replace to avoid history issues
-        window.location.replace("/dashboard");
+        // Use AuthContext to set authentication state
+        setAuthState(userData, token);
+
+        // Redirect to dashboard
+        navigate("/dashboard", { replace: true });
       } catch (error) {
-        window.location.replace(
-          "/login?error=Authentication processing failed"
-        );
+        console.error("OAuth callback error:", error);
+        navigate("/login?error=Authentication processing failed", {
+          replace: true,
+        });
       }
     } else {
       // No token received, redirect to login
-      window.location.replace("/login?error=No authentication token received");
+      navigate("/login?error=No authentication token received", {
+        replace: true,
+      });
     }
-  }, [searchParams]);
+  }, [searchParams, navigate, setAuthState]);
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
       <div className="text-center">
         <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-        <p className="text-gray-600">Completing Google sign in...</p>
+        <p className="text-gray-600">Completing authentication...</p>
       </div>
     </div>
   );
