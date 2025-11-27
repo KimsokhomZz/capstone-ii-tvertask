@@ -81,12 +81,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/user", xpRoutes);
 app.use("/auth", googleAuthRoutes);
 app.use("/auth", facebookAuthRoutes);
-<<<<<<< HEAD
 app.use('/api/tasks', taskRoutes);
-=======
-// app.use('/api/auth', authRoutes);
-app.use("/api/tasks", taskRoutes);
->>>>>>> Frontend/Feature/Profile_Management
 app.use("/api/pomodoro", pomodoroRoutes);
 app.use("/api/quests", questRoutes);
 
