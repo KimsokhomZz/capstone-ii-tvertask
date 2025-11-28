@@ -166,7 +166,13 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-8">
+    <div
+      className={
+        embedded
+          ? "w-full h-full bg-gradient-to-br from-gray-50 to-gray-100 p-4 overflow-hidden"
+          : "min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-8"
+      }
+    >
       <div className="max-w-5xl mx-auto">
         {/* Header */}
         {/* toggle between header and compact MusicCard */}
@@ -175,13 +181,17 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
             <Music className="w-7 h-7 text-white" />
           </div>
           <h3 className="text-3xl font-bold text-gray-800">Focus Music</h3>
-          <button
-            aria-label="Show compact music card"
-            onClick={() => setShowCompact(true)}
-            className="ml-auto"
-          >
-            <ChevronDown className="w-10 h-10 text-[#F9C80E]" />
-          </button>
+
+          {/* show the chevron only when rendered embedded (inside the popup) */}
+          {embedded && (
+            <button
+              aria-label="Show compact music card"
+              onClick={() => setShowCompact(true)}
+              className="ml-auto"
+            >
+              <ChevronDown className="w-10 h-10 text-[#F9C80E]" />
+            </button>
+          )}
         </div>
 
         {/* Tabs */}

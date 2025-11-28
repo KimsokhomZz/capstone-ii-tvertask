@@ -1,11 +1,11 @@
-const app = require('./src/app');
-const { sequelize } = require('./src/models'); // exported sequelize from models/index.js
-require('dotenv').config();
+const app = require("./src/app");
+const { sequelize } = require("./src/models"); // exported sequelize from models/index.js
+require("dotenv").config();
 
 const PORT = process.env.PORT || 3000;
 
 // require models to register associations to make sure Sequelize knows about them
-require('./src/models/index'); // loads src/models/index.js
+require("./src/models/index"); // loads src/models/index.js
 
 // Test DB connection
 sequelize
