@@ -1,4 +1,4 @@
-import DeleteConfirmation from "@/components/DeleteConfirmation";
+import DeleteConfirmation from "@/Components/DeleteConfirmation";
 import { Toast } from "@/components/ConfirmDialog";
 import { useState } from "react";
 
@@ -16,21 +16,21 @@ export default function SessionNotesList({
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [toast, setToast] = useState<{ message: string } | null>(null);
   return (
-    <div className="bg-white rounded-[28px] shadow-xl border border-gray-100 p-6 md:p-8">
+    <div className="bg-card rounded-[28px] shadow-xl border border-border p-6 md:p-8">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-xl font-semibold text-gray-900">Session Notes</h3>
-        <span className="text-xs bg-yellow-100 text-yellow-700 border border-yellow-200 px-2.5 py-1 rounded-full">
+        <h3 className="text-xl font-semibold text-foreground">Session Notes</h3>
+        <span className="text-xs bg-primary/10 text-primary border border-border px-2.5 py-1 rounded-full">
           {notes.length}
         </span>
       </div>
       <div className="space-y-3">
         {notes.length === 0 && (
-          <div className="text-sm text-gray-500">No notes yet</div>
+          <div className="text-sm text-muted-foreground">No notes yet</div>
         )}
         {notes.map((n) => (
           <div
             key={n.id}
-            className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3"
+            className="flex items-center justify-between bg-secondary/50 border border-border rounded-2xl px-4 py-3"
           >
             <div className="flex-1 pr-3">
               {n.editing ? (
@@ -43,17 +43,17 @@ export default function SessionNotesList({
                       )
                     )
                   }
-                  className="w-full rounded-lg border border-gray-300 px-2 py-1 text-sm"
+                  className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring/50"
                 />
               ) : (
-                <div className="text-gray-800 text-sm">{n.text}</div>
+                <div className="text-foreground text-sm">{n.text}</div>
               )}
             </div>
             <div className="flex items-center gap-2">
               {n.editing ? (
                 <>
                   <button
-                    className="text-xs px-2 py-1 rounded-lg bg-yellow-400 text-black hover:bg-yellow-200 cursor-pointer"
+                    className="text-xs px-3 py-1.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer transition-colors"
                     onClick={() => {
                       setNotes((prev) =>
                         prev.map((x) =>
@@ -67,7 +67,7 @@ export default function SessionNotesList({
                     Save
                   </button>
                   <button
-                    className="text-xs px-2 py-1 rounded-lg bg-gray-200 text-gray-700 hover:bg-yellow-50 cursor-pointer"
+                    className="text-xs px-3 py-1.5 rounded-lg bg-secondary text-black hover:bg-accent hover:text-accent-foreground cursor-pointer transition-colors"
                     onClick={() =>
                       setNotes((prev) =>
                         prev.map((x) =>
@@ -79,7 +79,7 @@ export default function SessionNotesList({
                     Cancel
                   </button>
                   <button
-                    className="text-xs px-2 py-1 rounded-lg bg-red-500 text-white hover:bg-red-400 cursor-pointer"
+                    className="text-xs px-3 py-1.5 rounded-lg bg-destructive text-destructive-foreground hover:bg-destructive/90 cursor-pointer transition-colors"
                     onClick={() => setDeleteId(n.id)}
                   >
                     Delete
@@ -88,7 +88,7 @@ export default function SessionNotesList({
               ) : (
                 <>
                   <button
-                    className="text-xs px-2 py-1 rounded-lg bg-gray-200 text-gray-700 hover:bg-yellow-50 cursor-pointer"
+                    className="text-xs px-3 py-1.5 rounded-lg bg-secondary text-black hover:bg-accent hover:text-accent-foreground cursor-pointer transition-colors"
                     onClick={() =>
                       setNotes((prev) =>
                         prev.map((x) =>
@@ -100,7 +100,7 @@ export default function SessionNotesList({
                     Edit
                   </button>
                   <button
-                    className="text-xs px-2 py-1 rounded-lg bg-red-500 text-white hover:bg-red-400 cursor-pointer"
+                    className="text-xs px-3 py-1.5 rounded-lg bg-destructive text-destructive-foreground hover:bg-destructive/90 cursor-pointer transition-colors"
                     onClick={() => setDeleteId(n.id)}
                   >
                     Delete

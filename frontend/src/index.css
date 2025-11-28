@@ -241,3 +241,18 @@ h1 {
     @apply bg-background text-foreground;
   }
 }
+
+@layer components {
+  .cards-transparent .bg-card {
+    @apply bg-transparent;
+  }
+  .cards-transparent .border-border {
+    @apply border-transparent;
+  }
+  .cards-transparent .shadow-xl,
+  .cards-transparent .shadow,
+  .cards-transparent .shadow-sm,
+  .cards-transparent .shadow-md {
+    box-shadow: none !important;
+  }
+}

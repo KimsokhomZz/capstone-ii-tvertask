@@ -8,7 +8,7 @@ import {
   Pause,
   ChevronDown,
 } from "lucide-react";
-import MusicCard from "../../components/MusicCard";
+import MusicCard from "../../Components/MusicCard";
 
 interface Track {
   id: string;

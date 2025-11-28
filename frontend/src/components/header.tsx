@@ -16,7 +16,7 @@ export default function Header({
 }: HeaderProps) {
   return (
     <div
-      className={`flex items-center gap-2 text-gray-800 mb-4 ${
+      className={`flex items-center gap-2 text-foreground mb-4 ${
         containerClassName ?? ""
       }`}
     >
@@ -26,7 +26,7 @@ export default function Header({
         </span>
       )}
 
-      <div className={` font-bold text-md ${titleClassName ?? ""}`}>
+      <div className={`font-bold text-md ${titleClassName ?? "text-foreground"}`}>
         <h1>{title}</h1>
       </div>
     </div>

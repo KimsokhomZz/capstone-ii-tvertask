@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import FocusMusicApp from "../Pages/music/Musictask";
-import Header from "./header";
 import { Target } from "lucide-react";
+import Header from "../Components/header";
 
 type PomodoroTimerCardProps = {
   taskTitle?: string;
@@ -30,7 +29,6 @@ export default function PomodoroTimerCard({
   const [sliderShort, setSliderShort] = useState<number>(5);
   const [sliderLong, setSliderLong] = useState<number>(15);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [isMusicOpen, setIsMusicOpen] = useState(false);
   const [selectedPreset, setSelectedPreset] = useState<
     "baby" | "popular" | "medium" | "extended" | "custom"
   >("custom");
@@ -144,7 +142,7 @@ export default function PomodoroTimerCard({
   return (
     <div
       ref={cardRef}
-      className={`bg-white rounded-[28px] shadow-xl border border-gray-100 p-6 md:p-8 ${
+      className={`bg-card text-foreground rounded-[28px] shadow-xl border border-border p-6 md:p-8 transition-colors ${
         isFullscreen
           ? "h-screen w-screen rounded-none border-0 flex flex-col items-center justify-center"
           : ""
@@ -161,14 +159,14 @@ export default function PomodoroTimerCard({
             <div>
               <button
                 onClick={() => setShowPicker((s) => !s)}
-                className="px-3 py-1 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 hover:bg-yellow-50 hover:shadow-md text-sm cursor-pointer"
+                className="px-3 py-1 rounded-xl bg-secondary text-black border border-border hover:bg-accent hover:shadow-md text-sm cursor-pointer transition-colors"
               >
                 Change time
               </button>
               {showPicker && (
-                <div className="absolute right-0 mt-2 z-10 bg-white border border-gray-200 rounded-xl shadow-lg p-3 w-64">
+                <div className="absolute right-0 mt-2 z-10 bg-popover text-popover-foreground border border-border rounded-xl shadow-lg p-3 w-64">
                   <div className="mb-3">
-                    <div className="text-sm font-semibold text-gray-900 mb-2">
+                    <div className="text-sm font-semibold text-foreground mb-2">
                       Customize focus level
                     </div>
                     <div className="space-y-1">
@@ -195,23 +193,27 @@ export default function PomodoroTimerCard({
                             }}
                             className={`w-full flex items-center justify-between px-2 py-1.5 rounded-lg text-left border ${
                               active
-                                ? "bg-yellow-50 border-yellow-200"
-                                : "border-gray-200 hover:bg-yellow-50 hover:shadow-md"
+                                ? "bg-accent/50 border-primary"
+                                : "border-border hover:bg-accent/30 hover:shadow-md dark:bg-gray-800/50"
+                            } ${
+                              active
+                                ? "text-black"
+                                : "text-black/90 hover:text-black"
                             }`}
                           >
                             <div className="flex items-center gap-2">
                               <span
                                 className={`inline-block h-3.5 w-3.5 rounded-full border ${
                                   active
-                                    ? "border-yellow-500 ring-2 ring-yellow-200"
-                                    : "border-gray-300"
+                                    ? "border-primary ring-2 ring-primary/60"
+                                    : "border-border dark:border-gray-600"
                                 }`}
                               />
-                              <span className="text-sm text-gray-800">
+                              <span className="text-sm text-black">
                                 {p.label}
                               </span>
                             </div>
-                            <span className="text-xs text-gray-500">
+                            <span className="text-xs text-muted-foreground">
                               {p.focus} • {p.short} • {p.long} min
                             </span>
                           </button>
@@ -219,12 +221,12 @@ export default function PomodoroTimerCard({
                       })}
                     </div>
                   </div>
-                  <div className="text-sm font-medium text-gray-800 mb-2">
+                  <div className="text-sm font-medium text-foreground mb-2">
                     Custom (1–100 min)
                   </div>
                   <div className="space-y-3">
                     <div>
-                      <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
+                      <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
                         <span>Pomodoro</span>
                         <span>{sliderMinutes} min</span>
                       </div>
@@ -243,7 +245,7 @@ export default function PomodoroTimerCard({
                       />
                     </div>
                     <div>
-                      <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
+                      <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
                         <span>Rest</span>
                         <span>{sliderShort} min</span>
                       </div>
@@ -262,7 +264,7 @@ export default function PomodoroTimerCard({
                       />
                     </div>
                     <div>
-                      <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
+                      <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
                         <span>Long Rest</span>
                         <span>{sliderLong} min</span>
                       </div>
@@ -297,7 +299,7 @@ export default function PomodoroTimerCard({
                         setShowPicker(false);
                         setSelectedPreset("custom");
                       }}
-                      className="w-full px-2.5 py-1 rounded-lg bg-yellow-400 border border-gray-200 text-black text-sm hover:bg-yellow-50 hover:shadow-md cursor-pointer transition-colors"
+                      className="w-full px-2.5 py-1 rounded-lg bg-primary border border-border text-black text-sm hover:bg-accent hover:text-foreground hover:shadow-md cursor-pointer transition-colors"
                     >
                       Apply
                     </button>
@@ -306,7 +308,7 @@ export default function PomodoroTimerCard({
               )}
             </div>
           )}
-          <span className="text-sm bg-yellow-100 text-yellow-600 px-3 py-1 rounded-full">
+          <span className="text-sm bg-accent text-accent-foreground px-3 py-1 rounded-full">
             {isBreak
               ? shortsSinceLong === 4
                 ? `${longBreak}m`
@@ -328,35 +330,35 @@ export default function PomodoroTimerCard({
               cx="100"
               cy="100"
               r={radius}
-              stroke="#FFF7D6"
               strokeWidth="14"
               fill="none"
+              style={{ stroke: "var(--muted)" }}
             />
             <circle
               cx="100"
               cy="100"
               r={radius}
-              stroke="#FACC15"
               strokeWidth="14"
               strokeLinecap="round"
               strokeDasharray={`${dash} ${circumference - dash}`}
               fill="none"
+              style={{ stroke: "var(--primary)" }}
             />
           </svg>
-          <div className="absolute inset-0 flex flex-col items-center justify-center text-yellow-500">
-            <div className="text-4xl font-bold text-gray-800">
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <div className="text-4xl font-bold text-foreground">
               {formatTime(timeLeft)}
             </div>
-            <div className="text-xs mt-1 text-yellow-600">
+            <div className="text-xs mt-1 text-muted-foreground">
               {Math.round(progress * 100)}% Complete
             </div>
           </div>
         </div>
 
-        <div className="text-lg font-semibold text-gray-800 mb-1">
+        <div className="text-lg font-semibold text-foreground mb-1">
           {taskTitle}
         </div>
-        <div className="text-xs text-gray-500 mb-3">
+        <div className="text-xs text-muted-foreground mb-3">
           {isBreak
             ? shortsSinceLong === 4
               ? `Long Rest ${completedLongRests + 1}`
@@ -367,7 +369,7 @@ export default function PomodoroTimerCard({
         <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={toggleTimer}
-            className="px-4 py-2 rounded-xl bg-gray-100 border border-gray-200 hover:bg-yellow-50 hover:shadow-md text-gray-800 cursor-pointer transition-colors"
+            className="px-4 py-2 rounded-xl bg-secondary border border-border hover:bg-accent hover:shadow-md text-black cursor-pointer transition-colors"
           >
             {isRunning ? "Pause" : "Start"}
           </button>
@@ -401,13 +403,13 @@ export default function PomodoroTimerCard({
                 setTimeLeft(selectedFocus * 60);
               }
             }}
-            className="px-4 py-2 rounded-xl bg-gray-100 border border-gray-200 hover:bg-yellow-50 hover:shadow-md text-gray-800 cursor-pointer transition-colors"
+            className="px-4 py-2 rounded-xl bg-secondary border border-border hover:bg-accent hover:shadow-md text-black cursor-pointer transition-colors"
           >
             Complete
           </button>
           <button
             onClick={resetTimer}
-            className="px-4 py-2 rounded-xl bg-gray-100 border border-gray-200 hover:bg-yellow-50 hover:shadow-md text-gray-800 cursor-pointer transition-colors"
+            className="px-4 py-2 rounded-xl bg-secondary border border-border hover:bg-accent hover:shadow-md text-black cursor-pointer transition-colors"
           >
             Reset
           </button>
@@ -419,7 +421,7 @@ export default function PomodoroTimerCard({
                 cardRef.current?.requestFullscreen?.();
               }
             }}
-            className="px-4 py-2 rounded-xl bg-gray-100 border border-gray-200 hover:bg-yellow-50 hover:shadow-md text-gray-800 cursor-pointer transition-colors"
+            className="px-4 py-2 rounded-xl bg-secondary border border-border hover:bg-accent hover:shadow-md text-black cursor-pointer transition-colors"
           >
             {isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
           </button>
