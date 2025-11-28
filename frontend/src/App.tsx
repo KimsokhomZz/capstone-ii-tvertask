@@ -5,7 +5,7 @@ import {
   Route,
   useNavigate,
 } from "react-router-dom";
-import ProtectedRoute from "./components/ProtectedRoute";
+import ProtectedRoute from "./Components/ProtectedRoute";
 
 // @ts-ignore
 import Login from "./Pages/Authentication/Login.jsx";
@@ -26,7 +26,7 @@ import Dashboard from "./Pages/Dashboard/Dashboardtask.jsx";
 // @ts-ignore
 import { AuthProvider } from "./context/AuthContext.jsx";
 import TaskList from "./Pages/TaskList/TaskList.js";
-import MainLayout from "./components/MainLayout.tsx";
+import MainLayout from "./Components/MainLayout.tsx";
 import Pomodoro from "./Pages/Focus/Focustask.js";
 import Leaderboard from "./Pages/Leaderboard/leaderboard";
 import DashboardTask from "./Pages/Dashboard/Dashboardtask.js";
@@ -34,6 +34,7 @@ import Profile from "./Pages/Profile/Profile";
 import { Navigate } from "react-router-dom";
 // @ts-ignore
 import AvatarTask from "./Pages/Avatar/avatartask.tsx"; // add or adjust path/casing if needed
+import AnalyticsPage from "./Pages/Analytics/analytic.tsx";
 
 interface Task {
   id: number;
@@ -53,14 +54,7 @@ function AvatarPage() {
   return <AvatarTask />;
 }
 
-function AnalyticsPage() {
-  return (
-    <div className="bg-white p-8 md:p-10 rounded-[28px] shadow-xl w-full max-w-4xl border border-gray-100">
-      <h1 className="text-2xl font-bold mb-2">Analytics</h1>
-      <p className="text-gray-500">Coming soon...</p>
-    </div>
-  );
-}
+ 
 function NotificationsPage() {
   return (
     <div className="bg-white p-8 md:p-10 rounded-[28px] shadow-xl w-full max-w-4xl border border-gray-100">
