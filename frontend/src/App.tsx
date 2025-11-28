@@ -5,6 +5,7 @@ import {
   Route,
   useNavigate,
 } from "react-router-dom";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 // @ts-ignore
 import Login from "./Pages/Authentication/Login.jsx";
@@ -25,7 +26,7 @@ import Dashboard from "./Pages/Dashboard/Dashboardtask.jsx";
 // @ts-ignore
 import { AuthProvider } from "./context/AuthContext.jsx";
 import TaskList from "./Pages/TaskList/TaskList.js";
-import MainLayout from "./Components/MainLayout.tsx";
+import MainLayout from "./components/MainLayout.tsx";
 import Pomodoro from "./Pages/Focus/Focustask.js";
 import Leaderboard from "./Pages/Leaderboard/leaderboard";
 import DashboardTask from "./Pages/Dashboard/Dashboardtask.js";
