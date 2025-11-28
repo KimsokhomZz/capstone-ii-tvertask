@@ -6,12 +6,20 @@ type QuickNoteCardProps = {
   onAdd: () => void;
 };
 
-export default function QuickNoteCard({ draft, setDraft, tags, setTags, onAdd }: QuickNoteCardProps) {
+export default function QuickNoteCard({
+  draft,
+  setDraft,
+  tags,
+  setTags,
+  onAdd,
+}: QuickNoteCardProps) {
   return (
     <div className="bg-white rounded-[28px] shadow-xl border border-gray-100 p-6 md:p-8">
       <div className="flex items-start justify-between mb-4">
-        <h3 className="text-xl font-semibold text-gray-900">Quick Note</h3>
-        <span className="text-xs bg-yellow-100 text-yellow-700 border border-yellow-200 px-2.5 py-1 rounded-full">+5 XP</span>
+        <h3 className="text-xl font-semibold text-gray-900">🗒️ Quick Note</h3>
+        <span className="text-xs bg-yellow-100 text-yellow-700 border border-yellow-200 px-2.5 py-1 rounded-full">
+          +5 XP
+        </span>
       </div>
       <div className="mb-3 text-sm text-gray-600">Add context tags</div>
       <div className="flex flex-wrap gap-2 mb-4">
@@ -20,7 +28,11 @@ export default function QuickNoteCard({ draft, setDraft, tags, setTags, onAdd }:
           return (
             <button
               key={t}
-              onClick={() => setTags((prev) => (prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]))}
+              onClick={() =>
+                setTags((prev) =>
+                  prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]
+                )
+              }
               className={`px-3 py-1 rounded-full text-sm border ${
                 active
                   ? "bg-yellow-100 text-yellow-700 border-yellow-200"
@@ -39,8 +51,11 @@ export default function QuickNoteCard({ draft, setDraft, tags, setTags, onAdd }:
           placeholder="Write down your thought, idea, breakthroughs or blocker..."
           className="w-full resize-none h-28 rounded-xl border border-gray-200 p-3 focus:outline-none focus:ring-2 focus:ring-yellow-200"
         />
-        <button onClick={onAdd} className="w-full rounded-xl bg-yellow-400 border border-gray-200 hover:bg-yellow-50 hover:shadow-md text-black py-2 cursor-pointer transition-colors">
-          Add note
+        <button
+          onClick={onAdd}
+          className="w-full rounded-xl bg-yellow-400 border border-gray-200 hover:bg-yellow-50 hover:shadow-md text-white hover:text-yellow-400 font-semibold py-2 cursor-pointer transition-all"
+        >
+          ➕ Add note
         </button>
       </div>
     </div>

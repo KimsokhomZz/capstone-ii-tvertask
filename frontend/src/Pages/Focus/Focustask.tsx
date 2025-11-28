@@ -3,10 +3,10 @@ import PomodoroTimerCard from "../../Components/PomodoroTimerCard";
 import MusicCard from "../../Components/MusicCard";
 import QuickNoteCard from "../../Components/QuickNoteCard";
 import SessionNotesList from "../../Components/SessionNotesList";
-import Musictask from "../music/Musictask"; // added import
+import Musictask from "../music/Musictask";
 import { Link, useLocation } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
-import { awardXp } from "@/api/userXpApi"; // <-- add this import
+import { awardXp } from "../../api/userXpApi";
 
 type Note = { id: number; text: string; editing?: boolean };
 
@@ -27,24 +27,82 @@ export default function Focustask() {
     return Number.isFinite(n) && n > 0 ? n : 25;
   })();
 
+  const getStoredUserId = (): string | number | null => {
+    const direct = localStorage.getItem("userId");
+    if (direct) return direct;
+    const userJson = localStorage.getItem("user");
+    if (!userJson) return null;
+    try {
+      const u = JSON.parse(userJson);
+      return u?.id ?? u?.userId ?? null;
+    } catch (e) {
+      console.warn("Failed to parse localStorage.user:", e);
+      return null;
+    }
+  };
+
   // call awardXp from userXpApi
   const onSessionComplete = async () => {
-    const userId = localStorage.getItem("userId");
-    if (!userId) return;
+    console.log("onSessionComplete invoked");
+    const userId = getStoredUserId();
+    console.log("resolved userId:", userId);
+    if (!userId) {
+      console.warn(
+        "No userId in localStorage. User must be signed in to claim XP."
+      );
+      alert("You must be signed in to award XP.");
+      return;
+    }
     try {
+      console.log("calling awardXp with userId:", userId);
       const result = await awardXp(userId, 20, "pomodoro-complete");
+      console.log("awardXp result:", result);
       if (result?.success) {
         console.log("XP awarded:", result.data);
-        // OPTIONAL: refresh XP/status, show toast, update local UI
-        // e.g. await getStatus(userId) or set local state
+        alert("Awarded 20 XP");
+      } else {
+        alert("Failed to award XP (server returned unsuccessful).");
       }
     } catch (err) {
       console.error("Failed to award XP", err);
+      alert("Error awarding XP. See console for details.");
+    }
+  };
+
+  const handleAddNote = async () => {
+    // Add note locally
+    const text = draft?.trim();
+    if (!text) {
+      alert("Please write a note before adding.");
+      return;
+    }
+    const newNote = { id: Date.now(), text };
+    setNotes((prev) => [newNote, ...prev]);
+    setDraft("");
+
+    // Award XP for quick note
+    try {
+      const userId = getStoredUserId();
+      if (!userId) {
+        // note saved but user not signed in
+        alert("Note saved. Sign in to receive XP.");
+        return;
+      }
+      const res = await awardXp(userId, 5, "quick-note");
+      if (res?.success) {
+        alert("Nice! You earned +5 XP for adding a note.");
+      } else {
+        console.warn("awardXp response:", res);
+        alert("Note saved but awarding XP failed.");
+      }
+    } catch (err) {
+      console.error("Failed to award XP for quick note", err);
+      alert("Note saved but error awarding XP. See console for details.");
     }
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 pb-10">
       <Link
         to="/focus"
         className="inline-flex items-center gap-2 text-gray-700 hover:text-gray-900 rounded-lg px-2 py-1 transition-colors"
@@ -59,26 +117,31 @@ export default function Focustask() {
         onComplete={onSessionComplete}
       />
 
-      <div className="mt-4">
+      {/* <div className="mt-4">
         <button
           onClick={onSessionComplete}
           className="px-3 py-2 bg-yellow-400 text-white rounded-md shadow-sm hover:bg-yellow-500"
         >
           Award 20 XP (test)
         </button>
-      </div>
+      </div> */}
 
       <div className="bg-white rounded-[28px] shadow-xl border border-gray-100 p-6 md:p-8">
         <div className="space-y-1">
-          <p className="text-sm text-gray-700">
-            <span className="font-medium">Title:</span> {taskTitle}
+          <p className="text-md text-gray-700">
+            <span className="font-medium">Title:</span>{" "}
+            <span className="text-yellow-400">{taskTitle}</span>
           </p>
-          {taskDescription && (
-            <p className="text-sm text-gray-700 whitespace-pre-wrap">
-              <span className="font-medium">Description:</span>{" "}
-              {taskDescription}
-            </p>
-          )}
+          <p className="text-sm text-gray-700 whitespace-pre-wrap">
+            <span className="font-medium">Description:</span>{" "}
+            {taskDescription ? (
+              <span className="italic text-green-400">{taskDescription}</span>
+            ) : (
+              <span className="italic text-green-400">
+                No description added yet ✨
+              </span>
+            )}
+          </p>
         </div>
       </div>
 
@@ -95,11 +158,7 @@ export default function Focustask() {
         setDraft={setDraft}
         tags={tags}
         setTags={(fn) => setTags((prev) => fn(prev))}
-        onAdd={() => {
-          if (!draft.trim()) return;
-          setNotes((prev) => [{ id: Date.now(), text: draft.trim() }, ...prev]);
-          setDraft("");
-        }}
+        onAdd={handleAddNote}
       />
 
       <SessionNotesList

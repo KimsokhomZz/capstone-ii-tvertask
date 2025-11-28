@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Target } from "lucide-react";
 import Header from "../Components/header";
+import ClaimXpModal from "./ClaimXpModal";
 
 type PomodoroTimerCardProps = {
   taskTitle?: string;
@@ -34,6 +35,10 @@ export default function PomodoroTimerCard({
   const [selectedPreset, setSelectedPreset] = useState<
     "baby" | "popular" | "medium" | "extended" | "custom"
   >("custom");
+
+  // UI: show claim modal when a pomodoro completes
+  const [showClaimModal, setShowClaimModal] = useState(false);
+  const CLAIM_XP_AMOUNT = 20; // change if you want variable amount
 
   const presets = [
     { key: "baby" as const, label: "Baby step", focus: 10, short: 5, long: 10 },
@@ -77,15 +82,11 @@ export default function PomodoroTimerCard({
           if (timerRef.current) clearInterval(timerRef.current);
           if (!isBreak) {
             setCompletedPomodoros((v) => v + 1);
-            // notify parent that a pomodoro completed
-            try {
-              onComplete?.();
-            } catch (e) {
-              console.warn("PomodoroTimerCard: onComplete threw:", e);
-            }
-            setIsBreak(true);
-            const isLong = shortsSinceLong === 4;
-            return (isLong ? longBreak : shortBreak) * 60;
+            // Open claim modal instead of immediately notifying parent.
+            // Parent will be called when user clicks "Claim XP".
+            setIsRunning(false);
+            setShowClaimModal(true);
+            return 0; // show 00:00 until user picks claim / later
           } else {
             const wasLong = shortsSinceLong === 4;
             if (wasLong) {
@@ -156,7 +157,7 @@ export default function PomodoroTimerCard({
       <div className="flex items-start justify-between mb-4">
         <Header
           title="Focus Session"
-          icon={<Target size={23} />}
+          icon={<span className="text-4xl">🎯</span>}
           titleClassName="text-xs md:text-md"
         />
         <div className="flex items-center gap-2 relative">
@@ -377,16 +378,10 @@ export default function PomodoroTimerCard({
           <button
             onClick={() => {
               if (!isBreak) {
+                // manual completion: show claim modal, don't immediately call parent
                 setCompletedPomodoros((v) => v + 1);
-                try {
-                  onComplete?.();
-                } catch (e) {
-                  console.warn("PomodoroTimerCard: onComplete threw:", e);
-                }
-                setIsBreak(true);
                 setIsRunning(false);
-                const isLong = shortsSinceLong === 4;
-                setTimeLeft((isLong ? longBreak : shortBreak) * 60);
+                setShowClaimModal(true);
               } else {
                 const wasLong = shortsSinceLong === 4;
                 if (wasLong) {
@@ -425,6 +420,29 @@ export default function PomodoroTimerCard({
           </button>
         </div>
       </div>
+
+      <ClaimXpModal
+        open={showClaimModal}
+        xpAmount={CLAIM_XP_AMOUNT}
+        onClaim={async () => {
+          try {
+            await onComplete?.();
+          } catch (e) {
+            console.warn("onComplete handler threw:", e);
+          } finally {
+            const isLong = shortsSinceLong === 4;
+            setShowClaimModal(false);
+            setIsBreak(true);
+            setTimeLeft((isLong ? longBreak : shortBreak) * 60);
+          }
+        }}
+        onClose={() => {
+          const isLong = shortsSinceLong === 4;
+          setShowClaimModal(false);
+          setIsBreak(true);
+          setTimeLeft((isLong ? longBreak : shortBreak) * 60);
+        }}
+      />
     </div>
   );
 }
