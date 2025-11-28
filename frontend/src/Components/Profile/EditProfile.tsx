@@ -1,4 +1,6 @@
 import { useState } from "react";
+// @ts-ignore
+import { useAuth } from "../../context/AuthContext.jsx";
 
 interface EditProfileProps {
   user: any;
@@ -6,6 +8,7 @@ interface EditProfileProps {
 }
 
 const EditProfile = ({ user, onUpdate }: EditProfileProps) => {
+  const { refreshUserData } = useAuth();
   const [formData, setFormData] = useState({
     name: user?.name || "",
     email: user?.email || "",
@@ -50,12 +53,21 @@ const EditProfile = ({ user, onUpdate }: EditProfileProps) => {
       if (response.ok) {
         setMessage("Profile updated successfully!");
         onUpdate();
-        // Update user data in localStorage
-        const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
-        localStorage.setItem(
-          "user",
-          JSON.stringify({ ...currentUser, ...formData })
-        );
+
+        // Refresh user data in AuthContext to keep state synced
+        const refreshResult = await refreshUserData();
+        if (!refreshResult.success) {
+          console.warn(
+            "Failed to refresh user data in AuthContext:",
+            refreshResult.error
+          );
+          // Still update localStorage as fallback
+          const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+          localStorage.setItem(
+            "user",
+            JSON.stringify({ ...currentUser, ...formData })
+          );
+        }
       } else {
         setMessage(data.message || "Failed to update profile");
       }

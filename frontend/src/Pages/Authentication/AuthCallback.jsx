@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 // @ts-ignore
 import { useAuth } from "../../context/AuthContext.jsx";
+import authService from "../../services/authService";
 
 export default function AuthCallback() {
   const [searchParams] = useSearchParams();
@@ -26,19 +27,35 @@ export default function AuthCallback() {
 
     if (token && userString) {
       try {
+        console.log(
+          "[AUTH DEBUG] OAuth callback: Processing authentication data",
+          {
+            hasToken: !!token,
+            userDataLength: userString?.length,
+          }
+        );
+
         // Parse user data
         const userData = JSON.parse(decodeURIComponent(userString));
 
-        // Clear any logout flags since this is a successful OAuth login
-        localStorage.removeItem("hasLoggedOut");
+        console.log(
+          "[AUTH DEBUG] OAuth callback: User data parsed successfully"
+        );
+
+        // Store authentication data using authService
+        authService.handleOAuthCallback(userData, token);
 
         // Use AuthContext to set authentication state
         setAuthState(userData, token);
 
+        console.log(
+          "[AUTH DEBUG] OAuth callback: Authentication state set, redirecting to dashboard"
+        );
+
         // Redirect to dashboard
         navigate("/dashboard", { replace: true });
       } catch (error) {
-        console.error("OAuth callback error:", error);
+        console.error("[AUTH ERROR] OAuth callback processing failed:", error);
         navigate("/login?error=Authentication processing failed", {
           replace: true,
         });

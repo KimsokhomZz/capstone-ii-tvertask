@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useReducer, useEffect } from "react";
+import React, {
+  createContext,
+  useContext,
+  useReducer,
+  useEffect,
+  useState,
+} from "react";
 import authService from "../services/authService";
 
 // Initial state
@@ -85,6 +91,8 @@ const AuthContext = createContext();
 // Auth provider component
 export const AuthProvider = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
+  const [authRetryCount, setAuthRetryCount] = useState(0);
+  const maxRetries = 2;
 
   // Initialize authentication state on app load
   useEffect(() => {
@@ -94,33 +102,71 @@ export const AuthProvider = ({ children }) => {
         const user = authService.getUser();
         const hasLoggedOut = authService.hasLoggedOut();
 
+        console.log("[AUTH DEBUG] Initializing auth state:", {
+          hasToken: !!token,
+          hasUser: !!user,
+          hasLoggedOut,
+        });
+
         // If user has explicitly logged out, don't auto-login
         if (hasLoggedOut) {
+          console.log(
+            "[AUTH DEBUG] User has logged out flag, clearing and not auto-logging in"
+          );
           authService.clearLogoutFlag();
           dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: false });
           return;
         }
 
         if (token && user) {
-          // Validate token by making a request to the server
+          console.log("[AUTH DEBUG] Token and user found, validating token...");
+
+          // Try to validate token, but be more forgiving about failures
           try {
             await authService.getCurrentUser();
+            console.log(
+              "[AUTH DEBUG] Token validation successful, restoring auth state"
+            );
             dispatch({
               type: AUTH_ACTIONS.LOGIN_SUCCESS,
               payload: { user, token },
             });
           } catch (error) {
-            // Token is invalid, clear it
-            console.log("Token validation failed, clearing auth data");
-            authService.clearAuthData();
-            dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: false });
+            console.error(
+              "[AUTH DEBUG] Token validation failed:",
+              error.message
+            );
+
+            // Check if it's a network error or server error
+            if (
+              error.message.includes("fetch") ||
+              error.message.includes("Server error")
+            ) {
+              console.log(
+                "[AUTH DEBUG] Network/server error, will retry. Keeping user logged in for now."
+              );
+              // Keep user logged in but show they might need to refresh
+              dispatch({
+                type: AUTH_ACTIONS.LOGIN_SUCCESS,
+                payload: { user, token },
+              });
+            } else {
+              console.log(
+                "[AUTH DEBUG] Authentication error, clearing auth data"
+              );
+              authService.clearAuthData();
+              dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: false });
+            }
           }
         } else {
+          console.log(
+            "[AUTH DEBUG] No token or user found, user is not authenticated"
+          );
           dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: false });
         }
       } catch (error) {
-        console.error("Error initializing auth:", error);
-        authService.clearAuthData();
+        console.error("[AUTH ERROR] Error initializing auth:", error);
+        // Don't clear auth data on initialization errors unless it's clearly an auth issue
         dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: false });
       }
     };
@@ -206,6 +252,16 @@ export const AuthProvider = ({ children }) => {
 
   // Set auth state directly (for Google OAuth callback)
   const setAuthState = (userData, token) => {
+    // Save to localStorage for persistence
+    if (token && userData) {
+      console.log(
+        "[AUTH DEBUG] OAuth setAuthState: Saving token and user to localStorage"
+      );
+      localStorage.removeItem("hasLoggedOut"); // Clear logout flag
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(userData));
+    }
+
     dispatch({
       type: AUTH_ACTIONS.LOGIN_SUCCESS,
       payload: {
@@ -215,6 +271,36 @@ export const AuthProvider = ({ children }) => {
     });
   };
 
+  // Refresh user data from server and update both localStorage and context state
+  const refreshUserData = async () => {
+    try {
+      console.log("[AUTH DEBUG] Refreshing user data from server...");
+
+      const response = await authService.getCurrentUser();
+      if (response && response.data) {
+        const updatedUser = response.data;
+
+        // Update localStorage
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+
+        // Update AuthContext state
+        dispatch({
+          type: AUTH_ACTIONS.LOGIN_SUCCESS,
+          payload: {
+            user: updatedUser,
+            token: state.token, // Keep existing token
+          },
+        });
+
+        console.log("[AUTH DEBUG] User data refreshed successfully");
+        return { success: true, user: updatedUser };
+      }
+    } catch (error) {
+      console.error("[AUTH ERROR] Failed to refresh user data:", error);
+      return { success: false, error: error.message };
+    }
+  };
+
   const value = {
     ...state,
     login,
@@ -222,6 +308,7 @@ export const AuthProvider = ({ children }) => {
     logout,
     clearError,
     setAuthState,
+    refreshUserData,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

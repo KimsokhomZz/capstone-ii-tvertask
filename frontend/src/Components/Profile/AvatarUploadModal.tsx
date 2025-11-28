@@ -1,5 +1,7 @@
 import { useState, useRef } from "react";
 import { Camera, Upload, X } from "lucide-react";
+// @ts-ignore
+import { useAuth } from "../../context/AuthContext.jsx";
 
 interface AvatarUploadModalProps {
   isOpen: boolean;
@@ -14,6 +16,7 @@ const AvatarUploadModal = ({
   user,
   onUpdate,
 }: AvatarUploadModalProps) => {
+  const { refreshUserData } = useAuth();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -84,18 +87,27 @@ const AvatarUploadModal = ({
 
       if (response.ok) {
         setMessage("Profile picture updated successfully!");
-        const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
-        const updatedUser = {
-          ...currentUser,
-          avatarUrl: data.data.avatarUrl,
-        };
-        localStorage.setItem("user", JSON.stringify(updatedUser));
+
+        // Refresh user data in AuthContext to keep state synced
+        const refreshResult = await refreshUserData();
+        if (!refreshResult.success) {
+          console.warn(
+            "Failed to refresh user data in AuthContext:",
+            refreshResult.error
+          );
+          // Still update localStorage as fallback
+          const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+          const updatedUser = {
+            ...currentUser,
+            avatarUrl: data.data.avatarUrl,
+          };
+          localStorage.setItem("user", JSON.stringify(updatedUser));
+        }
 
         onUpdate(); // Refresh parent state
 
         setTimeout(() => {
           handleClose();
-          window.location.reload(); // Reload to ensure all components update
         }, 1000);
       } else {
         setMessage(data.message || "Failed to update profile picture");
@@ -128,18 +140,28 @@ const AvatarUploadModal = ({
 
       if (response.ok) {
         setMessage("Profile picture removed successfully!");
-        const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
-        localStorage.setItem(
-          "user",
-          JSON.stringify({
-            ...currentUser,
-            avatarUrl: null,
-          })
-        );
+
+        // Refresh user data in AuthContext to keep state synced
+        const refreshResult = await refreshUserData();
+        if (!refreshResult.success) {
+          console.warn(
+            "Failed to refresh user data in AuthContext:",
+            refreshResult.error
+          );
+          // Still update localStorage as fallback
+          const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+          localStorage.setItem(
+            "user",
+            JSON.stringify({
+              ...currentUser,
+              avatarUrl: null,
+            })
+          );
+        }
+
         onUpdate();
         setTimeout(() => {
           handleClose();
-          window.location.reload();
         }, 1000);
       } else {
         setMessage(data.message || "Failed to remove profile picture");

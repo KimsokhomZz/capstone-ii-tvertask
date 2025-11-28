@@ -24,8 +24,10 @@ const app = express();
 const corsOptions = {
   origin: [
     "http://localhost:5173",
+    "http://localhost:5174", // Add port 5174 for when 5173 is in use
     "http://localhost:3000",
     "http://127.0.0.1:5173",
+    "http://127.0.0.1:5174", // Add 5174 for 127.0.0.1 as well
   ], // Add common dev ports
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],

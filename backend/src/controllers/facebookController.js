@@ -22,7 +22,7 @@ router.get(
   "/facebook/callback",
   passport.authenticate("facebook", {
     failureRedirect: `${
-      process.env.FRONTEND_URL || "http://localhost:5173"
+      process.env.FRONTEND_URL || "http://localhost:5174"
     }/login?error=auth_failed`,
   }),
   function (req, res) {
@@ -31,22 +31,24 @@ router.get(
       const token = generateToken(req.user.id);
 
       // Redirect to frontend with token in URL (will be handled by frontend)
-      const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+      const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5174";
       res.redirect(
         `${frontendUrl}/auth/callback?token=${token}&user=${encodeURIComponent(
           JSON.stringify({
             id: req.user.id,
             name: req.user.name,
             email: req.user.email,
-            avatar_url: req.user.avatarUrl,
+            avatarUrl: req.user.avatarUrl, // Fix property name
             facebookId: req.user.facebookId,
+            isEmailVerified: req.user.isEmailVerified,
             createdAt: req.user.createdAt,
+            updatedAt: req.user.updatedAt,
           })
         )}`
       );
     } catch (error) {
       console.error("Facebook auth callback error:", error);
-      const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+      const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5174";
       res.redirect(`${frontendUrl}/login?error=auth_failed`);
     }
   }
