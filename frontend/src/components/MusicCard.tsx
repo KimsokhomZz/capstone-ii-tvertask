@@ -138,31 +138,31 @@ const MusicCard: React.FC<MusicCardProps> = ({
     <div
       ref={rootRef}
       tabIndex={-1}
-      className="flex items-center justify-between bg-white rounded-2xl p-3 shadow-xl w-full max-w-[944px]"
+      className="flex items-center justify-between bg-card rounded-2xl p-3 shadow-xl w-full max-w-[944px] border border-border"
     >
       <button
         onClick={togglePlay}
         aria-pressed={!!currentTrack}
-        className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 transition"
+        className="flex items-center justify-center w-10 h-10 rounded-full bg-yellow-500 hover:bg-yellow-600 text-white transition-colors"
       >
         {currentTrack ? (
-          <Pause className="w-5 h-5 text-gray-700" />
+          <Pause className="w-5 h-5 text-black" />
         ) : (
-          <Play className="w-5 h-5 text-gray-700" />
+          <Play className="w-5 h-5 text-black" />
         )}
       </button>
 
       <div className="flex flex-col ml-4 flex-1">
-        <span className="text-gray-800 font-medium">
+        <span className="text-foreground font-medium">
           {currentTrack ? currentTrack : "No track selected"}
         </span>
-        <span className="text-gray-500 text-sm">
+        <span className="text-muted-foreground text-sm">
           {currentTrack ? "Now playing..." : "Choose a track to start playing"}
         </span>
       </div>
 
       <div className="flex items-center space-x-4">
-        <Volume2 className="w-5 h-5 text-gray-700 cursor-pointer" />
+        <Volume2 className="w-5 h-5 text-foreground cursor-pointer" />
         <input
           aria-label="Volume"
           type="range"
@@ -171,7 +171,7 @@ const MusicCard: React.FC<MusicCardProps> = ({
           step={1}
           value={volume}
           onChange={(e) => onVolumeChange?.(Number(e.target.value))}
-          className="w-24"
+          className="w-24 accent-foreground/80"
         />
       </div>
     </div>
