@@ -98,14 +98,14 @@ export default function TodoList() {
       <div className="flex items-center justify-between">
         <Header
           title="Focus Session"
-          icon={<Target size={23} />}
+          icon={<span className="text-4xl">🎯</span>}
           titleClassName="text-xs md:text-md"
         />
         <button
           onClick={() => setShowCreate(true)}
-          className="rounded-xl bg-yellow-400 border border-gray-200 hover:bg-yellow-50 hover:shadow-md text-black px-3 py-2 text-sm cursor-pointer transition-colors"
+          className="rounded-xl bg-yellow-400 border border-gray-200 hover:bg-yellow-50 hover:shadow-md text-white hover:text-yellow-400 px-3 py-2 text-sm cursor-pointer transition-all font-semibold"
         >
-          + Add Task
+          ➕ Add Task
         </button>
       </div>
       <p className="text-gray-500 mb-4">Choose your focus task</p>

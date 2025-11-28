@@ -6,12 +6,20 @@ type QuickNoteCardProps = {
   onAdd: () => void;
 };
 
-export default function QuickNoteCard({ draft, setDraft, tags, setTags, onAdd }: QuickNoteCardProps) {
+export default function QuickNoteCard({
+  draft,
+  setDraft,
+  tags,
+  setTags,
+  onAdd,
+}: QuickNoteCardProps) {
   return (
     <div className="bg-card rounded-[28px] shadow-xl border border-border p-6 md:p-8">
       <div className="flex items-start justify-between mb-4">
-        <h3 className="text-xl font-semibold text-foreground">Quick Note</h3>
-        <span className="text-xs bg-primary/10 text-primary border border-border px-2.5 py-1 rounded-full">+5 XP</span>
+        <h3 className="text-xl font-semibold text-gray-900">🗒️ Quick Note</h3>
+        <span className="text-xs bg-yellow-100 text-yellow-700 border border-yellow-200 px-2.5 py-1 rounded-full">
+          +5 XP
+        </span>
       </div>
       <div className="mb-3 text-sm text-muted-foreground">Add context tags</div>
       <div className="flex flex-wrap gap-2 mb-4">
@@ -20,7 +28,11 @@ export default function QuickNoteCard({ draft, setDraft, tags, setTags, onAdd }:
           return (
             <button
               key={t}
-              onClick={() => setTags((prev) => (prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]))}
+              onClick={() =>
+                setTags((prev) =>
+                  prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]
+                )
+              }
               className={`px-3 py-1 rounded-full text-sm border transition-colors ${
                 active
                   ? "bg-primary/10 text-primary border-primary/20"
@@ -39,11 +51,11 @@ export default function QuickNoteCard({ draft, setDraft, tags, setTags, onAdd }:
           placeholder="Write down your thought, idea, breakthroughs or blocker..."
           className="w-full resize-none h-28 rounded-xl border border-input bg-background p-3 focus:outline-none focus:ring-2 focus:ring-ring/50 text-foreground"
         />
-        <button 
-          onClick={onAdd} 
-          className="w-full rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 py-2 cursor-pointer transition-colors font-medium"
+        <button
+          onClick={onAdd}
+          className="w-full rounded-xl bg-yellow-400 border border-gray-200 hover:bg-yellow-50 hover:shadow-md text-white hover:text-yellow-400 font-semibold py-2 cursor-pointer transition-all"
         >
-          Add note
+          ➕ Add note
         </button>
       </div>
     </div>
