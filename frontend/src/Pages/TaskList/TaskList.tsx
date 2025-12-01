@@ -1,12 +1,11 @@
 import { useEffect, useState, useContext } from "react";
-import TaskBar from "@/Components/taskbar";
+import TaskBar from "@/components/taskbar";
 import { useNavigate } from "react-router-dom";
-import TaskForm, { type NewTask } from "@/Components/TaskForm";
-import DeleteConfirmation from "@/Components/DeleteConfirmation";
-import Header from "@/Components/header";
+import TaskForm, { type NewTask } from "@/components/TaskForm";
+import DeleteConfirmation from "@/components/DeleteConfirmation";
+import Header from "@/components/header";
 import { Toast } from "@/components/ConfirmDialog";
 import { fetchTask } from "../../api/taskApi";
-import { Target } from "lucide-react";
 import {
   createTask,
   updateTask,

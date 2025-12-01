@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 // import { Target } from "lucide-react";
-import Header from "../Components/header";
+import Header from "../components/header";
 import ClaimXpModal from "./ClaimXpModal";
 import FocusMusicApp from "../Pages/music/Musictask";
 
