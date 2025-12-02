@@ -1,0 +1,79 @@
+{
+  "version": "3.4",
+  "type": "table",
+  "title": "Users",
+  "hideInSidebar": false,
+  "config": {
+    "dataSource": "mysql_db_8591xb",
+    "fetchStrategy": "databaseTable",
+    "table": "Users",
+    "columns": [
+      {
+        "column": "avatarUrl",
+        "hiddenInTable": true
+      },
+      {
+        "column": "facebookId",
+        "hiddenInTable": true
+      },
+      {
+        "column": "emailVerificationToken",
+        "hiddenInTable": true
+      },
+      {
+        "column": "googleId",
+        "hiddenInTable": true
+      },
+      {
+        "column": "password",
+        "hiddenInTable": true
+      },
+      {
+        "column": "resetPasswordToken",
+        "hiddenInTable": true
+      },
+      {
+        "column": "resetPasswordExpires",
+        "hiddenInTable": true
+      },
+      {
+        "column": "updatedAt",
+        "hiddenInTable": true
+      },
+      {
+        "column": "emailVerificationExpires",
+        "hiddenInTable": true
+      }
+    ],
+    "linkedRecordsColumns": [
+      {
+        "relationshipKey": "PomodoroSessions__c__user_id",
+        "hiddenInTable": true
+      },
+      {
+        "relationshipKey": "ProgressLogs__c__user_id",
+        "hiddenInTable": true
+      },
+      {
+        "relationshipKey": "Tasks__c__user_id",
+        "hiddenInTable": true
+      },
+      {
+        "relationshipKey": "UserBadges__c__user_id",
+        "hiddenInTable": true
+      },
+      {
+        "relationshipKey": "UserQuests__c__userId",
+        "hiddenInTable": true
+      },
+      {
+        "relationshipKey": "UserXPs__c__user_id",
+        "hiddenInTable": true
+      },
+      {
+        "relationshipKey": "XPLogs__c__user_id",
+        "hiddenInTable": true
+      }
+    ]
+  }
+}

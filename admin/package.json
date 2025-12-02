@@ -1,0 +1,47 @@
+{
+  "name": "admin",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "sideEffects": false,
+  "scripts": {
+    "dev": "kottster dev",
+    "dev:add-data-source": "kottster add-data-source",
+    "dev:upgrade-kottster": "kottster upgrade",
+    "build": "vite build && kottster build:server",
+    "start": "node dist/server/server.cjs"
+  },
+  "dependencies": {
+    "@kottster/cli": "^3.4.6",
+    "@kottster/common": "3.4.6",
+    "@kottster/react": "3.4.6",
+    "@kottster/server": "3.4.6",
+    "@mantine/charts": "^8.3.9",
+    "@mantine/core": "^8.3.9",
+    "@mantine/dates": "^8.3.9",
+    "@mantine/hooks": "^8.3.9",
+    "@mantine/modals": "^8.3.9",
+    "@mantine/notifications": "^8.3.9",
+    "better-sqlite3": "^12.x",
+    "dayjs": "^1.11.19",
+    "knex": "^3.1.0",
+    "mysql2": "^3.15.3",
+    "react": "^19.x",
+    "react-dom": "^19.x",
+    "react-router-dom": "^7.x",
+    "recharts": "^3.5.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.x",
+    "@types/react": "^19.x",
+    "@types/react-dom": "^19.x",
+    "@vitejs/plugin-react": "^4.x",
+    "tsx": "^4.x",
+    "typescript": "^5.x",
+    "vite": "^6.x",
+    "vite-tsconfig-paths": "^4.x"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
