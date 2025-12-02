@@ -20,6 +20,10 @@ const Task = sequelize.define('Task', {
         type: DataTypes.STRING,
         allowNull: false,
     },
+    description: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
     focus_time: {
         type: DataTypes.INTEGER,
         allowNull: false,

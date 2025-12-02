@@ -18,13 +18,56 @@ const User = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
       unique: true,
+      validate: {
+        isEmail: true, // Validates email format
+      },
     },
     password: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true, // Allow null for OAuth users
+      validate: {
+        len: {
+          args: [6, 100], // Password length between 6-100 characters
+          msg: "Password must be between 6 and 100 characters",
+        },
+        // Only validate if password is provided (not null for OAuth users)
+        isValidPassword(value) {
+          if (value !== null && value !== undefined && value.length < 6) {
+            throw new Error("Password must be at least 6 characters long");
+          }
+        },
+      },
     },
     avatarUrl: {
       type: DataTypes.STRING,
+      allowNull: true,
+    },
+    googleId: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    facebookId: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    isEmailVerified: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    emailVerificationToken: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    emailVerificationExpires: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    resetPasswordToken: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    resetPasswordExpires: {
+      type: DataTypes.DATE,
       allowNull: true,
     },
   },

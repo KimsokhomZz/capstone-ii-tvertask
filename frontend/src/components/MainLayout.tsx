@@ -2,14 +2,13 @@ import { Outlet } from "react-router-dom";
 import Sidebar from "./sidebar";
 
 export default function MainLayout() {
-  const handleAddTask = () => alert("Add new task clicked!");
   const handleLogout = () => alert("Logged out!");
 
   return (
     <div className="min-h-screen bg-[#FFFBF6]">
-      {/* Fixed Sidebar */}
+      {/* Fixed 0Sidebar */}
       <aside className="fixed left-0 top-0 h-screen w-64 bg-white border-r shadow-sm">
-        <Sidebar onAddTask={handleAddTask} onLogout={handleLogout} />
+        <Sidebar onLogout={handleLogout} />
       </aside>
       {/* Scrollable Content */}
       <main className="pl-64">

@@ -1,11 +1,11 @@
-const app = require("./src/app");
-const sequelize = require("./src/config/database");
-require("dotenv").config();
+const app = require('./src/app');
+const { sequelize } = require('./src/models'); // exported sequelize from models/index.js
+require('dotenv').config();
 
 const PORT = process.env.PORT || 3000;
 
-// register models with Sequelize to make sure it knows about them
-const { User, ProgressLog, PomodoroSession, Task } = require("./src/models");
+// require models to register associations to make sure Sequelize knows about them
+require('./src/models/index'); // loads src/models/index.js
 
 // Test DB connection
 sequelize
@@ -13,9 +13,9 @@ sequelize
   .then(() => console.log("✅ Database connected"))
   .catch((err) => console.error("❌ Connection failed:", err));
 
-// Sync models with database
+// Sync models with database (use alter instead of force to avoid data loss)
 sequelize
-  .sync({ alter: true })
+  .sync({ force: false })
   .then(() => console.log("✅ Models synced"))
   .catch((err) => console.error("❌ Sync error:", err));
 

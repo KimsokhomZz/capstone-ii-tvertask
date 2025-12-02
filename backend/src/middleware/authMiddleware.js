@@ -1,6 +1,6 @@
 // src/middleware/authMiddleware.js
 const jwt = require("jsonwebtoken");
-const User = require("../database/models/User");
+const User = require("../models/userModel");
 
 // Protect routes - verify JWT token
 exports.protect = async (req, res, next) => {
@@ -62,49 +62,6 @@ exports.protect = async (req, res, next) => {
   }
 };
 
-// Role-based access control - restrict to specific roles
-exports.authorize = (...roles) => {
-  return (req, res, next) => {
-    if (!req.user) {
-      return res.status(401).json({
-        success: false,
-        message: "Not authorized - no user found",
-      });
-    }
-
-    if (!roles.includes(req.user.role)) {
-      return res.status(403).json({
-        success: false,
-        message: `Access denied. This resource requires one of the following roles: ${roles.join(
-          ", "
-        )}`,
-      });
-    }
-
-    next();
-  };
-};
-
-// Admin only middleware - shortcut for authorize("admin")
-exports.adminOnly = (req, res, next) => {
-  if (!req.user) {
-    return res.status(401).json({
-      success: false,
-      message: "Not authorized - no user found",
-    });
-  }
-
-  if (req.user.role !== "admin") {
-    return res.status(403).json({
-      success: false,
-      message: "Access denied. Admin privileges required",
-    });
-  }
-
-  next();
-};
-
-// Optional authentication - adds user to request if token is valid, but doesn't require it
 exports.optionalAuth = async (req, res, next) => {
   let token;
 
