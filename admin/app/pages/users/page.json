@@ -1,0 +1,11 @@
+{
+  "version": "3.4",
+  "type": "table",
+  "title": "Users",
+  "hideInSidebar": false,
+  "config": {
+    "dataSource": "mysql_db_wpck38",
+    "fetchStrategy": "databaseTable",
+    "table": "users"
+  }
+}
