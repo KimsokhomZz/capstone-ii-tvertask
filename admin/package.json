@@ -25,7 +25,7 @@
     "better-sqlite3": "^12.x",
     "dayjs": "^1.11.19",
     "knex": "^3.1.0",
-    "mysql2": "^3.15.3",
+    "mysql2": "^2.3.0",
     "react": "^19.x",
     "react-dom": "^19.x",
     "react-router-dom": "^7.x",

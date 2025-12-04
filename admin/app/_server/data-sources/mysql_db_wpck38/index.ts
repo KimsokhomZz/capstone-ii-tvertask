@@ -9,7 +9,7 @@ const client = knex({
   connection: {
     host: 'localhost',
     port: 3306,
-    user: 'username',
+    user: 'root',
     password: 'password',
     database: 'tvertask_db',
   },
