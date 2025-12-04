@@ -169,16 +169,17 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
     <div
       className={
         embedded
-          ? "w-full h-full bg-gradient-to-br from-gray-50 to-gray-100 p-4 overflow-hidden"
-          : "min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-8"
+          ? "w-full h-full bg-white shadow-md overflow-hidden p-8 rounded-4xl"
+          : "min-h-screen bg-white shadow-md p-8"
       }
     >
       <div className="max-w-5xl mx-auto">
         {/* Header */}
         {/* toggle between header and compact MusicCard */}
         <div className="flex items-center gap-3 mb-8">
-          <div className="w-14 h-14 bg-[#F9C80E] rounded-2xl flex items-center justify-center">
-            <Music className="w-7 h-7 text-white" />
+          <div className="w-14 h-14 bg-yellow-100 rounded-2xl flex items-center justify-center">
+            {/* <Music className="w-7 h-7 text-white" /> */}
+            <span className="text-2xl">🎵</span>
           </div>
           <h3 className="text-3xl font-bold text-gray-800">Focus Music</h3>
 
@@ -208,7 +209,7 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
                 }}
                 className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-medium transition-all ${
                   isActive
-                    ? "bg-[#F9C80E] text-white shadow-lg shadow-emerald-200"
+                    ? "bg-[#F9C80E] text-white shadow-lg shadow-green-300"
                     : "bg-white text-gray-600 hover:bg-gray-50"
                 }`}
               >

@@ -134,21 +134,55 @@ const MusicCard: React.FC<MusicCardProps> = ({
     }
   };
 
+  const handleContainerClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    // don't treat clicks that originate from interactive elements (buttons/inputs/etc.)
+    const target = e.target as HTMLElement | null;
+    if (target && target.closest("button, input, a, textarea, select")) return;
+    togglePlay();
+  };
+
+  const handleContainerKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      togglePlay();
+    }
+  };
+
+  // UI state helpers for transitions
+  const isPlaying = !!currentTrack;
+  const containerClass = `flex items-center justify-between rounded-3xl px-8 py-6 w-full max-w-[944px] border border-border cursor-pointer transition-all duration-300 ${
+    isPlaying
+      ? "bg-gradient-to-r from-yellow-50 to-white shadow-xl scale-102 ring-4 ring-yellow-200 animate-pulse-glow"
+      : "bg-card shadow-md"
+  }`;
+  const playBtnClass = `flex items-center justify-center w-10 h-10 rounded-full text-white transition-transform duration-300 ${
+    isPlaying
+      ? "bg-yellow-600 transform scale-110 animate-wiggle"
+      : "bg-yellow-500 hover:bg-yellow-600"
+  }`;
+  const statusTextClass = `text-muted-foreground text-sm transition-opacity duration-300 ${
+    isPlaying ? "opacity-100" : "opacity-80"
+  }`;
+
   return (
     <div
       ref={rootRef}
-      tabIndex={-1}
-      className="flex items-center justify-between bg-card rounded-2xl p-3 shadow-xl w-full max-w-[944px] border border-border"
+      role="button"
+      tabIndex={0}
+      aria-pressed={!!currentTrack}
+      onClick={handleContainerClick}
+      onKeyDown={handleContainerKeyDown}
+      className={containerClass}
     >
       <button
         onClick={togglePlay}
         aria-pressed={!!currentTrack}
-        className="flex items-center justify-center w-10 h-10 rounded-full bg-yellow-500 hover:bg-yellow-600 text-white transition-colors"
+        className={playBtnClass}
       >
         {currentTrack ? (
-          <Pause className="w-5 h-5 text-black" />
+          <Pause className="w-5 h-5 text-white" />
         ) : (
-          <Play className="w-5 h-5 text-black" />
+          <Play className="w-5 h-5 text-white" />
         )}
       </button>
 
@@ -156,7 +190,7 @@ const MusicCard: React.FC<MusicCardProps> = ({
         <span className="text-foreground font-medium">
           {currentTrack ? currentTrack : "No track selected"}
         </span>
-        <span className="text-muted-foreground text-sm">
+        <span className={statusTextClass}>
           {currentTrack ? "Now playing..." : "Choose a track to start playing"}
         </span>
       </div>

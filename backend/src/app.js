@@ -13,6 +13,7 @@ const taskRoutes = require('./routes/taskRoutes');
 const pomodoroRoutes = require("./routes/pomodoroRoutes");
 const questRoutes = require("./routes/questRoutes");
 const leaderboardRoutes = require("./routes/leaderboardRoutes")
+const taskNoteRoutes = require("./routes/taskNoteRoutes")
 
 //! for get all users testing
 const { User } = require("./models");
@@ -87,6 +88,7 @@ app.use("/auth", facebookAuthRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use("/api/pomodoro", pomodoroRoutes);
 app.use("/api/quests", questRoutes);
-app.use("/api/leaderboard", leaderboardRoutes)
+app.use("/api/leaderboard", leaderboardRoutes);
+app.use("/api/taskNotes", taskNoteRoutes);
 
 module.exports = app;

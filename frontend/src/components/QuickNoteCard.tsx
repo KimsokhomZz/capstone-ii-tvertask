@@ -16,26 +16,31 @@ export default function QuickNoteCard({
   return (
     <div className="bg-card rounded-[28px] shadow-xl border border-border p-6 md:p-8">
       <div className="flex items-start justify-between mb-4">
-        <h3 className="text-xl font-semibold text-gray-900">🗒️ Quick Note</h3>
+        <h3 className="text-xl font-semibold text-gray-900">
+          <span className="text-2xl">🗒️</span> Quick Note
+        </h3>
         <span className="text-xs bg-yellow-100 text-yellow-700 border border-yellow-200 px-2.5 py-1 rounded-full">
           +5 XP
         </span>
       </div>
       <div className="mb-3 text-sm text-muted-foreground">Add context tags</div>
       <div className="flex flex-wrap gap-2 mb-4">
-        {["idea", "blocker", "win", "plan", "bug", "note"].map((t) => {
+        {[
+          "idea 💡",
+          "blocker ⛔",
+          "win 🏆",
+          "plan 📝",
+          "bug ⚠️",
+          "note ✍🏻",
+        ].map((t) => {
           const active = tags.includes(t);
           return (
             <button
               key={t}
-              onClick={() =>
-                setTags((prev) =>
-                  prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]
-                )
-              }
+              onClick={() => setTags((prev) => (prev.includes(t) ? [] : [t]))}
               className={`px-3 py-1 rounded-full text-sm border transition-colors ${
                 active
-                  ? "bg-primary/10 text-primary border-primary/20"
+                  ? "bg-green-100 text-primary border-green-700"
                   : "bg-secondary text-black border-border hover:bg-accent hover:text-accent-foreground"
               }`}
             >

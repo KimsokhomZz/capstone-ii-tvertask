@@ -42,7 +42,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
     { name: "Dashboard", icon: <Home size={20} />, path: "/dashboard" },
     { name: "Focus", icon: <Target size={20} />, path: "/focus" },
     { name: "Leaderboard", icon: <Trophy size={20} />, path: "/leaderboard" },
-    { name: "Profile", icon: <User size={20} />, path: "/profile" },
+    { name: "Avatar", icon: <User size={20} />, path: "/avatar" },
     { name: "Analytics", icon: <BarChart2 size={20} />, path: "/analytics" },
   ];
 
@@ -53,9 +53,9 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
         <div className="p-2 pb-8">
           <div className="flex items-center gap-3 mb-1">
             {/* SVG Logo */}
-            <div className="relative w-full">
+            <div className="relative w-full border-b-2 border-yellow-200 pb-4">
               <img
-                src="../src/assets/logo.svg"
+                src="../src/assets/logo1.svg"
                 alt="TverTask Logo"
                 className="w-full h-full object-contain rounded-2xl"
               />
@@ -76,9 +76,9 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
                 key={item.name}
                 onClick={() => navigate(item.path)}
                 aria-current={isActive ? "page" : undefined}
-                className={`flex items-center gap-3 w-full px-4 py-3 rounded-2xl transition-all duration-200 ${
+                className={`flex items-center gap-3 w-full px-4 py-2 rounded-xl transition-all duration-200 ${
                   isActive
-                    ? "bg-linear-to-r from-yellow-400 to-yellow-300 text-white font-semibold shadow-lg shadow-yellow-200"
+                    ? "bg-linear-to-r from-yellow-500 to-yellow-300 text-white font-semibold shadow-lg shadow-yellow-200"
                     : "text-gray-600 hover:bg-yellow-50 hover:text-yellow-600"
                 }`}
               >
@@ -93,27 +93,40 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
       <div className="p-4 space-y-4">
         {/* Bottom Actions */}
         <div className="space-y-1">
-          <button
-            onClick={() => navigate("/notifications")}
-            className="flex items-center gap-3 w-full px-4 py-2 text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded-lg transition-all text-sm"
-          >
-            <Bell size={18} />
-            <span>Notifications</span>
-          </button>
-          <button
-            onClick={() => navigate("/settings")}
-            className="flex items-center gap-3 w-full px-4 py-2 text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded-lg transition-all text-sm"
-          >
-            <Settings size={18} />
-            <span>Settings</span>
-          </button>
-          <button
-            onClick={() => navigate("/support")}
-            className="flex items-center gap-3 w-full px-4 py-2 text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded-lg transition-all text-sm"
-          >
-            <HelpCircle size={18} />
-            <span>Support</span>
-          </button>
+          {[
+            {
+              label: "Notifications",
+              icon: <Bell size={18} />,
+              path: "/notifications",
+            },
+            {
+              label: "Settings",
+              icon: <Settings size={18} />,
+              path: "/profile",
+            },
+            {
+              label: "Support",
+              icon: <HelpCircle size={18} />,
+              path: "/support",
+            },
+          ].map(({ label, icon, path }) => {
+            const isActive = location.pathname === path;
+            return (
+              <button
+                key={label}
+                onClick={() => navigate(path)}
+                aria-current={isActive ? "page" : undefined}
+                className={`flex items-center gap-3 w-full px-4 py-1 space-x-2 rounded-lg transition-all text-sm focus:outline-none focus:ring-2 focus:ring-yellow-300 focus:ring-offset-1 ${
+                  isActive
+                    ? "bg-yellow-50 text-yellow-700 font-semibold shadow-sm"
+                    : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+                }`}
+              >
+                {icon}
+                <span>{label}</span>
+              </button>
+            );
+          })}
         </div>
 
         {/* Illustration Card */}

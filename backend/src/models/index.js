@@ -11,6 +11,7 @@ const UserBadge = require("./userBadgeModel");
 const UserQuest = require("./userQuestModel");
 const Quest = require("./questModel");
 const ProgressLog = require("./progressLogModel");
+const TaskNote = require("./taskNoteModel");
 
 // USER → TASKS
 User.hasMany(Task, { foreignKey: "user_id", onDelete: "CASCADE" });
@@ -23,6 +24,10 @@ PomodoroSession.belongsTo(User, { foreignKey: "user_id" });
 // TASK → POMODORO SESSIONS
 Task.hasMany(PomodoroSession, { foreignKey: "task_id", onDelete: "CASCADE" });
 PomodoroSession.belongsTo(Task, { foreignKey: "task_id" });
+
+// TASK → TASK NOTES
+Task.hasMany(TaskNote, { foreignKey: "task_id", onDelete: "CASCADE" });
+TaskNote.belongsTo(Task, { foreignKey: "task_id" });
 
 // USER → USER_XP (1:1)
 User.hasOne(UserXP, { foreignKey: "user_id", onDelete: "CASCADE" });
@@ -48,6 +53,9 @@ User.hasOne(ProgressLog, {
 });
 ProgressLog.belongsTo(User, { foreignKey: "userId" });
 
+User.hasMany(TaskNote, { foreignKey: "user_id" });
+TaskNote.belongsTo(User, { foreignKey: "user_id" });
+
 module.exports = {
   sequelize,
   User,
@@ -60,4 +68,5 @@ module.exports = {
   Quest,
   UserQuest,
   ProgressLog,
+  TaskNote,
 };

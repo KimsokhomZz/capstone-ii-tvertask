@@ -52,7 +52,7 @@ export default function TaskBar({
           aria-label={`Toggle ${label}`}
         />
         <span
-          className={`font-medium select-none ${
+          className={`font-medium text-md select-none ${
             checked ? "line-through text-gray-400" : "text-gray-700"
           }`}
         >

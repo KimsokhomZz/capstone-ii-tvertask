@@ -130,6 +130,7 @@ export default function TodoList() {
                   title: task.title || task.name || "",
                   description: task.description ?? "",
                   duration: task.focus_time ?? Number(task.duration) ?? 25,
+                  taskId: task.id,
                 },
               })
             }

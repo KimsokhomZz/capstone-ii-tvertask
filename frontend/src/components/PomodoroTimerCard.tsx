@@ -153,7 +153,7 @@ export default function PomodoroTimerCard({
   return (
     <div
       ref={cardRef}
-      className={`bg-card text-foreground rounded-[28px] shadow-xl border border-border p-6 md:p-8 transition-colors ${
+      className={`bg-card text-foreground rounded-[28px] shadow-md border border-border p-6 md:p-8 transition-colors ${
         isFullscreen
           ? "h-screen w-screen rounded-none border-0 flex flex-col items-center justify-center"
           : ""
@@ -162,7 +162,7 @@ export default function PomodoroTimerCard({
       <div className="flex items-start justify-between mb-4">
         <Header
           title="Focus Session"
-          icon={<span className="text-4xl">🎯</span>}
+          icon={<span className="text-4xl pb-[5px] pl-[5px]">🎯</span>}
           titleClassName="text-xs md:text-md"
         />
         <div className="flex items-center gap-2 relative">
