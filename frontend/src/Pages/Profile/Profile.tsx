@@ -8,7 +8,7 @@ import AvatarUploadModal from "../../Components/Profile/AvatarUploadModal";
 import { User, Edit, Lock, BarChart3, Camera } from "lucide-react";
 
 const Profile = () => {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, refreshUserData } = useAuth();
   const [activeTab, setActiveTab] = useState("view");
   const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
   const [userStats, setUserStats] = useState({
@@ -31,6 +31,12 @@ const Profile = () => {
   useEffect(() => {
     if (isAuthenticated && user) {
       fetchUserStats();
+      // Also refresh user data to ensure we have latest bio and location
+      refreshUserData().then((result: { success: any }) => {
+        if (result?.success) {
+          console.log("[PROFILE] Fresh user data loaded on mount");
+        }
+      });
     }
   }, [isAuthenticated, user]);
 
@@ -91,6 +97,24 @@ const Profile = () => {
     }
   };
 
+  const handleProfileUpdate = async () => {
+    // Refresh user data first to get updated bio and location
+    console.log("[PROFILE] Refreshing user data after profile update...");
+    const refreshResult = await refreshUserData();
+
+    if (refreshResult?.success) {
+      console.log("[PROFILE] User data refreshed successfully");
+    } else {
+      console.warn(
+        "[PROFILE] Failed to refresh user data:",
+        refreshResult?.error
+      );
+    }
+
+    // Then refresh stats
+    await fetchUserStats();
+  };
+
   const tabs = [
     {
       id: "view",
@@ -136,7 +160,7 @@ const Profile = () => {
       case "view":
         return <ProfileView user={user} stats={userStats} />;
       case "edit":
-        return <EditProfile user={user} onUpdate={fetchUserStats} />;
+        return <EditProfile user={user} onUpdate={handleProfileUpdate} />;
       case "password":
         return <ChangePassword />;
       case "stats":
@@ -302,7 +326,7 @@ const Profile = () => {
         isOpen={isAvatarModalOpen}
         onClose={() => setIsAvatarModalOpen(false)}
         user={user}
-        onUpdate={fetchUserStats}
+        onUpdate={handleProfileUpdate}
       />
     </div>
   );
@@ -310,6 +334,14 @@ const Profile = () => {
 
 // Profile View Component
 const ProfileView = ({ user, stats }: { user: any; stats: any }) => {
+  console.log("[PROFILE VIEW] Current user data:", {
+    name: user?.name,
+    email: user?.email,
+    bio: user?.bio,
+    location: user?.location,
+    avatarUrl: user?.avatarUrl,
+  });
+
   return (
     <div className="p-10">
       <div className="mb-8">

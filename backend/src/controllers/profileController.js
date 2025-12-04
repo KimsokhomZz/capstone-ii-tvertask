@@ -68,7 +68,7 @@ const getProfile = async (req, res) => {
 // Update user profile
 const updateProfile = async (req, res) => {
   try {
-    const { name, username, bio, location, website } = req.body;
+    const { name, email, bio, location, website } = req.body;
     const userId = req.user.id;
 
     const user = await User.findByPk(userId);
@@ -79,20 +79,48 @@ const updateProfile = async (req, res) => {
       });
     }
 
+    // Check if email is being changed and if it's already taken
+    if (email && email.toLowerCase() !== user.email.toLowerCase()) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({
+          success: false,
+          message: "Please provide a valid email address",
+        });
+      }
+
+      const existingUser = await User.findOne({
+        where: {
+          email: email.toLowerCase(),
+          id: { [require("sequelize").Op.ne]: userId },
+        },
+      });
+
+      if (existingUser) {
+        return res.status(409).json({
+          success: false,
+          message: "Email is already in use by another account",
+        });
+      }
+    }
+
     // Update user fields
     const updates = {};
     if (name !== undefined) updates.name = name;
-    if (username !== undefined) updates.username = username;
+    if (email !== undefined) updates.email = email.toLowerCase();
     if (bio !== undefined) updates.bio = bio;
     if (location !== undefined) updates.location = location;
     if (website !== undefined) updates.website = website;
 
     await user.update(updates);
 
+    // Remove password from response
+    const { password, ...userWithoutPassword } = user.toJSON();
+
     res.json({
       success: true,
       message: "Profile updated successfully",
-      data: { user },
+      data: { user: userWithoutPassword },
     });
   } catch (error) {
     console.error("Update profile error:", error);

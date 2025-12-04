@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Mail, Lock, Eye, EyeOff, AlertCircle } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, AlertCircle, Check, X } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import authService from "../../services/authService";
 
@@ -14,22 +14,108 @@ export default function Login() {
   const [showVerificationError, setShowVerificationError] = useState(false);
   const [verificationEmail, setVerificationEmail] = useState("");
   const [isResendingVerification, setIsResendingVerification] = useState(false);
+  const [isPasswordFocused, setIsPasswordFocused] = useState(false);
 
   const { login, isLoading, error, clearError } = useAuth();
   const navigate = useNavigate();
+
+  const passwordRequirements = [
+    { label: "At least 8 characters", test: (pwd) => pwd.length >= 8 },
+    {
+      label: "Contains uppercase letter",
+      test: (pwd) => /[A-Z]/.test(pwd),
+    },
+    {
+      label: "Contains lowercase letter",
+      test: (pwd) => /[a-z]/.test(pwd),
+    },
+    { label: "Contains number", test: (pwd) => /\d/.test(pwd) },
+    {
+      label: "Contains special character",
+      test: (pwd) => /[!@#$%^&*(),.?":{}|<>]/.test(pwd),
+    },
+  ];
+
+  const isPasswordValid = () => {
+    return passwordRequirements.every((req) => req.test(password));
+  };
+
+  const handlePasswordChange = (e) => {
+    setPassword(e.target.value);
+    if (formErrors.password) {
+      setFormErrors((prev) => ({ ...prev, password: "" }));
+    }
+  };
+
+  // Enhanced email validation function
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const validDomainRegex =
+      /^[^\s@]+@[a-zA-Z0-9][a-zA-Z0-9.-]*[a-zA-Z0-9]\.[a-zA-Z]{2,}$/;
+
+    if (!email.trim()) {
+      return "Email is required";
+    }
+
+    if (email.length > 254) {
+      return "Email address is too long";
+    }
+
+    if (!emailRegex.test(email)) {
+      return "Please enter a valid email address";
+    }
+
+    if (!validDomainRegex.test(email)) {
+      return "Please enter a valid email domain";
+    }
+
+    // Check for consecutive dots
+    if (email.includes("..")) {
+      return "Email address cannot contain consecutive dots";
+    }
+
+    // Check for invalid characters
+    if (/[<>()\[\]\\,;:\s@"]/.test(email.split("@")[0])) {
+      return "Email contains invalid characters";
+    }
+
+    // Check for common typos
+    const commonDomains = [
+      "gmail.com",
+      "yahoo.com",
+      "hotmail.com",
+      "outlook.com",
+      "icloud.com",
+    ];
+    const domain = email.split("@")[1]?.toLowerCase();
+    const suggestions = {
+      "gmial.com": "gmail.com",
+      "gmai.com": "gmail.com",
+      "yahooo.com": "yahoo.com",
+      "hotmial.com": "hotmail.com",
+      "outlok.com": "outlook.com",
+    };
+
+    if (suggestions[domain]) {
+      return `Did you mean ${email.split("@")[0]}@${suggestions[domain]}?`;
+    }
+
+    return null;
+  };
 
   // Form validation
   const validateForm = () => {
     const errors = {};
 
-    if (!email.trim()) {
-      errors.email = "Email is required";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      errors.email = "Please enter a valid email address";
+    const emailError = validateEmail(email);
+    if (emailError) {
+      errors.email = emailError;
     }
 
     if (!password) {
       errors.password = "Password is required";
+    } else if (!isPasswordValid()) {
+      errors.password = "Password does not meet security requirements";
     }
 
     return errors;
@@ -198,6 +284,8 @@ export default function Login() {
                   className={`w-full border rounded-lg py-2.5 px-10 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400 text-gray-900 ${
                     formErrors.email
                       ? "border-red-300 bg-red-50"
+                      : email && validateEmail(email) === null
+                      ? "border-green-300 bg-green-50"
                       : "border-gray-300"
                   }`}
                   value={email}
@@ -207,16 +295,32 @@ export default function Login() {
                       setFormErrors((prev) => ({ ...prev, email: "" }));
                     }
                   }}
+                  onBlur={(e) => {
+                    const emailError = validateEmail(e.target.value);
+                    if (emailError) {
+                      setFormErrors((prev) => ({ ...prev, email: emailError }));
+                    }
+                  }}
                   disabled={isLoading || isSuccess}
                 />
+                {email && validateEmail(email) === null && (
+                  <div className="absolute right-3 top-3">
+                    <Check className="w-5 h-5 text-green-500" />
+                  </div>
+                )}
               </div>
               {formErrors.email && (
                 <p className="text-red-500 text-xs mt-1">{formErrors.email}</p>
               )}
+              {email && validateEmail(email) === null && !formErrors.email && (
+                <p className="text-green-600 text-xs mt-1">
+                  ✓ Valid email address
+                </p>
+              )}
             </div>
 
             {/* Password */}
-            <div>
+            <div className="relative">
               <div className="flex justify-between items-center mb-2">
                 <label
                   htmlFor="password"
@@ -243,12 +347,9 @@ export default function Login() {
                       : "border-gray-300"
                   }`}
                   value={password}
-                  onChange={(e) => {
-                    setPassword(e.target.value);
-                    if (formErrors.password) {
-                      setFormErrors((prev) => ({ ...prev, password: "" }));
-                    }
-                  }}
+                  onChange={handlePasswordChange}
+                  onFocus={() => setIsPasswordFocused(true)}
+                  onBlur={() => setIsPasswordFocused(false)}
                   disabled={isLoading || isSuccess}
                 />
                 <button
@@ -268,6 +369,45 @@ export default function Login() {
                 <p className="text-red-500 text-xs mt-1">
                   {formErrors.password}
                 </p>
+              )}
+
+              {/* Password Requirements - Floating */}
+              {password && isPasswordFocused && (
+                <div className="absolute top-full left-0 right-0 mt-2 p-4 bg-white rounded-lg border border-gray-200 shadow-lg z-50 animate-fadeIn">
+                  <h4 className="text-sm font-bold text-gray-900 mb-3">
+                    Password Requirements:
+                  </h4>
+                  <div className="space-y-2">
+                    {passwordRequirements.map((req, index) => {
+                      const isValid = req.test(password);
+                      return (
+                        <div
+                          key={index}
+                          className="flex items-center space-x-2"
+                        >
+                          <div
+                            className={`flex-shrink-0 w-4 h-4 rounded-full flex items-center justify-center ${
+                              isValid ? "bg-green-100" : "bg-red-100"
+                            }`}
+                          >
+                            {isValid ? (
+                              <Check className="w-3 h-3 text-green-600" />
+                            ) : (
+                              <X className="w-3 h-3 text-red-600" />
+                            )}
+                          </div>
+                          <span
+                            className={`text-xs font-medium ${
+                              isValid ? "text-green-700" : "text-gray-600"
+                            }`}
+                          >
+                            {req.label}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
               )}
             </div>
 
