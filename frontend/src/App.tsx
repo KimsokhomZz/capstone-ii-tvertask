@@ -5,7 +5,7 @@ import {
   Route,
   useNavigate,
 } from "react-router-dom";
-import ProtectedRoute from "./Components/ProtectedRoute";
+import ProtectedRoute from "./components/ProtectedRoute.tsx";
 
 // @ts-ignore
 import Login from "./Pages/Authentication/Login.jsx";
@@ -26,7 +26,7 @@ import Dashboard from "./Pages/Dashboard/Dashboardtask.jsx";
 // @ts-ignore
 import { AuthProvider } from "./context/AuthContext.jsx";
 import TaskList from "./Pages/TaskList/TaskList.js";
-import MainLayout from "./Components/MainLayout.tsx";
+import MainLayout from "./components/MainLayout.tsx";
 import Pomodoro from "./Pages/Focus/Focustask.js";
 import Leaderboard from "./Pages/Leaderboard/leaderboard";
 import DashboardTask from "./Pages/Dashboard/Dashboardtask.js";
@@ -54,7 +54,6 @@ function AvatarPage() {
   return <AvatarTask />;
 }
 
- 
 function NotificationsPage() {
   return (
     <div className="bg-white p-8 md:p-10 rounded-[28px] shadow-xl w-full max-w-4xl border border-gray-100">

@@ -36,7 +36,7 @@ export default function AuthCallback() {
         );
 
         // Parse user data
-        const userData = JSON.parse(decodeURIComponent(userString));
+        const userData = JSON.parse(decodeURIcomponent(userString));
 
         console.log(
           "[AUTH DEBUG] OAuth callback: User data parsed successfully"

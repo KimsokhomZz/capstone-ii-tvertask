@@ -1,6 +1,6 @@
 import { useState } from "react";
 // @ts-ignore
-import { useAuth } from "../../context/AuthContext.jsx";
+import { useAuth } from "../../context/AuthContext.js";
 
 interface EditProfileProps {
   user: any;

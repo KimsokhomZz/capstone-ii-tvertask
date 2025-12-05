@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 // @ts-ignore
 import { useAuth } from "../../context/AuthContext.jsx";
-import EditProfile from "../../Components/Profile/EditProfile";
-import ChangePassword from "../../Components/Profile/ChangePassword";
-import ProgressStats from "../../Components/Profile/ProgressStats";
-import AvatarUploadModal from "../../Components/Profile/AvatarUploadModal";
+import EditProfile from "../../components/Profile/EditProfile.js";
+import ChangePassword from "../../components/Profile/ChangePassword.js";
+import ProgressStats from "../../components/Profile/ProgressStats.js";
+import AvatarUploadModal from "../../components/Profile/AvatarUploadModal.js";
 import { User, Edit, Lock, BarChart3, Camera } from "lucide-react";
 
 const Profile = () => {
@@ -308,7 +308,7 @@ const Profile = () => {
   );
 };
 
-// Profile View Component
+// Profile View component
 const ProfileView = ({ user, stats }: { user: any; stats: any }) => {
   return (
     <div className="p-10">
