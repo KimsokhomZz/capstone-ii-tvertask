@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 // @ts-ignore
-import { useAuth } from "../../context/AuthContext.jsx";
+import { useAuth } from "../../context/AuthContext";
 import EditProfile from "../../components/Profile/EditProfile.js";
 import ChangePassword from "../../components/Profile/ChangePassword.js";
 import ProgressStats from "../../components/Profile/ProgressStats.js";

@@ -1,4 +1,5 @@
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+console.log("=========[AUTH DEBUG] API_BASE_URL set to:", API_BASE_URL);
 
 class AuthService {
   // Google OAuth login

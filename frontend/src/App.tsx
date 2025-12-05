@@ -24,7 +24,7 @@ import ResetPassword from "./Pages/Authentication/ResetPassword.jsx";
 // @ts-ignore
 import Dashboard from "./Pages/Dashboard/Dashboardtask.jsx";
 // @ts-ignore
-import { AuthProvider } from "./context/AuthContext.jsx";
+import { AuthProvider } from "./context/AuthContext";
 import TaskList from "./Pages/TaskList/TaskList.js";
 import MainLayout from "./components/MainLayout.tsx";
 import Pomodoro from "./Pages/Focus/Focustask.js";
