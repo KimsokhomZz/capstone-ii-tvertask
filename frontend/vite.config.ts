@@ -9,14 +9,23 @@ export default defineConfig(() => {
 
   return {
     define: {
-      'import.meta.env.VITE_API_URL': JSON.stringify(env.VITE_API_BASE),
+      "import.meta.env.VITE_API_URL": JSON.stringify(env.VITE_API_BASE),
     },
     plugins: [react(), tailwindcss()],
     server: {
+      host: "0.0.0.0",
+      port: 5173,
+      strictPort: true,
+      hmr: {
+        host: "localhost",
+        port: 5173,
+      },
+      allowedHosts: true,
       proxy: {
         "/api": "http://localhost:3000",
       },
     },
+
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "./src"),
