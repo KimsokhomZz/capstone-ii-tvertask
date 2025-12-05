@@ -1,7 +1,6 @@
 import { useState, useRef } from "react";
 import { Camera, Upload, X } from "lucide-react";
-// @ts-ignore
-import { useAuth } from "../../context/AuthContext.js";
+import { useAuth } from "@/context/AuthContext";
 
 interface AvatarUploadModalProps {
   isOpen: boolean;
