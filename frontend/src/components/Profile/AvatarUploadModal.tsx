@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Camera, Upload, X } from "lucide-react";
+import { Upload, X } from "lucide-react";
 // @ts-ignore
 import { useAuth } from "../../context/AuthContext";
 

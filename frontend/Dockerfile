@@ -6,12 +6,11 @@ COPY package.json .
 
 RUN npm install
 
-RUN npm i -g serve
-
 COPY . .
-
-RUN npm run build
 
 EXPOSE 5173
 
-CMD [ "serve", "-s", "dist" ]
+ENV HOST=0.0.0.0
+ENV PORT=5173
+
+CMD ["npm", "run", "dev"]

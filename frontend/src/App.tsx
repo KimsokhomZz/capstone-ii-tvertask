@@ -32,8 +32,7 @@ import Leaderboard from "./Pages/Leaderboard/leaderboard";
 import DashboardTask from "./Pages/Dashboard/Dashboardtask.js";
 import Profile from "./Pages/Profile/Profile";
 import { Navigate } from "react-router-dom";
-// @ts-ignore
-import AvatarTask from "./Pages/Avatar/avatartask.tsx"; // add or adjust path/casing if needed
+import AvatarTask from "./Pages/Avatar/Avatartask.tsx"; // add or adjust path/casing if needed
 import AnalyticsPage from "./Pages/Analytics/analytic.tsx";
 
 interface Task {
