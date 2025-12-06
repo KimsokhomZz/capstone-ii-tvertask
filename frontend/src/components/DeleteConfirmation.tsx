@@ -33,7 +33,7 @@ export default function DeleteConfirmation({
               onConfirm();
               onClose();
             }}
-            className="px-4 py-2 rounded-xl bg-red-500 hover:bg-red-100 text-black cursor-pointer"
+            className="px-4 py-2 rounded-xl bg-red-500 hover:bg-red-100 text-white cursor-pointer"
           >
             Delete
           </button>

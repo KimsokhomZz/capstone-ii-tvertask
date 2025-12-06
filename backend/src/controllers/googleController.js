@@ -32,7 +32,7 @@ router.get(
       // Redirect to frontend with token in URL (will be handled by frontend)
       const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5174";
       res.redirect(
-        `${frontendUrl}/auth/callback?token=${token}&user=${encodeURIcomponent(
+        `${frontendUrl}/auth/callback?token=${token}&user=${encodeURIComponent(
           JSON.stringify({
             id: req.user.id,
             name: req.user.name,

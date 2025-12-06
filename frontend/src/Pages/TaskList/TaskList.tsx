@@ -93,7 +93,7 @@ export default function TodoList() {
   };
 
   return (
-    <div className="bg-white p-8 md:p-10 rounded-[28px] shadow-xl w-full max-w-4xl border border-gray-100">
+    <div className="bg-white p-8 md:p-10 rounded-[28px] shadow-md w-full max-w-4xl border border-gray-100">
       <div className="flex items-center justify-between">
         <Header
           title="Focus Session"

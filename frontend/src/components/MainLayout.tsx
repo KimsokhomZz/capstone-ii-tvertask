@@ -13,7 +13,7 @@ export default function MainLayout() {
       {/* Scrollable Content */}
       <main className="pl-64">
         <div className="min-h-screen overflow-y-auto">
-          <div className="max-w-5xl mx-auto pt-12 px-10">
+          <div className="max-w-5xl mx-auto py-12">
             <Outlet />
           </div>
         </div>
