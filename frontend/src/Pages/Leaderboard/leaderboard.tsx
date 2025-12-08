@@ -1,85 +1,102 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Crown } from "lucide-react";
+import { fetchLeaderboard } from "@/api/leaderboardApi";
+import type { LeaderboardData } from "@/api/leaderboardApi";
 
 const FocusSessionLeaderboard = () => {
-  const [activeTab, setActiveTab] = useState("weekly");
+  const [activeTab, setActiveTab] = useState<"weekly" | "monthly" | "global">(
+    "weekly"
+  );
+  const [leaderboardData, setLeaderboardData] =
+    useState<LeaderboardData | null>(null);
 
   // Sample data - in a real app, this would come from your backend
-  const avatarUrl =
-    "https://gratisography.com/wp-content/uploads/2024/11/gratisography-augmented-reality-800x525.jpg";
+  // const avatarUrl =
+  // "https://gratisography.com/wp-content/uploads/2024/11/gratisography-augmented-reality-800x525.jpg";
 
-  const leaderboardData = {
-    weekly: [
-      {
-        rank: 1,
-        name: "Lina",
-        xp: 2450,
-        avatar: avatarUrl,
-      },
-      {
-        rank: 2,
-        name: "Maya",
-        xp: 2100,
-        avatar: avatarUrl,
-      },
-      {
-        rank: 3,
-        name: "Noah",
-        xp: 1850,
-        avatar: avatarUrl,
-      },
-      {
-        rank: 4,
-        name: "Evan",
-        xp: 1350,
-        avatar: avatarUrl,
-      },
-      {
-        rank: 5,
-        name: "Sam",
-        xp: 1250,
-        avatar: avatarUrl,
-      },
-      {
-        rank: 6,
-        name: "Ava",
-        xp: 1150,
-        avatar: avatarUrl,
-      },
-      {
-        rank: 7,
-        name: "Oli",
-        xp: 1050,
-        avatar: avatarUrl,
-      },
-      {
-        rank: 8,
-        name: "Rae",
-        xp: 950,
-        avatar: avatarUrl,
-      },
-      {
-        rank: 9,
-        name: "Kai",
-        xp: 850,
-        avatar: avatarUrl,
-      },
-    ],
-    monthly: [
-      // fallback sample for monthly (uses same image)
-      { rank: 1, name: "Lina", xp: 9800, avatar: avatarUrl },
-      { rank: 2, name: "Maya", xp: 9200, avatar: avatarUrl },
-      { rank: 3, name: "Noah", xp: 8700, avatar: avatarUrl },
-    ],
-    global: [
-      // fallback sample for global
-      { rank: 1, name: "Lina", xp: 45200, avatar: avatarUrl },
-      { rank: 2, name: "Maya", xp: 43000, avatar: avatarUrl },
-      { rank: 3, name: "Noah", xp: 41000, avatar: avatarUrl },
-    ],
-  };
+  useEffect(() => {
+    const getLeaderboardData = async () => {
+      const data = await fetchLeaderboard();
+      if (data) {
+        setLeaderboardData(data);
+      }
+    };
 
-  const currentData = leaderboardData[activeTab] ?? leaderboardData.weekly;
+    getLeaderboardData();
+  }, []);
+
+  // const leaderboardData = {
+  //   weekly: [
+  //     {
+  //       rank: 1,
+  //       name: "Lina",
+  //       xp: 2450,
+  //       avatar: avatarUrl,
+  //     },
+  //     {
+  //       rank: 2,
+  //       name: "Maya",
+  //       xp: 2100,
+  //       avatar: avatarUrl,
+  //     },
+  //     {
+  //       rank: 3,
+  //       name: "Noah",
+  //       xp: 1850,
+  //       avatar: avatarUrl,
+  //     },
+  //     {
+  //       rank: 4,
+  //       name: "Evan",
+  //       xp: 1350,
+  //       avatar: avatarUrl,
+  //     },
+  //     {
+  //       rank: 5,
+  //       name: "Sam",
+  //       xp: 1250,
+  //       avatar: avatarUrl,
+  //     },
+  //     {
+  //       rank: 6,
+  //       name: "Ava",
+  //       xp: 1150,
+  //       avatar: avatarUrl,
+  //     },
+  //     {
+  //       rank: 7,
+  //       name: "Oli",
+  //       xp: 1050,
+  //       avatar: avatarUrl,
+  //     },
+  //     {
+  //       rank: 8,
+  //       name: "Rae",
+  //       xp: 950,
+  //       avatar: avatarUrl,
+  //     },
+  //     {
+  //       rank: 9,
+  //       name: "Kai",
+  //       xp: 850,
+  //       avatar: avatarUrl,
+  //     },
+  //   ],
+  //   monthly: [
+  //     // fallback sample for monthly (uses same image)
+  //     { rank: 1, name: "Lina", xp: 9800, avatar: avatarUrl },
+  //     { rank: 2, name: "Maya", xp: 9200, avatar: avatarUrl },
+  //     { rank: 3, name: "Noah", xp: 8700, avatar: avatarUrl },
+  //   ],
+  //   global: [
+  //     // fallback sample for global
+  //     { rank: 1, name: "Lina", xp: 45200, avatar: avatarUrl },
+  //     { rank: 2, name: "Maya", xp: 43000, avatar: avatarUrl },
+  //     { rank: 3, name: "Noah", xp: 41000, avatar: avatarUrl },
+  //   ],
+  // };
+
+  const currentData = leaderboardData ? leaderboardData[activeTab] ?? leaderboardData.weekly: [];
   const topThree = currentData.slice(0, 3);
   const restOfList = currentData.slice(3);
 

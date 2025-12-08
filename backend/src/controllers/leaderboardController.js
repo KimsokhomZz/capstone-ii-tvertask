@@ -25,13 +25,17 @@ exports.getLeaderboard = async (req, res) => {
     });
 
     // Compute rank based on page offset
-    const leaderboard = topUsers.map((user, index) => ({
+    const weekly = topUsers.map((user, index) => ({
       rank: offset + index + 1,
-      user: user.name,
-      xp_earned: user.ProgressLog?.xp_earned || 0,
+      name: user.name,
+      xp: user.ProgressLog?.xp_earned || 0,
+      avatar: user.avatarUrl || null,
     }));
 
-    res.status(200).json({ success: true, leaderboard });
+    const monthly = [{}];
+    const global = [{}];
+
+    res.status(200).json({ weekly, monthly, global });
   } catch (error) {
     console.error(error);
     return res.status(500).json({
