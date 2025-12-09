@@ -119,21 +119,28 @@ export const AuthProvider = ({ children }) => {
         }
 
         if (token && user) {
-          console.log("[AUTH DEBUG] Token and user found, validating token...");
+          console.log(
+            "[AUTH DEBUG] Token and user found, fetching fresh user data..."
+          );
 
-          // Try to validate token, but be more forgiving about failures
+          // Always fetch fresh user data from server to get latest bio and location
           try {
-            await authService.getCurrentUser();
-            console.log(
-              "[AUTH DEBUG] Token validation successful, restoring auth state"
+            const freshUserResponse = await authService.getCurrentUser();
+            console.log("[AUTH DEBUG] Fresh user data fetched successfully");
+
+            // Update localStorage with fresh data
+            localStorage.setItem(
+              "user",
+              JSON.stringify(freshUserResponse.data)
             );
+
             dispatch({
               type: AUTH_ACTIONS.LOGIN_SUCCESS,
-              payload: { user, token },
+              payload: { user: freshUserResponse.data, token },
             });
           } catch (error) {
             console.error(
-              "[AUTH DEBUG] Token validation failed:",
+              "[AUTH DEBUG] Failed to fetch fresh user data:",
               error.message
             );
 
@@ -143,9 +150,9 @@ export const AuthProvider = ({ children }) => {
               error.message.includes("Server error")
             ) {
               console.log(
-                "[AUTH DEBUG] Network/server error, will retry. Keeping user logged in for now."
+                "[AUTH DEBUG] Network/server error, using cached user data for now."
               );
-              // Keep user logged in but show they might need to refresh
+              // Keep user logged in with cached data
               dispatch({
                 type: AUTH_ACTIONS.LOGIN_SUCCESS,
                 payload: { user, token },
@@ -238,8 +245,7 @@ export const AuthProvider = ({ children }) => {
       await authService.logout();
       dispatch({ type: AUTH_ACTIONS.LOGOUT });
     } catch (error) {
-      console.error("Logout error:", error);
-      // Even if logout fails, clear local state
+      // Silent error handling - Even if logout fails, clear local state
       authService.logout(); // Ensure cleanup
       dispatch({ type: AUTH_ACTIONS.LOGOUT });
     }

@@ -1,5 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useAuth } from "@/context/AuthContext";
+
+import LocationInput from "../ui/LocationInput";
+// @ts-ignore
+import emailService from "../../services/emailService";
 
 interface EditProfileProps {
   user: any;
@@ -16,6 +20,138 @@ const EditProfile = ({ user, onUpdate }: EditProfileProps) => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [emailCheckStatus, setEmailCheckStatus] = useState<
+    "checking" | "available" | "taken" | null
+  >(null);
+  const emailCheckTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  );
+
+  // Enhanced email validation function
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const validDomainRegex =
+      /^[^\s@]+@[a-zA-Z0-9][a-zA-Z0-9.-]*[a-zA-Z0-9]\.[a-zA-Z]{2,}$/;
+
+    if (!email.trim()) {
+      return "Email is required";
+    }
+
+    if (email.length > 254) {
+      return "Email address is too long";
+    }
+
+    if (!emailRegex.test(email)) {
+      return "Please enter a valid email address";
+    }
+
+    if (!validDomainRegex.test(email)) {
+      return "Please enter a valid email domain";
+    }
+
+    // Check for consecutive dots
+    if (email.includes("..")) {
+      return "Email address cannot contain consecutive dots";
+    }
+
+    // Check for invalid characters
+    if (/[<>()\[\]\\,;:\s@"]/.test(email.split("@")[0])) {
+      return "Email contains invalid characters";
+    }
+
+    // Check for common typos
+    const domain = email.split("@")[1]?.toLowerCase();
+    const suggestions: Record<string, string> = {
+      "gmial.com": "gmail.com",
+      "gmai.com": "gmail.com",
+      "yahooo.com": "yahoo.com",
+      "hotmial.com": "hotmail.com",
+      "outlok.com": "outlook.com",
+    };
+
+    const localPart = email.split("@")[0];
+    const suggestion = domain ? suggestions[domain] : undefined;
+
+    if (suggestion) {
+      return `Did you mean ${localPart}@${suggestion}?`;
+    }
+
+    return null;
+  };
+
+  // Debounced email availability check
+  const checkEmailAvailability = useCallback(
+    async (emailValue: string) => {
+      if (
+        !emailValue ||
+        validateEmail(emailValue) ||
+        emailValue.toLowerCase() === user?.email?.toLowerCase()
+      ) {
+        setEmailCheckStatus(null);
+        return;
+      }
+
+      setEmailCheckStatus("checking");
+
+      try {
+        const result = await emailService.checkEmailAvailability(
+          emailValue,
+          user?.id
+        );
+
+        if (result.available) {
+          setEmailCheckStatus("available");
+          setEmailError("");
+        } else {
+          setEmailCheckStatus("taken");
+          setEmailError(result.message || "This email is already in use");
+        }
+      } catch (error) {
+        setEmailCheckStatus(null);
+        console.error("Email check failed:", error);
+      }
+    },
+    [user?.email, user?.id]
+  );
+
+  // Handle email change with debouncing
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const emailValue = e.target.value;
+    handleInputChange(e);
+
+    // Clear previous timeout
+    if (emailCheckTimeoutRef.current) {
+      clearTimeout(emailCheckTimeoutRef.current);
+    }
+
+    // Clear existing errors immediately for better UX
+    if (emailError) {
+      setEmailError("");
+    }
+
+    // Set new timeout for email checking
+    if (
+      emailValue.trim() &&
+      emailValue.toLowerCase() !== user?.email?.toLowerCase()
+    ) {
+      emailCheckTimeoutRef.current = setTimeout(() => {
+        checkEmailAvailability(emailValue.trim().toLowerCase());
+      }, 800); // 800ms debounce
+    } else {
+      setEmailCheckStatus(null);
+    }
+  };
+
+  // Update form data when user prop changes (e.g., after successful update)
+  useEffect(() => {
+    setFormData({
+      name: user?.name || "",
+      email: user?.email || "",
+      bio: user?.bio || "",
+      location: user?.location || "",
+    });
+  }, [user]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -31,6 +167,36 @@ const EditProfile = ({ user, onUpdate }: EditProfileProps) => {
     e.preventDefault();
     setIsLoading(true);
     setMessage("");
+    setEmailError("");
+
+    // Validate email before submission
+    const emailValidationError = validateEmail(formData.email);
+    if (emailValidationError) {
+      setEmailError(emailValidationError);
+      setIsLoading(false);
+      return;
+    }
+
+    // Check if email is being changed and if it's still being verified
+    if (formData.email.toLowerCase() !== user?.email?.toLowerCase()) {
+      if (emailCheckStatus === "checking") {
+        setEmailError("Please wait while we verify email availability");
+        setIsLoading(false);
+        return;
+      }
+
+      if (emailCheckStatus === "taken") {
+        setEmailError("This email is already in use");
+        setIsLoading(false);
+        return;
+      }
+
+      if (emailCheckStatus !== "available") {
+        setEmailError("Please wait for email verification to complete");
+        setIsLoading(false);
+        return;
+      }
+    }
 
     try {
       const response = await fetch(
@@ -51,22 +217,37 @@ const EditProfile = ({ user, onUpdate }: EditProfileProps) => {
 
       if (response.ok) {
         setMessage("Profile updated successfully!");
-        onUpdate();
 
-        // Refresh user data in AuthContext to keep state synced
+        console.log(
+          "[EDIT PROFILE DEBUG] Profile updated successfully, refreshing data..."
+        );
+        console.log("[EDIT PROFILE DEBUG] Updated form data:", formData);
+
+        // Update user data in AuthContext to keep state synced
         const refreshResult = await refreshUserData();
         if (!refreshResult.success) {
           console.warn(
             "Failed to refresh user data in AuthContext:",
             refreshResult.error
           );
-          // Still update localStorage as fallback
+          // Fallback: update localStorage directly
           const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
-          localStorage.setItem(
-            "user",
-            JSON.stringify({ ...currentUser, ...formData })
+          const updatedUser = { ...currentUser, ...formData };
+          localStorage.setItem("user", JSON.stringify(updatedUser));
+
+          console.log(
+            "[EDIT PROFILE DEBUG] Updated localStorage as fallback:",
+            updatedUser
+          );
+        } else {
+          console.log(
+            "[EDIT PROFILE DEBUG] AuthContext refresh successful:",
+            refreshResult.user
           );
         }
+
+        // Call parent onUpdate to refresh Profile component
+        onUpdate();
       } else {
         setMessage(data.message || "Failed to update profile");
       }
@@ -120,15 +301,69 @@ const EditProfile = ({ user, onUpdate }: EditProfileProps) => {
             >
               Email Address
             </label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              className="w-full px-4 py-3 text-base border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-              required
-            />
+            <div className="relative">
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value={formData.email}
+                onChange={handleEmailChange}
+                className={`w-full px-4 py-3 text-base border-2 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all ${
+                  emailError || emailCheckStatus === "taken"
+                    ? "border-red-300 bg-red-50"
+                    : emailCheckStatus === "available"
+                    ? "border-green-300 bg-green-50"
+                    : "border-gray-300"
+                }`}
+                required
+              />
+              <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                {emailCheckStatus === "checking" && (
+                  <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                )}
+                {emailCheckStatus === "available" && (
+                  <svg
+                    className="w-5 h-5 text-green-500"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                )}
+                {(emailCheckStatus === "taken" || emailError) && (
+                  <svg
+                    className="w-5 h-5 text-red-500"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                )}
+              </div>
+            </div>
+            {emailError && (
+              <p className="mt-2 text-sm text-red-600 font-medium">
+                {emailError}
+              </p>
+            )}
+            {emailCheckStatus === "available" && !emailError && (
+              <p className="mt-2 text-sm text-green-600 font-medium">
+                ✓ Email is available
+              </p>
+            )}
+            {emailCheckStatus === "checking" && (
+              <p className="mt-2 text-sm text-blue-600 font-medium">
+                Checking availability...
+              </p>
+            )}
           </div>
         </div>
 
@@ -140,12 +375,16 @@ const EditProfile = ({ user, onUpdate }: EditProfileProps) => {
             >
               Location
             </label>
-            <input
-              type="text"
+            <LocationInput
               id="location"
               name="location"
               value={formData.location}
-              onChange={handleInputChange}
+              onChange={(value) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  location: value,
+                }))
+              }
               className="w-full px-4 py-3 text-base border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
               placeholder="City, Country"
             />

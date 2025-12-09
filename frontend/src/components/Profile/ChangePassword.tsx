@@ -14,6 +14,9 @@ const ChangePassword = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [isNewPasswordFocused, setIsNewPasswordFocused] = useState(false);
+  const [isConfirmPasswordFocused, setIsConfirmPasswordFocused] =
+    useState(false);
 
   const passwordRequirements = [
     { label: "At least 8 characters", test: (pwd: string) => pwd.length >= 8 },
@@ -163,7 +166,7 @@ const ChangePassword = () => {
         </div>
 
         {/* New Password */}
-        <div>
+        <div className="relative">
           <label
             htmlFor="newPassword"
             className="block text-sm font-medium text-gray-700 mb-2"
@@ -177,6 +180,8 @@ const ChangePassword = () => {
               name="newPassword"
               value={formData.newPassword}
               onChange={handleInputChange}
+              onFocus={() => setIsNewPasswordFocused(true)}
+              onBlur={() => setIsNewPasswordFocused(false)}
               className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               required
             />
@@ -193,30 +198,30 @@ const ChangePassword = () => {
             </button>
           </div>
 
-          {/* Password Requirements */}
-          {formData.newPassword && (
-            <div className="mt-4 p-5 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border-2 border-gray-200 shadow-sm">
-              <h4 className="text-base font-bold text-gray-900 mb-4">
+          {/* Password Requirements - Floating */}
+          {formData.newPassword && isNewPasswordFocused && (
+            <div className="absolute top-full left-0 right-0 mt-2 p-4 bg-white rounded-lg border border-gray-200 shadow-lg z-50 animate-fadeIn">
+              <h4 className="text-sm font-bold text-gray-900 mb-3">
                 Password Requirements:
               </h4>
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {passwordRequirements.map((req, index) => {
                   const isValid = req.test(formData.newPassword);
                   return (
-                    <div key={index} className="flex items-center space-x-3">
+                    <div key={index} className="flex items-center space-x-2">
                       <div
-                        className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center ${
+                        className={`flex-shrink-0 w-4 h-4 rounded-full flex items-center justify-center ${
                           isValid ? "bg-green-100" : "bg-red-100"
                         }`}
                       >
                         {isValid ? (
-                          <Check className="w-4 h-4 text-green-600" />
+                          <Check className="w-3 h-3 text-green-600" />
                         ) : (
-                          <X className="w-4 h-4 text-red-600" />
+                          <X className="w-3 h-3 text-red-600" />
                         )}
                       </div>
                       <span
-                        className={`text-base font-medium ${
+                        className={`text-xs font-medium ${
                           isValid ? "text-green-700" : "text-gray-600"
                         }`}
                       >
@@ -231,7 +236,7 @@ const ChangePassword = () => {
         </div>
 
         {/* Confirm Password */}
-        <div>
+        <div className="relative">
           <label
             htmlFor="confirmPassword"
             className="block text-sm font-medium text-gray-700 mb-2"
@@ -245,6 +250,8 @@ const ChangePassword = () => {
               name="confirmPassword"
               value={formData.confirmPassword}
               onChange={handleInputChange}
+              onFocus={() => setIsConfirmPasswordFocused(true)}
+              onBlur={() => setIsConfirmPasswordFocused(false)}
               className={`w-full px-3 py-2 pr-10 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
                 formData.confirmPassword && !doPasswordsMatch()
                   ? "border-red-300"
@@ -265,35 +272,62 @@ const ChangePassword = () => {
             </button>
           </div>
 
-          {formData.confirmPassword && (
-            <div
-              className={`mt-4 p-4 rounded-xl border-2 ${
-                doPasswordsMatch()
-                  ? "bg-green-50 border-green-300"
-                  : "bg-red-50 border-red-300"
-              }`}
-            >
-              <div className="flex items-center space-x-3">
-                <div
-                  className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                    doPasswordsMatch() ? "bg-green-100" : "bg-red-100"
-                  }`}
-                >
-                  {doPasswordsMatch() ? (
-                    <Check className="w-4 h-4 text-green-600" />
-                  ) : (
-                    <X className="w-4 h-4 text-red-600" />
-                  )}
+          {/* Confirm Password Requirements - Floating */}
+          {formData.confirmPassword && isConfirmPasswordFocused && (
+            <div className="absolute top-full left-0 right-0 mt-2 p-4 bg-white rounded-lg border border-gray-200 shadow-lg z-50 animate-fadeIn">
+              <h4 className="text-sm font-bold text-gray-900 mb-3">
+                Password Requirements:
+              </h4>
+              <div className="space-y-2">
+                {passwordRequirements.map((req, index) => {
+                  const isValid = req.test(formData.confirmPassword);
+                  return (
+                    <div key={index} className="flex items-center space-x-2">
+                      <div
+                        className={`flex-shrink-0 w-4 h-4 rounded-full flex items-center justify-center ${
+                          isValid ? "bg-green-100" : "bg-red-100"
+                        }`}
+                      >
+                        {isValid ? (
+                          <Check className="w-3 h-3 text-green-600" />
+                        ) : (
+                          <X className="w-3 h-3 text-red-600" />
+                        )}
+                      </div>
+                      <span
+                        className={`text-xs font-medium ${
+                          isValid ? "text-green-700" : "text-gray-600"
+                        }`}
+                      >
+                        {req.label}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Password Match Indicator */}
+              <div className="mt-3 pt-3 border-t border-gray-200">
+                <div className="flex items-center space-x-2">
+                  <div
+                    className={`flex-shrink-0 w-4 h-4 rounded-full flex items-center justify-center ${
+                      doPasswordsMatch() ? "bg-green-100" : "bg-red-100"
+                    }`}
+                  >
+                    {doPasswordsMatch() ? (
+                      <Check className="w-3 h-3 text-green-600" />
+                    ) : (
+                      <X className="w-3 h-3 text-red-600" />
+                    )}
+                  </div>
+                  <span
+                    className={`text-xs font-medium ${
+                      doPasswordsMatch() ? "text-green-700" : "text-gray-600"
+                    }`}
+                  >
+                    Passwords match
+                  </span>
                 </div>
-                <span
-                  className={`text-base font-medium ${
-                    doPasswordsMatch() ? "text-green-700" : "text-red-700"
-                  }`}
-                >
-                  {doPasswordsMatch()
-                    ? "Passwords match"
-                    : "Passwords do not match"}
-                </span>
               </div>
             </div>
           )}

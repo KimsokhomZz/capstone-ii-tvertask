@@ -34,7 +34,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
       }
       navigate("/login");
     } catch (error) {
-      console.error("Logout failed:", error);
+      // Silent error handling
     }
   };
 

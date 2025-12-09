@@ -11,6 +11,61 @@ const generateToken = (userId) => {
   });
 };
 
+// @desc    Check if email is available
+// @route   POST /auth/check-email
+// @access  Public
+exports.checkEmailAvailability = async (req, res) => {
+  try {
+    const { email, currentUserId } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: "Email is required",
+      });
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide a valid email address",
+      });
+    }
+
+    // Check if email exists for another user
+    const existingUser = await User.findOne({
+      where: {
+        email: email.toLowerCase(),
+        ...(currentUserId && {
+          id: { [require("sequelize").Op.ne]: currentUserId },
+        }),
+      },
+    });
+
+    if (existingUser) {
+      return res.status(409).json({
+        success: false,
+        message: "Email is already in use",
+        available: false,
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Email is available",
+      available: true,
+    });
+  } catch (error) {
+    console.error("Check email availability error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
+
 // @desc    Register new user
 // @route   POST /auth/register
 // @access  Public
@@ -217,7 +272,9 @@ exports.login = async (req, res) => {
 exports.getMe = async (req, res) => {
   try {
     // User is already attached to req by the protect middleware
-    const user = await User.findByPk(req.user.id);
+    const user = await User.findByPk(req.user.id, {
+      attributes: { exclude: ["password"] },
+    });
 
     if (!user) {
       return res.status(404).json({
@@ -225,6 +282,15 @@ exports.getMe = async (req, res) => {
         message: "User not found",
       });
     }
+
+    console.log("GetMe - returning user data:", {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      bio: user.bio,
+      location: user.location,
+      avatarUrl: user.avatarUrl,
+    });
 
     res.status(200).json({
       success: true,
