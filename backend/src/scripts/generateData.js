@@ -29,6 +29,7 @@ async function generateData() {
         email: faker.internet.email(),
         password: "$2a$10$hashedpasswordhere",
         isEmailVerified: true,
+        avatarUrl: faker.image.avatar(),
       });
 
       // 2. Create a Task for that user
