@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Flame, Target, Trophy,  } from "lucide-react";
+import { Flame, Target, Trophy } from "lucide-react";
 
 interface Task {
   id: number;
@@ -67,17 +67,17 @@ const Dashboard = () => {
       setShowTaskInput(false);
     }
   };
-//   const toggleTask = (id) => {
-const toggleTask = (id: number) => {
-  setTasks(
-    tasks.map((task) =>
-      task.id === id ? { ...task, completed: !task.completed } : task
-    )
-  );
-};
+  //   const toggleTask = (id) => {
+  const toggleTask = (id: number) => {
+    setTasks(
+      tasks.map((task) =>
+        task.id === id ? { ...task, completed: !task.completed } : task
+      )
+    );
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
+    <div className="min-h-screen">
       <div className="mx-auto" style={{ maxWidth: "1117px" }}>
         {/* Header */}
         <h1 className="text-4xl font-bold text-gray-900 mb-6">Dashboard</h1>

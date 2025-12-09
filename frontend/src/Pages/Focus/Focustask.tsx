@@ -11,8 +11,10 @@ import ThemeCard from "../../components/ThemeCard";
 import ThemeGallery, { type ThemeOption } from "../../components/ThemeGallery";
 import { awardXp } from "../../api/userXpApi";
 import useTaskNotes from "../../hooks/useTaskNotes";
+import { ToastContainer, toast as toastify } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-type Note = { id: number; text: string; editing?: boolean };
+// type Note = { id: number; text: string; editing?: boolean };
 
 export default function Focustask() {
   const { darkMode } = useTheme();
@@ -230,12 +232,6 @@ export default function Focustask() {
   };
 
   const handleAddNote = async () => {
-    console.log(
-      "[Focustask] handleAddNote called — draft:",
-      draft,
-      "taskId:",
-      taskId
-    );
     const text = draft?.trim();
     if (!text) return alert("Please write a note before adding.");
 
@@ -257,6 +253,12 @@ export default function Focustask() {
           n.id === tempId ? { id: created.id, text: created.text } : n
         )
       );
+      // Award 5 XP to user
+      const userId = getStoredUserId();
+      if (userId) {
+        await awardXp(userId, 5, "note-add");
+        toastify.success("You received 5 XP for adding a note!");
+      }
     } catch (err) {
       console.error("Failed to save note", err);
       setToast({ message: "Failed to save note" });
@@ -270,24 +272,6 @@ export default function Focustask() {
 
   const handleDeleteRemoteNote = async (id: number) => {
     await removeNote(id);
-  };
-
-  const handleTestXpAward = async () => {
-    const userId = getStoredUserId();
-    if (!userId) return alert("User not found. Sign in to award XP.");
-
-    try {
-      const result = await awardXp(userId, 20, "test-award");
-      console.log("Test XP award result:", result);
-      if (result?.success) {
-        alert("Test: Awarded 20 XP");
-      } else {
-        alert("Test: Failed to award XP (server returned unsuccessful).");
-      }
-    } catch (err) {
-      console.error("Test XP award error", err);
-      alert("Test: Error awarding XP. See console for details.");
-    }
   };
 
   return (
@@ -321,15 +305,6 @@ export default function Focustask() {
           defaultFocus={taskDuration}
           onComplete={onSessionComplete}
         />
-
-        {/* <div className="mt-4">
-        <button
-          onClick={onSessionComplete}
-          className="px-3 py-2 bg-yellow-400 text-white rounded-md shadow-sm hover:bg-yellow-500"
-        >
-          Award 20 XP (test)
-        </button>
-      </div> */}
 
         <div className="bg-card rounded-[28px] shadow-md border border-border p-6 md:p-8">
           <div className="space-y-1">
@@ -382,6 +357,7 @@ export default function Focustask() {
         selectedId={bgId}
         onSelect={(id) => setBgId(id)}
       />
+      <ToastContainer />
     </div>
   );
 }
