@@ -14,8 +14,13 @@ import {
   // Pencil,
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useContext, useEffect } from "react";
 // @ts-ignore
 import { useAuth } from "../context/AuthContext";
+// @ts-ignore
+import AuthContext from "../context/AuthContext";
+
+import { NotificationContext } from "../context/NotificationContext";
 
 interface SidebarProps {
   onLogout?: () => void;
@@ -25,6 +30,18 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { logout } = useAuth(); // @ts-ignore
+  const { user } = useContext(AuthContext) as any;
+  const { unreadCount, fetchUnreadCount } = useContext(NotificationContext)!;
+
+  useEffect(() => {
+    if (user?.id) {
+      fetchUnreadCount(user.id);
+      const interval = setInterval(() => {
+        fetchUnreadCount(user.id);
+      }, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [user?.id, fetchUnreadCount]);
 
   const handleLogout = async () => {
     try {
@@ -95,11 +112,6 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
         <div className="space-y-1">
           {[
             {
-              label: "Notifications",
-              icon: <Bell size={18} />,
-              path: "/notifications",
-            },
-            {
               label: "Settings",
               icon: <Settings size={18} />,
               path: "/profile",
@@ -127,6 +139,29 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
               </button>
             );
           })}
+
+          {/* Notifications with Badge */}
+          <button
+            onClick={() => navigate("/notifications")}
+            aria-current={
+              location.pathname === "/notifications" ? "page" : undefined
+            }
+            className={`flex items-center justify-between w-full px-4 py-1 rounded-lg transition-all text-sm focus:outline-none focus:ring-2 focus:ring-yellow-300 focus:ring-offset-1 ${
+              location.pathname === "/notifications"
+                ? "bg-yellow-50 text-yellow-700 font-semibold shadow-sm"
+                : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <Bell size={18} />
+              <span>Notifications</span>
+            </div>
+            {unreadCount > 0 && (
+              <span className="bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                {unreadCount > 9 ? "9+" : unreadCount}
+              </span>
+            )}
+          </button>
         </div>
 
         {/* Illustration Card */}

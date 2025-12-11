@@ -12,6 +12,7 @@ const UserQuest = require("./userQuestModel");
 const Quest = require("./questModel");
 const ProgressLog = require("./progressLogModel");
 const TaskNote = require("./taskNoteModel");
+const Notification = require("./notificationModel");
 
 // USER → TASKS
 User.hasMany(Task, { foreignKey: "user_id", onDelete: "CASCADE" });
@@ -56,6 +57,10 @@ ProgressLog.belongsTo(User, { foreignKey: "userId" });
 User.hasMany(TaskNote, { foreignKey: "user_id" });
 TaskNote.belongsTo(User, { foreignKey: "user_id" });
 
+// USER → NOTIFICATIONS
+User.hasMany(Notification, { foreignKey: "user_id", onDelete: "CASCADE" });
+Notification.belongsTo(User, { foreignKey: "user_id" });
+
 module.exports = {
   sequelize,
   User,
@@ -69,4 +74,5 @@ module.exports = {
   UserQuest,
   ProgressLog,
   TaskNote,
+  Notification,
 };

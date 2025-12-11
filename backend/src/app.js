@@ -9,11 +9,12 @@ const userRoutes = require("./routes/userRoutes");
 const xpRoutes = require("./routes/xpRoutes");
 const googleAuthRoutes = require("./controllers/googleController");
 const facebookAuthRoutes = require("./controllers/facebookController");
-const taskRoutes = require('./routes/taskRoutes');
+const taskRoutes = require("./routes/taskRoutes");
 const pomodoroRoutes = require("./routes/pomodoroRoutes");
 const questRoutes = require("./routes/questRoutes");
-const leaderboardRoutes = require("./routes/leaderboardRoutes")
-const taskNoteRoutes = require("./routes/taskNoteRoutes")
+const leaderboardRoutes = require("./routes/leaderboardRoutes");
+const taskNoteRoutes = require("./routes/taskNoteRoutes");
+const notificationRoutes = require("./routes/notificationRoutes");
 
 //! for get all users testing
 const { User } = require("./models");
@@ -85,10 +86,11 @@ app.use("/api/users", userRoutes);
 app.use("/api/user", xpRoutes);
 app.use("/auth", googleAuthRoutes);
 app.use("/auth", facebookAuthRoutes);
-app.use('/api/tasks', taskRoutes);
+app.use("/api/tasks", taskRoutes);
 app.use("/api/pomodoro", pomodoroRoutes);
 app.use("/api/quests", questRoutes);
 app.use("/api/leaderboard", leaderboardRoutes);
 app.use("/api/taskNotes", taskNoteRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 module.exports = app;
