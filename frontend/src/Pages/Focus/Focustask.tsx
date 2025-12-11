@@ -281,7 +281,7 @@ export default function Focustask() {
       }`}
     >
       <div
-        className={`max-w-4xl mx-auto space-y-4 ${
+        className={`max-w-4xl mx-auto space-y-6 ${
           transparentCards ? "cards-transparent" : ""
         }`}
       >

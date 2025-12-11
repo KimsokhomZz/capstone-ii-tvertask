@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Play, Pause, Volume2 } from "lucide-react";
+import { Play, Pause, Volume2, Music } from "lucide-react";
+import { motion } from "framer-motion";
 
 interface MusicCardProps {
   onOpenMusic?: () => void;
-  // new props: volume (0-100) and callback to notify parent
   volume?: number;
   onVolumeChange?: (v: number) => void;
 }
@@ -16,7 +16,6 @@ const MusicCard: React.FC<MusicCardProps> = ({
   const [currentTrack, setCurrentTrack] = useState<string | null>(null);
   const rootRef = useRef<HTMLDivElement | null>(null);
 
-  // keep small WebAudio test tone but use parent's volume when available
   const audioCtxRef = useRef<AudioContext | null>(null);
   const gainRef = useRef<GainNode | null>(null);
   const oscRef = useRef<OscillatorNode | null>(null);
@@ -48,7 +47,6 @@ const MusicCard: React.FC<MusicCardProps> = ({
     const ctx = audioCtxRef.current!;
     if (!gainRef.current) {
       const g = ctx.createGain();
-      // use parent's volume (0-100) mapped to 0-1
       g.gain.value = (volume ?? 50) / 100;
       g.connect(ctx.destination);
       gainRef.current = g;
@@ -92,7 +90,6 @@ const MusicCard: React.FC<MusicCardProps> = ({
     }
   };
 
-  // sync gain when parent's volume prop changes
   useEffect(() => {
     if (gainRef.current && audioCtxRef.current) {
       try {
@@ -128,14 +125,12 @@ const MusicCard: React.FC<MusicCardProps> = ({
       setCurrentTrack(null);
     } else {
       startSound();
-      setCurrentTrack("Lo-Fi Focus Beats (test)");
-      // notify parent to open full music view
+      setCurrentTrack("Lo-Fi Focus Beats");
       onOpenMusic?.();
     }
   };
 
   const handleContainerClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    // don't treat clicks that originate from interactive elements (buttons/inputs/etc.)
     const target = e.target as HTMLElement | null;
     if (target && target.closest("button, input, a, textarea, select")) return;
     togglePlay();
@@ -148,67 +143,107 @@ const MusicCard: React.FC<MusicCardProps> = ({
     }
   };
 
-  // UI state helpers for transitions
   const isPlaying = !!currentTrack;
-  const containerClass = `flex items-center justify-between rounded-3xl px-8 py-6 w-full max-w-[944px] border border-border cursor-pointer transition-all duration-300 ${
-    isPlaying
-      ? "bg-gradient-to-r from-yellow-50 to-white shadow-xl scale-102 ring-4 ring-yellow-200 animate-pulse-glow"
-      : "bg-card shadow-md"
-  }`;
-  const playBtnClass = `flex items-center justify-center w-10 h-10 rounded-full text-white transition-transform duration-300 ${
-    isPlaying
-      ? "bg-yellow-600 transform scale-110 animate-wiggle"
-      : "bg-yellow-500 hover:bg-yellow-600"
-  }`;
-  const statusTextClass = `text-muted-foreground text-sm transition-opacity duration-300 ${
-    isPlaying ? "opacity-100" : "opacity-80"
-  }`;
 
   return (
-    <div
+    <motion.div
       ref={rootRef}
       role="button"
       tabIndex={0}
       aria-pressed={!!currentTrack}
       onClick={handleContainerClick}
       onKeyDown={handleContainerKeyDown}
-      className={containerClass}
+      initial={{ opacity: 0, y: 5 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className={`bg-card rounded-[28px] shadow-md border border-border p-6 md:p-8 w-full max-w-[944px] cursor-pointer transition-all duration-300 ${
+        isPlaying ? "ring-2 ring-yellow-400 shadow-2xl" : ""
+      }`}
     >
-      <button
-        onClick={togglePlay}
-        aria-pressed={!!currentTrack}
-        className={playBtnClass}
-      >
-        {currentTrack ? (
-          <Pause className="w-5 h-5 text-white" />
-        ) : (
-          <Play className="w-5 h-5 text-white" />
+      <div className="flex items-start justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <Music className="w-6 h-6 text-yellow-500" />
+          <h3 className="text-xl font-semibold text-gray-900">Focus Music</h3>
+        </div>
+        {isPlaying && (
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            className="flex items-center gap-2"
+          >
+            <span className="relative flex h-3 w-3">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+            </span>
+            <span className="text-xs text-green-600 font-medium">
+              Now Playing
+            </span>
+          </motion.div>
         )}
-      </button>
-
-      <div className="flex flex-col ml-4 flex-1">
-        <span className="text-foreground font-medium">
-          {currentTrack ? currentTrack : "No track selected"}
-        </span>
-        <span className={statusTextClass}>
-          {currentTrack ? "Now playing..." : "Choose a track to start playing"}
-        </span>
       </div>
 
-      <div className="flex items-center space-x-4">
-        <Volume2 className="w-5 h-5 text-foreground cursor-pointer" />
-        <input
-          aria-label="Volume"
-          type="range"
-          min={0}
-          max={100}
-          step={1}
-          value={volume}
-          onChange={(e) => onVolumeChange?.(Number(e.target.value))}
-          className="w-24 accent-foreground/80"
-        />
+      <div className="flex items-center gap-4">
+        <motion.button
+          onClick={togglePlay}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
+          aria-pressed={!!currentTrack}
+          className={`flex items-center justify-center w-14 h-14 rounded-full text-white shadow-lg transition-all ${
+            isPlaying
+              ? "bg-yellow-500 hover:bg-yellow-600"
+              : "bg-gray-400 hover:bg-gray-500"
+          }`}
+        >
+          {currentTrack ? (
+            <Pause className="w-6 h-6 text-white" />
+          ) : (
+            <Play className="w-6 h-6 text-white ml-1" />
+          )}
+        </motion.button>
+
+        <div className="flex-1 min-w-0">
+          <motion.div
+            initial={false}
+            animate={{ opacity: isPlaying ? 1 : 0.6 }}
+            className="space-y-1"
+          >
+            <p className="text-foreground font-medium truncate">
+              {currentTrack || "No track selected"}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              {currentTrack
+                ? "Relaxing beats to help you focus"
+                : "Click play to start"}
+            </p>
+          </motion.div>
+        </div>
+
+        <div className="flex items-center gap-3 ml-4">
+          <Volume2
+            className={`w-5 h-5 flex-shrink-0 transition-colors ${
+              volume === 0 ? "text-gray-400" : "text-yellow-500"
+            }`}
+          />
+          <input
+            aria-label="Volume"
+            type="range"
+            min={0}
+            max={100}
+            step={1}
+            value={volume}
+            onChange={(e) => onVolumeChange?.(Number(e.target.value))}
+            onClick={(e) => e.stopPropagation()}
+            className="w-24 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-yellow-500 hover:accent-yellow-600"
+            style={{
+              background: `linear-gradient(to right, #eab308 0%, #eab308 ${volume}%, #e5e7eb ${volume}%, #e5e7eb 100%)`,
+            }}
+          />
+          <span className="text-xs text-muted-foreground w-8 text-right">
+            {volume}%
+          </span>
+        </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

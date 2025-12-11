@@ -14,6 +14,7 @@ export async function createNote(payload: {
   task_id: number;
   user_id?: number;
   text: string;
+  tag?: string;
 }) {
   try {
     console.log("[taskNoteApi] createNote payload:", payload);
@@ -28,7 +29,7 @@ export async function createNote(payload: {
 
 export async function updateNote(
   id: number,
-  updates: Partial<{ text: string }>
+  updates: Partial<{ text: string; tag?: string }>
 ) {
   const res = await axios.put(`${API_BASE}/${id}`, updates);
   return res.data;

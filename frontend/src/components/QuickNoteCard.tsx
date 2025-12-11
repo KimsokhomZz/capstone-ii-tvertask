@@ -28,7 +28,7 @@ export default function QuickNoteCard({
   };
 
   return (
-    <div className="bg-card rounded-[28px] shadow-xl border border-border p-6 md:p-8">
+    <div className="bg-card rounded-[28px] shadow-md border border-border p-6 md:p-8">
       <div className="flex items-start justify-between mb-4">
         <h3 className="text-xl font-semibold text-gray-900">
           <span className="text-2xl">🗒️</span> Quick Note
