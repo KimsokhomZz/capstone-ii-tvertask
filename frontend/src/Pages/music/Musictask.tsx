@@ -7,7 +7,9 @@ import {
   Play,
   Pause,
   ChevronDown,
+  Clock,
 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import MusicCard from "../../components/MusicCard";
 
 interface Track {
@@ -21,19 +23,15 @@ interface Track {
   youtubeId?: string;
 }
 
-// added optional prop so parent can request embedded (inline) compact card
 const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
   embedded = false,
 }) => {
   const [activeTab, setActiveTab] = useState<string>("lofi");
   const [playingTrack, setPlayingTrack] = useState<string | null>(null);
-  const [time, setTime] = useState<number>(0); // current play time in seconds
-  const [showCompact, setShowCompact] = useState<boolean>(false); // new state
-
-  // shared volume (0-100) used by MusicCard; parent keeps the value so compact/full versions stay in sync
+  const [time, setTime] = useState<number>(0);
+  const [showCompact, setShowCompact] = useState<boolean>(false);
   const [volume, setVolume] = useState<number>(50);
 
-  // simulate timer since we can’t read actual YouTube progress
   useEffect(() => {
     let interval: ReturnType<typeof setInterval> | undefined;
     if (playingTrack) {
@@ -70,13 +68,13 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
       description: "Smooth background music for creativity 🌙",
       duration: "4:10",
       genre: "lofi",
-      youtubeId: "Viu_ptw9MrU", // 👈 new track
+      youtubeId: "Viu_ptw9MrU",
     },
     {
       id: "3",
       title: "Coffee Shop Vibes",
       category: "Study Flow",
-      description: "Cozy atmosphere with gentle melodies",
+      description: "Cozy atmosphere with gentle melodies ☕",
       duration: "1:00",
       genre: "nature",
     },
@@ -84,7 +82,7 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
       id: "4",
       title: "Midnight Study",
       category: "Focus Collective",
-      description: "Late night concentration companion",
+      description: "Late night concentration companion 🌙",
       duration: "1:00",
       isPremium: true,
       genre: "ambient",
@@ -93,22 +91,41 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
       id: "5",
       title: "Peaceful Flow",
       category: "Calm Minds",
-      description: "Gentle melodies for sustained focus",
+      description: "Gentle melodies for sustained focus 🧘",
       duration: "1:00",
       genre: "focus",
     },
   ];
 
   const tabs = [
-    { id: "lofi", label: "Lo-Fi", icon: Music },
-    { id: "nature", label: "Nature", icon: Cloud },
-    { id: "ambient", label: "Ambient", icon: Zap },
-    { id: "focus", label: "Focus", icon: Headphones },
+    {
+      id: "lofi",
+      label: "Lo-Fi",
+      icon: Music,
+      color: "from-purple-400 to-pink-400",
+    },
+    {
+      id: "nature",
+      label: "Nature",
+      icon: Cloud,
+      color: "from-green-400 to-cyan-400",
+    },
+    {
+      id: "ambient",
+      label: "Ambient",
+      icon: Zap,
+      color: "from-blue-400 to-indigo-400",
+    },
+    {
+      id: "focus",
+      label: "Focus",
+      icon: Headphones,
+      color: "from-orange-400 to-yellow-400",
+    },
   ];
 
   const visibleTracks = tracks.filter((t) => t.genre === activeTab);
 
-  // helper to format seconds → mm:ss
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60)
       .toString()
@@ -117,22 +134,22 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
     return `${m}:${s}`;
   };
 
-  // find currently playing track (used to keep the audio iframe mounted)
   const currentTrack = tracks.find((t) => t.id === playingTrack);
 
-  // when compact mode is active, render compact MusicCard inline if embedded,
-  // otherwise render the centered full-page compact view.
   if (showCompact) {
     if (embedded) {
       return (
-        // inline compact version — no min-h-screen, minimal spacing so parent layout isn't affected
-        <div className="mb-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          className="mb-4"
+        >
           <MusicCard
             onOpenMusic={() => setShowCompact(false)}
             volume={volume}
             onVolumeChange={setVolume}
           />
-          {/* keep audio iframe mounted so playback continues while compact is shown */}
           {currentTrack?.youtubeId && (
             <iframe
               className="w-0 h-0 invisible"
@@ -141,18 +158,22 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
               allow="autoplay; encrypted-media"
             />
           )}
-        </div>
+        </motion.div>
       );
     }
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-8 flex items-center justify-center">
-        <MusicCard
-          onOpenMusic={() => setShowCompact(false)}
-          volume={volume}
-          onVolumeChange={setVolume}
-        />
-        {/* keep audio iframe mounted so playback continues while compact is shown */}
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 p-8 flex items-center justify-center">
+        <motion.div
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+        >
+          <MusicCard
+            onOpenMusic={() => setShowCompact(false)}
+            volume={volume}
+            onVolumeChange={setVolume}
+          />
+        </motion.div>
         {currentTrack?.youtubeId && (
           <iframe
             className="w-0 h-0 invisible"
@@ -166,121 +187,191 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
   }
 
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
       className={
         embedded
-          ? "w-full h-full bg-white shadow-md overflow-hidden p-8 rounded-4xl"
-          : "min-h-screen bg-white shadow-md p-8"
+          ? "w-full h-full bg-card rounded-[28px] shadow-md border border-border overflow-hidden p-8"
+          : "min-h-screen p-8"
       }
     >
       <div className="max-w-5xl mx-auto">
         {/* Header */}
-        {/* toggle between header and compact MusicCard */}
-        <div className="flex items-center gap-3 mb-8">
-          <div className="w-14 h-14 bg-yellow-100 rounded-2xl flex items-center justify-center">
-            {/* <Music className="w-7 h-7 text-white" /> */}
-            <span className="text-2xl">🎵</span>
+        <motion.div
+          initial={{ y: -20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.1 }}
+          className="flex items-center gap-4 mb-8"
+        >
+          <div className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-3xl flex items-center justify-center shadow-lg">
+            <span className="text-3xl">🎵</span>
           </div>
-          <h3 className="text-3xl font-bold text-gray-800">Focus Music</h3>
+          <div className="flex-1">
+            <h3 className="text-3xl font-bold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
+              Focus Music
+            </h3>
+            <p className="text-sm text-gray-600">
+              Curated playlists to boost your productivity
+            </p>
+          </div>
 
-          {/* show the chevron only when rendered embedded (inside the popup) */}
           {embedded && (
-            <button
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
               aria-label="Show compact music card"
               onClick={() => setShowCompact(true)}
-              className="ml-auto"
+              className="p-3 rounded-2xl bg-white shadow-md hover:shadow-lg transition-all"
             >
-              <ChevronDown className="w-10 h-10 text-[#F9C80E]" />
-            </button>
+              <ChevronDown className="w-6 h-6 text-yellow-500" />
+            </motion.button>
           )}
-        </div>
+        </motion.div>
 
         {/* Tabs */}
-        <div className="flex gap-4 mb-8">
+        <motion.div
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.2 }}
+          className="flex gap-3 mb-8 overflow-x-auto pb-2"
+        >
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
             return (
-              <button
+              <motion.button
                 key={tab.id}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => {
                   setActiveTab(tab.id);
-                  setPlayingTrack(null); // stop when switching
+                  setPlayingTrack(null);
                 }}
-                className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-medium transition-all ${
+                className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-medium transition-all whitespace-nowrap ${
                   isActive
-                    ? "bg-[#F9C80E] text-white shadow-lg shadow-green-300"
-                    : "bg-white text-gray-600 hover:bg-gray-50"
+                    ? `bg-gradient-to-r ${tab.color} text-white shadow-lg`
+                    : "bg-white text-gray-600 hover:bg-gray-50 shadow-sm"
                 }`}
               >
                 <Icon className="w-5 h-5" />
                 {tab.label}
-              </button>
+              </motion.button>
             );
           })}
-        </div>
+        </motion.div>
 
         {/* Track List */}
-        <div className="space-y-4">
-          {visibleTracks.length === 0 ? (
-            <div className="text-center text-gray-500 py-8">
-              No tracks for this category.
-            </div>
-          ) : (
-            visibleTracks.map((track) => {
-              const isPlaying = playingTrack === track.id;
-              return (
-                <div
-                  key={track.id}
-                  className="bg-white rounded-3xl p-6 shadow-sm hover:shadow-md transition-shadow relative"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-purple-100 to-purple-200 rounded-xl flex items-center justify-center flex-shrink-0">
-                      <Music className="w-6 h-6 text-purple-500" />
-                    </div>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ delay: 0.3 }}
+            className="space-y-4"
+          >
+            {visibleTracks.length === 0 ? (
+              <div className="text-center py-16">
+                <Music className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                <p className="text-gray-500">
+                  No tracks for this category yet.
+                </p>
+              </div>
+            ) : (
+              visibleTracks.map((track, index) => {
+                const isPlaying = playingTrack === track.id;
+                return (
+                  <motion.div
+                    key={track.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    className={`bg-white rounded-3xl p-6 shadow-md hover:shadow-xl transition-all relative overflow-hidden ${
+                      isPlaying ? "ring-2 ring-yellow-400" : ""
+                    }`}
+                  >
+                    {isPlaying && (
+                      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-yellow-400 to-orange-500">
+                        <motion.div
+                          className="h-full bg-white/30"
+                          initial={{ width: "0%" }}
+                          animate={{ width: "100%" }}
+                          transition={{ duration: 3, repeat: Infinity }}
+                        />
+                      </div>
+                    )}
 
-                    <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-gray-800">
-                        {track.title}
-                      </h3>
-                      <p className="text-sm text-gray-600">
-                        {track.description}
-                      </p>
-                    </div>
-
-                    {/* Play button here */}
                     <div className="flex items-center gap-4">
-                      <button
-                        onClick={() =>
-                          setPlayingTrack(isPlaying ? null : track.id)
-                        }
-                        className="p-3 hover:bg-gray-100 rounded-full transition"
+                      <motion.div
+                        whileHover={{ rotate: 360 }}
+                        transition={{ duration: 0.6 }}
+                        className={`w-14 h-14 bg-gradient-to-br ${
+                          tabs.find((t) => t.id === track.genre)?.color ||
+                          "from-gray-400 to-gray-500"
+                        } rounded-2xl flex items-center justify-center flex-shrink-0 shadow-md`}
                       >
-                        {isPlaying ? (
-                          <Pause className="w-5 h-5 text-gray-500" />
-                        ) : (
-                          <Play className="w-5 h-5 text-gray-500" />
+                        <Music className="w-7 h-7 text-white" />
+                      </motion.div>
+
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-lg font-semibold text-gray-800 truncate">
+                          {track.title}
+                          {track.isPremium && (
+                            <span className="ml-2 text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full">
+                              ⭐ Premium
+                            </span>
+                          )}
+                        </h3>
+                        <p className="text-sm text-gray-600 truncate">
+                          {track.description}
+                        </p>
+                      </div>
+
+                      <div className="flex items-center gap-3 flex-shrink-0">
+                        {isPlaying && (
+                          <motion.div
+                            initial={{ opacity: 0, scale: 0 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="flex items-center gap-2 text-sm text-gray-600 bg-gray-100 px-3 py-1.5 rounded-lg"
+                          >
+                            <Clock className="w-4 h-4" />
+                            <span className="font-mono">
+                              {formatTime(time)} / {track.duration}
+                            </span>
+                          </motion.div>
                         )}
-                      </button>
-                    </div>
-                  </div>
 
-                  {/* Time tracker */}
-                  {isPlaying && (
-                    <div className="mt-3 text-sm text-gray-500">
-                      {formatTime(time)} / {track.duration}
+                        <motion.button
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() =>
+                            setPlayingTrack(isPlaying ? null : track.id)
+                          }
+                          className={`p-4 rounded-2xl transition-all shadow-md ${
+                            isPlaying
+                              ? "bg-yellow-500 text-white hover:bg-yellow-600"
+                              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                          }`}
+                        >
+                          {isPlaying ? (
+                            <Pause className="w-5 h-5" />
+                          ) : (
+                            <Play className="w-5 h-5 ml-0.5" />
+                          )}
+                        </motion.button>
+                      </div>
                     </div>
-                  )}
-
-                  {/* removed per-track iframe; a single persistent iframe is kept below */}
-                </div>
-              );
-            })
-          )}
-        </div>
+                  </motion.div>
+                );
+              })
+            )}
+          </motion.div>
+        </AnimatePresence>
       </div>
 
-      {/* persistent (hidden) YouTube iframe so audio keeps playing even when UI switches */}
       {currentTrack?.youtubeId && (
         <iframe
           className="w-0 h-0 invisible"
@@ -289,7 +380,7 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
           allow="autoplay; encrypted-media"
         />
       )}
-    </div>
+    </motion.div>
   );
 };
 

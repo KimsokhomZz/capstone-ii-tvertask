@@ -33,7 +33,7 @@ export default function SessionNotesList({
   }
 
   return (
-    <div className="bg-card rounded-[28px] shadow-xl border border-border p-6 md:p-8">
+    <div className="bg-card rounded-[28px] shadow-md border border-border p-6 md:p-8">
       {error && <div className="text-sm text-destructive mb-3">{error}</div>}
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-xl font-semibold text-foreground">
