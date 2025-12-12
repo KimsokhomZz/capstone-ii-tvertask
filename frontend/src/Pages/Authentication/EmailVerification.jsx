@@ -90,14 +90,14 @@ export default function EmailVerification() {
   };
 
   return (
-    <div className="h-screen w-screen bg-gradient-to-br from-purple-400 via-purple-500 to-purple-700 flex items-center justify-center px-4 overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-purple-400 via-purple-500 to-purple-700 flex items-center justify-center px-4 sm:px-6 lg:px-8 overflow-hidden">
       <div className="max-w-md w-full">
         {/* Tver Task Logo */}
-        <div className="text-center mb-8">
-          <div className="flex justify-center mb-4">
+        <div className="text-center mb-6 sm:mb-8">
+          <div className="flex justify-center mb-3 sm:mb-4">
             <div className="relative">
               <svg
-                className="w-16 h-16 text-yellow-400"
+                className="w-12 h-12 sm:w-16 sm:h-16 text-yellow-400"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -106,7 +106,7 @@ export default function EmailVerification() {
                 <path strokeWidth="2" d="M12 6v6m3-3H9" />
               </svg>
               <svg
-                className="absolute top-0 right-0 w-4 h-4 text-white"
+                className="absolute top-0 right-0 w-3 h-3 sm:w-4 sm:h-4 text-white"
                 fill="currentColor"
                 viewBox="0 0 24 24"
               >
@@ -114,37 +114,45 @@ export default function EmailVerification() {
               </svg>
             </div>
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2">Tver Task</h1>
-          <p className="text-purple-100 text-sm">YOUR GOALS. YOUR GAME</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-1 sm:mb-2">
+            Tver Task
+          </h1>
+          <p className="text-purple-100 text-xs sm:text-sm">
+            YOUR GOALS. YOUR GAME
+          </p>
         </div>
 
         {/* Verification Card */}
-        <div className="bg-white rounded-2xl shadow-2xl p-8 text-center">
-          <div className="mb-6">{getStatusIcon()}</div>
+        <div className="bg-white rounded-2xl shadow-2xl p-6 sm:p-8 text-center">
+          <div className="mb-4 sm:mb-6">{getStatusIcon()}</div>
 
-          <div className={`rounded-lg p-4 mb-6 ${getStatusColor()}`}>
+          <div
+            className={`rounded-lg p-3 sm:p-4 mb-4 sm:mb-6 ${getStatusColor()}`}
+          >
             <div className="flex items-center justify-center gap-2 mb-2">
-              <Mail className={`w-5 h-5 ${getTextColor()}`} />
-              <h2 className={`text-lg font-semibold ${getTextColor()}`}>
+              <Mail className={`w-4 h-4 sm:w-5 sm:h-5 ${getTextColor()}`} />
+              <h2
+                className={`text-base sm:text-lg font-semibold ${getTextColor()}`}
+              >
                 Email Verification
               </h2>
             </div>
-            <p className={`text-sm ${getTextColor()}`}>
+            <p className={`text-xs sm:text-sm ${getTextColor()}`}>
               {isLoading ? "Verifying your email address..." : message}
             </p>
           </div>
 
           {verificationStatus === "success" && (
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                <p className="text-green-700 text-sm">
+                <p className="text-green-700 text-xs sm:text-sm">
                   🎉 Welcome to Tver Task! You'll be redirected to your
                   dashboard in a few seconds.
                 </p>
               </div>
               <button
                 onClick={() => navigate("/dashboard")}
-                className="w-full bg-[#F9C80E] hover:bg-[#e0b50d] text-black font-bold py-3 px-6 rounded-lg transition duration-200"
+                className="w-full bg-[#F9C80E] hover:bg-[#e0b50d] text-black font-bold py-2.5 sm:py-3 px-4 sm:px-6 rounded-lg transition duration-200 text-sm sm:text-base"
               >
                 Go to Dashboard
               </button>
@@ -152,21 +160,21 @@ export default function EmailVerification() {
           )}
 
           {verificationStatus === "error" && (
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               <div className="text-center space-y-2">
-                <p className="text-gray-600 text-sm">
+                <p className="text-gray-600 text-xs sm:text-sm">
                   Don't worry, you can try these options:
                 </p>
                 <div className="flex flex-col gap-2">
                   <Link
                     to="/signup"
-                    className="text-blue-600 hover:text-blue-800 underline text-sm font-medium"
+                    className="text-blue-600 hover:text-blue-800 underline text-xs sm:text-sm font-medium"
                   >
                     Request a new verification email
                   </Link>
                   <Link
                     to="/login"
-                    className="text-blue-600 hover:text-blue-800 underline text-sm font-medium"
+                    className="text-blue-600 hover:text-blue-800 underline text-xs sm:text-sm font-medium"
                   >
                     Try logging in if already verified
                   </Link>
@@ -177,7 +185,7 @@ export default function EmailVerification() {
 
           {verificationStatus === "verifying" && (
             <div className="text-center">
-              <p className="text-gray-600 text-sm">
+              <p className="text-gray-600 text-xs sm:text-sm">
                 Please wait while we verify your email address...
               </p>
             </div>
@@ -185,8 +193,8 @@ export default function EmailVerification() {
         </div>
 
         {/* Footer */}
-        <div className="text-center mt-6">
-          <p className="text-purple-100 text-sm">
+        <div className="text-center mt-4 sm:mt-6">
+          <p className="text-purple-100 text-xs sm:text-sm">
             Need help?{" "}
             <a
               href="mailto:support@tvertask.com"
