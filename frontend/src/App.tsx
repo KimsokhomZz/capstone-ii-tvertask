@@ -27,7 +27,7 @@ import Dashboard from "./Pages/Dashboard/Dashboardtask.jsx";
 import { AuthProvider } from "./context/AuthContext";
 import { NotificationProvider } from "./context/NotificationContext.tsx";
 import TaskList from "./Pages/TaskList/TaskList.js";
-import MainLayout from "./Components/MainLayout.tsx";
+import MainLayout from "./components/MainLayout.tsx";
 import Pomodoro from "./Pages/Focus/Focustask.js";
 import Leaderboard from "./Pages/Leaderboard/leaderboard";
 import DashboardTask from "./Pages/Dashboard/Dashboardtask.js";

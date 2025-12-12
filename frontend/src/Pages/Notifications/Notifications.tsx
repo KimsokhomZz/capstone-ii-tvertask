@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import { NotificationContext } from "@/context/NotificationContext";
 // @ts-ignore
 import AuthContext from "@/context/AuthContext";
-import NotificationItem from "@/Components/NotificationItem";
+import NotificationItem from "@/components/NotificationItem";
 import { Bell, CheckCheck, Trash2, Search, AlertTriangle } from "lucide-react";
 import { Toast, ConfirmDialog } from "@/components/ConfirmDialog";
 
@@ -154,9 +154,9 @@ export default function NotificationsPage() {
       {/* Header */}
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 flex items-center gap-2 sm:gap-3">
-            Notifications
-          </h1>
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 flex items-center gap-2 sm:gap-3">
+            📣 Notifications
+          </h2>
           <p className="text-xs sm:text-sm text-gray-500 mt-1">
             Stay updated with your achievements, quests, and progress
           </p>
