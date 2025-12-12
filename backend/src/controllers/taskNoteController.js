@@ -18,12 +18,12 @@ exports.getNotesByTask = async (req, res) => {
 
 /**
  * POST /api/notes
- * body: { task_id, text, user_id? }  (if you have auth, user_id will be taken from req.user.id)
+ * body: { task_id, text, tag?, user_id? }
  */
 exports.createNote = async (req, res) => {
     try {
         const user_id = req.user?.id || req.body.user_id || null;
-        const { task_id, text } = req.body;
+        const { task_id, text, tag } = req.body;
 
         if (!task_id || !text || text.trim() === "") {
             return res.status(400).json({ message: "task_id and text are required" });
@@ -32,7 +32,7 @@ exports.createNote = async (req, res) => {
         const task = await Task.findByPk(task_id);
         if (!task) return res.status(404).json({ message: "Task not found" });
 
-        const note = await TaskNote.create({ task_id, user_id, text });
+        const note = await TaskNote.create({ task_id, user_id, text, tag });
         return res.status(201).json(note);
     } catch (err) {
         return res.status(500).json({ message: err.message });

@@ -13,6 +13,10 @@ const TaskNote = sequelize.define(
             onDelete: "CASCADE",
         },
         text: { type: DataTypes.TEXT, allowNull: false },
+        tag: {
+            type: DataTypes.STRING,
+            allowNull: true,
+        },
     },
     { timestamps: true }
 );
