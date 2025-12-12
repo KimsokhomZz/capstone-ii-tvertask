@@ -13,6 +13,8 @@ import {
   deleteTask,
 } from "../../api/taskApi";
 import AuthContext from "@/context/AuthContext";
+import { motion, AnimatePresence } from "framer-motion";
+import { Plus, Target } from "lucide-react";
 
 // Use the Task type from your API if possible, otherwise define here:
 type Task = {
@@ -94,51 +96,121 @@ export default function TodoList() {
 
   return (
     <div className="bg-white p-8 md:p-10 rounded-[28px] shadow-md w-full max-w-4xl border border-gray-100">
-      <div className="flex items-center justify-between">
-        <Header
-          title="Focus Session"
-          icon={<span className="text-4xl">🎯</span>}
-          titleClassName="text-xs md:text-md"
-        />
-        <button
-          onClick={() => setShowCreate(true)}
-          className="rounded-xl bg-yellow-400 border border-gray-200 hover:bg-yellow-50 hover:shadow-md text-white hover:text-yellow-400 px-3 py-2 text-sm cursor-pointer transition-all font-semibold"
-        >
-          ➕ Add Task
-        </button>
-      </div>
-      <p className="text-gray-500 mb-4">Choose your focus task</p>
+      {/* Header */}
+      <motion.div
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        className="flex items-center justify-between mb-6"
+      >
+        <div className="flex items-center gap-1">
+          <div>
+            {/* <Target className="w-7 h-7 text-white" /> */}
+            <span className="text-5xl">🎯</span>
+          </div>
+          <div>
+            <h2 className="text-2xl font-bold bg-linear-to-r from-yellow-500 to-orange-500 bg-clip-text text-transparent">
+              Focus Session
+            </h2>
+            <p className="text-sm text-gray-500">Choose your focus task</p>
+          </div>
+        </div>
 
-      <div className="space-y-3">
-        {tasks.map((task) => (
-          <TaskBar
-            key={task.id}
-            id={task.id}
-            label={task.title || task.name || ""}
-            duration={task.focus_time ?? Number(task.duration) ?? 25}
-            highlighted={selectedId === task.id}
-            checked={!!checkedMap[task.id]}
-            onCheckedChange={(v) => {
-              setCheckedMap((prev) => ({ ...prev, [task.id]: v }));
-              setSelectedId(v ? task.id : null);
-              // Example: update status when checked
-              // handleUpdateTaskStatus(task.id, v ? "done" : "todo");
-            }}
-            onClick={() =>
-              navigate(`/pomodoro/${task.id}`, {
-                state: {
-                  title: task.title || task.name || "",
-                  description: task.description ?? "",
-                  duration: task.focus_time ?? Number(task.duration) ?? 25,
-                  taskId: task.id,
-                },
-              })
-            }
-            onEdit={() => setEditingTask(task)}
-            onDelete={() => setDeleteId(task.id)}
-          />
-        ))}
-      </div>
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => setShowCreate(true)}
+          className="flex items-center gap-2 rounded-xl bg-yellow-400 hover:bg-yellow-500 text-white px-4 py-2.5 text-sm font-semibold shadow-md hover:shadow-lg transition-all"
+        >
+          <Plus className="w-4 h-4" />
+          Add Task
+        </motion.button>
+      </motion.div>
+
+      {/* Task Count Badge */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.1 }}
+        className="mb-4"
+      >
+        <div className="inline-flex items-center gap-2 bg-gray-100 px-3 py-1.5 rounded-full text-sm text-gray-700">
+          <span className="font-semibold">{tasks.length}</span>
+          <span>{tasks.length === 1 ? "task" : "tasks"}</span>
+        </div>
+      </motion.div>
+
+      {/* Task List */}
+      <AnimatePresence mode="popLayout">
+        {tasks.length === 0 ? (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="text-center py-16"
+          >
+            <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Target className="w-10 h-10 text-gray-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-700 mb-2">
+              No tasks yet
+            </h3>
+            <p className="text-sm text-gray-500 mb-6">
+              Create your first focus task to get started
+            </p>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowCreate(true)}
+              className="inline-flex items-center gap-2 rounded-xl bg-yellow-400 hover:bg-yellow-500 text-white px-5 py-2.5 text-sm font-semibold shadow-md hover:shadow-lg transition-all"
+            >
+              <Plus className="w-4 h-4" />
+              Create Task
+            </motion.button>
+          </motion.div>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="space-y-3"
+          >
+            {tasks.map((task, index) => (
+              <motion.div
+                key={task.id}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                transition={{ delay: index * 0.05 }}
+              >
+                <TaskBar
+                  id={task.id}
+                  label={task.title || task.name || ""}
+                  duration={task.focus_time ?? Number(task.duration) ?? 25}
+                  highlighted={selectedId === task.id}
+                  checked={!!checkedMap[task.id]}
+                  onCheckedChange={(v) => {
+                    setCheckedMap((prev) => ({ ...prev, [task.id]: v }));
+                    setSelectedId(v ? task.id : null);
+                  }}
+                  onClick={() =>
+                    navigate(`/pomodoro/${task.id}`, {
+                      state: {
+                        title: task.title || task.name || "",
+                        description: task.description ?? "",
+                        duration:
+                          task.focus_time ?? Number(task.duration) ?? 25,
+                        taskId: task.id,
+                      },
+                    })
+                  }
+                  onEdit={() => setEditingTask(task)}
+                  onDelete={() => setDeleteId(task.id)}
+                />
+              </motion.div>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {showCreate && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">

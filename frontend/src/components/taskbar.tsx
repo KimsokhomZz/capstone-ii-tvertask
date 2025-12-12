@@ -1,5 +1,6 @@
 import { Clock, Pencil, Trash2 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
+import { motion } from "framer-motion";
 
 type TaskBarProps = {
   id: number | string;
@@ -25,7 +26,7 @@ export default function TaskBar({
   onDelete,
 }: TaskBarProps) {
   return (
-    <div
+    <motion.div
       role="button"
       tabIndex={0}
       onClick={() => onClick?.()}
@@ -35,67 +36,83 @@ export default function TaskBar({
           onClick?.();
         }
       }}
-      className={`flex justify-between items-center p-4 border rounded-2xl transition-shadow outline-none ${
+      // whileHover={{ scale: 1.01, y: -2 }}
+      whileTap={{ scale: 0.99 }}
+      className={`flex justify-between items-center p-5 border rounded-2xl transition-all outline-none cursor-pointer ${
         highlighted
-          ? "bg-yellow-50 border-yellow-100 shadow-sm"
-          : "hover:bg-yellow-50 border-gray-200 hover:shadow-md"
+          ? "bg-linear-to-r from-yellow-50 to-orange-50 border-yellow-200 shadow-lg ring-2 ring-yellow-200"
+          : checked
+          ? "bg-gray-50 border-gray-200 shadow-sm"
+          : "bg-white border-gray-200 hover:border-yellow-300 hover:shadow-sm"
       }`}
       data-id={id}
     >
-      <div className="flex items-center gap-3">
-        <Checkbox
-          checked={checked}
-          onCheckedChange={(v) =>
-            onCheckedChange?.(typeof v === "boolean" ? v : false)
-          }
-          onClick={(e) => e.stopPropagation()}
-          aria-label={`Toggle ${label}`}
-        />
+      <div className="flex items-center gap-4 flex-1 min-w-0">
+        <motion.div whileTap={{ scale: 0.9 }}>
+          <Checkbox
+            checked={checked}
+            onCheckedChange={(v: boolean | "indeterminate") =>
+              onCheckedChange?.(typeof v === "boolean" ? v : false)
+            }
+            onClick={(e: React.MouseEvent<HTMLButtonElement>) =>
+              e.stopPropagation()
+            }
+            aria-label={`Toggle ${label}`}
+            className="w-5 h-5"
+          />
+        </motion.div>
         <span
-          className={`font-medium text-md select-none ${
-            checked ? "line-through text-gray-400" : "text-gray-700"
+          className={`font-semibold text-base select-none truncate ${
+            checked ? "line-through text-gray-400" : "text-gray-800"
           }`}
         >
           {label}
         </span>
       </div>
 
-      <div className="flex items-center gap-2">
-        <div
-          className={`flex items-center gap-1 text-sm px-3 py-1 rounded-full ${
+      <div className="flex items-center gap-2 shrink-0">
+        <motion.div
+          whileHover={{ scale: 1.05 }}
+          className={`flex items-center gap-2 text-sm font-medium px-3 py-1.5 rounded-xl shadow-sm ${
             checked
               ? "bg-gray-100 text-gray-400"
-              : "bg-yellow-100 text-yellow-600"
+              : "bg-linear-to-r from-yellow-100 to-orange-100 text-yellow-700"
           }`}
         >
           <Clock size={16} />
-          {duration}
-        </div>
+          <span>{duration} min</span>
+        </motion.div>
+
         {onEdit && (
-          <button
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
             aria-label="Edit task"
             onClick={(e) => {
               e.stopPropagation();
               onEdit();
             }}
-            className="p-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-yellow-50 hover:text-yellow-700 cursor-pointer"
+            className="p-2 rounded-xl bg-white border border-gray-200 text-gray-600 hover:bg-yellow-50 hover:border-yellow-300 hover:text-yellow-700 shadow-sm hover:shadow-md transition-all"
           >
-            <Pencil size={14} />
-          </button>
+            <Pencil size={16} />
+          </motion.button>
         )}
+
         {onDelete && (
-          <button
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
             aria-label="Delete task"
             onClick={(e) => {
               e.stopPropagation();
               onDelete();
             }}
-            className="p-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-red-100 hover:text-red-700 cursor-pointer"
+            className="p-2 rounded-xl bg-white border border-gray-200 text-gray-600 hover:bg-red-50 hover:border-red-300 hover:text-red-700 shadow-sm hover:shadow-md transition-all"
           >
-            <Trash2 size={14} />
-          </button>
+            <Trash2 size={16} />
+          </motion.button>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }
