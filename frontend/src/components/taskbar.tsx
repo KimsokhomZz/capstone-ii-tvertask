@@ -7,6 +7,7 @@ type TaskBarProps = {
   label: string;
   duration: number;
   checked?: boolean;
+  completed?: boolean;
   onCheckedChange?: (checked: boolean) => void;
   highlighted?: boolean;
   onClick?: () => void;
@@ -19,6 +20,7 @@ export default function TaskBar({
   label,
   duration,
   checked = false,
+  completed = false,
   onCheckedChange,
   highlighted = false,
   onClick,
@@ -51,6 +53,7 @@ export default function TaskBar({
         <motion.div whileTap={{ scale: 0.9 }}>
           <Checkbox
             checked={checked}
+            disabled={completed}
             onCheckedChange={(v: boolean | "indeterminate") =>
               onCheckedChange?.(typeof v === "boolean" ? v : false)
             }

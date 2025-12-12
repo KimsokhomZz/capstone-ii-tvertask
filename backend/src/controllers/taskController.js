@@ -96,6 +96,14 @@ exports.completeTask = async (req, res) => {
     // Get task details for notification
     const task = await Task.findByPk(taskId);
 
+    if (!task) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+    if (task.status !== "completed") {
+      task.status = "completed";
+      await task.save();
+    }
+
     // call XP service
     await xpService.addXP({
       userId,
@@ -105,19 +113,17 @@ exports.completeTask = async (req, res) => {
     });
 
     // Send task completion notification
-    if (task) {
-      try {
-        await notificationService.notifyTaskComplete(
-          userId,
-          task.title,
-          taskId
-        );
-      } catch (err) {
-        console.warn(
-          "Failed to send task completion notification:",
-          err.message
-        );
-      }
+    try {
+      await notificationService.notifyTaskComplete(
+        userId,
+        task.title,
+        taskId
+      );
+    } catch (err) {
+      console.warn(
+        "Failed to send task completion notification:",
+        err.message
+      );
     }
 
     res.status(200).json({ message: "Task completed and XP added." });

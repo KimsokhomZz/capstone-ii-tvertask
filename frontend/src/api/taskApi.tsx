@@ -50,7 +50,7 @@ export async function updateTask(
   }
 }
 
-// Update onlyn
+// Update only the status of a task
 export async function updateTaskStatus(
   id: number,
   status: string
@@ -74,5 +74,22 @@ export async function deleteTask(id: number): Promise<boolean> {
   } catch (error) {
     console.error("Error deleting task:", error);
     return false;
+  }
+}
+
+// Complete a task (add XP and notify)
+export async function completeTask(
+  userId: number,
+  taskId: number,
+  xp: number
+): Promise<{ message: string } | undefined> {
+  try {
+    const response = await axios.post<{ message: string }>(
+      "http://localhost:3000/api/tasks/complete",
+      { userId, taskId, xp }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error completing task:", error);
   }
 }

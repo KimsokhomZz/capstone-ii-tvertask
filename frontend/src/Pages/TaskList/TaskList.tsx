@@ -1,20 +1,22 @@
 import { useEffect, useState, useContext } from "react";
 import TaskBar from "@/components/taskbar";
 import { useNavigate } from "react-router-dom";
-import TaskForm, { type NewTask } from "@/components/TaskForm";
 import DeleteConfirmation from "@/components/DeleteConfirmation";
-import Header from "@/components/header";
-import { Toast } from "@/components/ConfirmDialog";
 import { fetchTask } from "../../api/taskApi";
 import {
   createTask,
   updateTask,
-  updateTaskStatus,
   deleteTask,
+  completeTask,
 } from "../../api/taskApi";
 import AuthContext from "@/context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Target } from "lucide-react";
+import CreateTaskModal from "./components/CreateTaskModal";
+import EditTaskModal from "./components/EditTaskModal";
+import ConfirmCompleteModal from "./components/ConfirmCompleteModal";
+import { ToastContainer, toast as showToastify, Bounce } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 // Use the Task type from your API if possible, otherwise define here:
 type Task = {
@@ -24,6 +26,14 @@ type Task = {
   focus_time?: number;
   duration?: string;
   name?: string;
+  status?: string;
+};
+
+// Define NewTask type for creating/updating tasks
+type NewTask = {
+  title: string;
+  description?: string | null;
+  duration?: string | number;
 };
 
 export default function TodoList() {
@@ -34,20 +44,25 @@ export default function TodoList() {
   const [showCreate, setShowCreate] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [deleteId, setDeleteId] = useState<number | null>(null);
-  const [toast, setToast] = useState<{
-    message: string;
-    type?: "success" | "error";
-  } | null>(null);
+  const [confirmComplete, setConfirmComplete] = useState<null | {
+    taskId: number;
+    xp: number;
+  }>(null);
   const { user } = useContext(
     AuthContext
   ) as import("@/context/AuthContext").AuthContextType;
 
   useEffect(() => {
     const getTasks = async () => {
-      console.log("Fetching tasks...");
       const fetchedTasks = await fetchTask();
       if (fetchedTasks) {
         setTasks(fetchedTasks);
+        // Initialize checkedMap based on completed status
+        const initialCheckedMap: Record<number, boolean> = {};
+        fetchedTasks.forEach((task) => {
+          initialCheckedMap[task.id] = task.status === "completed";
+        });
+        setCheckedMap(initialCheckedMap);
       }
     };
     getTasks();
@@ -57,8 +72,7 @@ export default function TodoList() {
     message: string,
     type: "success" | "error" = "success"
   ) => {
-    setToast({ message, type });
-    setTimeout(() => setToast(null), 2500);
+    showToastify[type](message);
   };
 
   // Update a task (full update)
@@ -66,20 +80,9 @@ export default function TodoList() {
     const updated = await updateTask(id, updates);
     if (updated) {
       setTasks((prev) => prev.map((t) => (t.id === id ? updated : t)));
-      showToast("Task updated successfully!", "success");
+      showToast("🎉 Task updated successfully!", "success");
     } else {
-      showToast("Failed to update task", "error");
-    }
-  };
-
-  // Update only status
-  const handleUpdateTaskStatus = async (id: number, status: string) => {
-    const updated = await updateTaskStatus(id, status);
-    if (updated) {
-      setTasks((prev) => prev.map((t) => (t.id === id ? updated : t)));
-      showToast("Task status updated!", "success");
-    } else {
-      showToast("Failed to update status", "error");
+      showToast("🚫 Failed to update task", "error");
     }
   };
 
@@ -88,9 +91,33 @@ export default function TodoList() {
     const success = await deleteTask(id);
     if (success) {
       setTasks((prev) => prev.filter((t) => t.id !== id));
-      showToast("Task deleted!", "success");
+      showToast("🎉 Task deleted successfully!", "success");
     } else {
-      showToast("Failed to delete task", "error");
+      showToast("🚫 Failed to delete task", "error");
+    }
+  };
+
+  // Complete a task
+  const handleCompleteTask = async (id: number) => {
+    const taskToComplete = tasks.find((task) => task.id === id);
+    if (!taskToComplete || !user) return;
+
+    const xp = Math.floor((taskToComplete.focus_time ?? 25) / 5) * 10;
+
+    // Call completeTask API
+    const success = await completeTask(user.id, id, xp);
+    if (success) {
+      // Option 1: Remove the task from the list (if you want to hide completed tasks)
+      // setTasks((prev) => prev.filter((t) => t.id !== id));
+
+      // Option 2: Mark as completed in the list (recommended)
+      setTasks((prev) =>
+        prev.map((t) => (t.id === id ? { ...t, status: "completed" } : t))
+      );
+      setCheckedMap((prev) => ({ ...prev, [id]: true }));
+      showToast(`🏆 Task completed! You earned ${xp} XP.`, "success");
+    } else {
+      showToast("🚫 Failed to complete task", "error");
     }
   };
 
@@ -104,7 +131,6 @@ export default function TodoList() {
       >
         <div className="flex items-center gap-1">
           <div>
-            {/* <Target className="w-7 h-7 text-white" /> */}
             <span className="text-5xl">🎯</span>
           </div>
           <div>
@@ -188,9 +214,12 @@ export default function TodoList() {
                   duration={task.focus_time ?? Number(task.duration) ?? 25}
                   highlighted={selectedId === task.id}
                   checked={!!checkedMap[task.id]}
+                  completed={task.status === "completed"}
                   onCheckedChange={(v) => {
-                    setCheckedMap((prev) => ({ ...prev, [task.id]: v }));
-                    setSelectedId(v ? task.id : null);
+                    if (v && task.status !== "completed") {
+                      const xp = Math.floor((task.focus_time ?? 25) / 5) * 10;
+                      setConfirmComplete({ taskId: task.id, xp });
+                    }
                   }}
                   onClick={() =>
                     navigate(`/pomodoro/${task.id}`, {
@@ -212,89 +241,67 @@ export default function TodoList() {
         )}
       </AnimatePresence>
 
-      {showCreate && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div
-            className="absolute inset-0 bg-black/30"
-            onClick={() => setShowCreate(false)}
-          />
-          <div className="relative bg-white rounded-2xl shadow-2xl border border-gray-100 w-full max-w-lg p-6">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-lg font-semibold text-gray-900">
-                Create Task
-              </h3>
-              <button
-                onClick={() => setShowCreate(false)}
-                className="text-gray-500 hover:bg-yellow-50 rounded-md px-1 cursor-pointer"
-              >
-                ✕
-              </button>
-            </div>
-            <TaskForm
-              onSubmit={async (t: NewTask) => {
-                if (!user) {
-                  showToast("User not found. Please log in.", "error");
-                  return;
-                }
-                // Prepare the payload
-                const payload = {
-                  user_id: user.id,
-                  title: t.title,
-                  description: t.description,
-                  focus_time: Number(t.duration ?? "25"),
-                  status: "todo",
-                };
-                const created = await createTask(payload);
-                if (created) {
-                  setTasks((prev) => [...prev, created]);
-                  setShowCreate(false);
-                  showToast("Task created successfully!", "success");
-                } else {
-                  showToast("Failed to create task", "error");
-                }
-              }}
-              onCancel={() => setShowCreate(false)}
-            />
-          </div>
-        </div>
-      )}
+      <CreateTaskModal
+        show={showCreate}
+        onClose={() => setShowCreate(false)}
+        onSubmit={async (t: NewTask) => {
+          if (!user) {
+            showToast("⛔ User not found. Please log in.", "error");
+            return;
+          }
+          const payload = {
+            user_id: user.id,
+            title: t.title,
+            description: t.description,
+            focus_time: Number(t.duration ?? "25"),
+            status: "todo",
+          };
+          const created = await createTask(payload);
+          if (created) {
+            setTasks((prev) => [...prev, created]);
+            setShowCreate(false);
+            showToast("🚀 Task created successfully!", "success");
+          } else {
+            showToast("🚫 Failed to create task", "error");
+          }
+        }}
+        user={user}
+        showToast={showToast}
+        setTasks={setTasks}
+        createTask={createTask}
+      />
 
-      {/* Edit Task Modal */}
-      {editingTask && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div
-            className="absolute inset-0 bg-black/30"
-            onClick={() => setEditingTask(null)}
-          />
-          <div className="relative bg-white rounded-2xl shadow-2xl border border-gray-100 w-full max-w-lg p-6">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-lg font-semibold text-gray-900">Edit Task</h3>
-              <button
-                onClick={() => setEditingTask(null)}
-                className="text-gray-500 hover:bg-yellow-50 rounded-md px-1 cursor-pointer"
-              >
-                ✕
-              </button>
-            </div>
-            <TaskForm
-              initial={{
-                title: editingTask.title || editingTask.name || "",
-                description: editingTask.description ?? "",
-                duration: editingTask.duration ?? "25",
-              }}
-              onSubmit={async (t: NewTask) => {
-                await handleUpdateTask(editingTask.id, {
-                  title: t.title,
-                  description: t.description,
-                  focus_time: Number(t.duration ?? "25"),
-                });
-                setEditingTask(null);
-              }}
-              onCancel={() => setEditingTask(null)}
-            />
-          </div>
-        </div>
-      )}
+      <EditTaskModal
+        editingTask={editingTask}
+        onClose={() => setEditingTask(null)}
+        onSubmit={async (t: NewTask) => {
+          if (editingTask) {
+            await handleUpdateTask(editingTask.id, {
+              title: t.title,
+              description: t.description,
+              focus_time: Number(t.duration ?? "25"),
+            });
+            setEditingTask(null);
+          }
+        }}
+      />
+
+      <ConfirmCompleteModal
+        show={!!confirmComplete}
+        onCancel={() => setConfirmComplete(null)}
+        onConfirm={async () => {
+          if (!user) {
+            showToast("⛔ User not found. Please log in.", "error");
+            setConfirmComplete(null);
+            return;
+          }
+          if (confirmComplete) {
+            const { taskId, xp } = confirmComplete;
+            await handleCompleteTask(taskId);
+          }
+          setConfirmComplete(null);
+        }}
+      />
 
       <DeleteConfirmation
         isOpen={deleteId !== null}
@@ -311,13 +318,19 @@ export default function TodoList() {
         }}
       />
 
-      {toast && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onClose={() => setToast(null)}
-        />
-      )}
+      <ToastContainer
+        position="bottom-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick={false}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+        transition={Bounce}
+      />
     </div>
   );
 }
