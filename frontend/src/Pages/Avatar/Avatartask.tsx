@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import ShinChan from "./ShinChan";
 
 // --- Metadata ---
 const metadata = {
@@ -657,7 +658,7 @@ const EyeIcon: React.FC = () => (
 
 interface AvatarItem {
   id: number;
-  type: "face" | "image";
+  type: "face" | "image" | "shinchan";
   image?: string;
   locked: boolean;
   customization?: CustomizationState;
@@ -665,12 +666,7 @@ interface AvatarItem {
 
 const initialAvatars: AvatarItem[] = [
   { id: 1, type: "face", locked: false, customization: DEFAULT_CUSTOMIZATION },
-  {
-    id: 2,
-    type: "face",
-    locked: false,
-    customization: { ...DEFAULT_CUSTOMIZATION, glasses: "round" },
-  },
+  { id: 2, type: "shinchan", locked: false },
 ];
 
 const Avatar: React.FC = () => {
@@ -773,6 +769,12 @@ const Avatar: React.FC = () => {
           <Face mood={mood} customization={activeCustomization} />
         </div>
       );
+    } else if (selectedAvatar.type === "shinchan") {
+      return (
+        <div className="transform scale-75 sm:scale-90 transition-transform duration-500 ease-in-out group-hover:scale-100">
+          <ShinChan showControls={false} />
+        </div>
+      );
     }
     return (
       <img
@@ -816,280 +818,302 @@ const Avatar: React.FC = () => {
         </button>
 
         {/* Main Center Area */}
-        <div className="flex flex-col items-center justify-center w-full h-full pb-20 pr-0 md:pr-80 transition-all duration-500">
+        <div
+          className={`flex flex-col items-center justify-center w-full h-full pb-20 pr-0 ${
+            selectedAvatar.type === "face" ? "md:pr-80" : ""
+          } transition-all duration-500`}
+        >
           {/* Header */}
           <h1 className="text-4xl md:text-5xl font-black text-gray-800/90 tracking-tight mb-12 -mt-24 drop-shadow-sm">
             Play Time
           </h1>
 
-          {/* Speech Bubble */}
-          <div
-            className="relative z-20 mb-8 animate-bounce"
-            style={{ animationDuration: "3s" }}
-          >
-            <div className="bg-white/95 backdrop-blur-sm px-8 py-4 rounded-[2rem] shadow-xl text-xl md:text-2xl font-bold text-gray-800 transform scale-100 transition-all border-2 border-white/50">
-              {message}
-              <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-6 h-6 bg-white/95 border-b-2 border-r-2 border-white/50 rotate-45 rounded-sm"></div>
-            </div>
-          </div>
-
-          {/* Avatar - Reduced Scale */}
-          <div className="transform scale-75 sm:scale-90 md:scale-100 transition-all duration-500 z-10 mb-20 mt-12 animate-bob drop-shadow-2xl">
-            <Face mood={mood} customization={activeCustomization} />
-          </div>
-
-          {/* Controls Dock (Bottom) - Moved down with margin-top */}
-          <div className="bg-white/40 backdrop-blur-2xl border border-white/50 p-3 rounded-[2rem] shadow-2xl flex gap-4 transition-all hover:bg-white/50 z-50 mx-4 mt-12">
-            <button
-              onClick={() => setMood(Mood.HAPPY)}
-              className={`w-16 h-16 rounded-2xl flex items-center justify-center text-3xl transition-all duration-300 hover:-translate-y-1 active:translate-y-0 ${
-                mood === Mood.HAPPY
-                  ? "bg-yellow-400 text-white shadow-lg scale-110 ring-4 ring-yellow-200"
-                  : "bg-white/70 text-yellow-600 hover:bg-yellow-100 hover:scale-105"
-              }`}
-              title="Happy"
+          {/* Speech Bubble - Only show for face type which relies on global messages */}
+          {selectedAvatar.type === "face" && (
+            <div
+              className="relative z-20 mb-8 animate-bounce"
+              style={{ animationDuration: "3s" }}
             >
-              <i className="fa-solid fa-face-smile"></i>
-            </button>
-            <button
-              onClick={handleLove}
-              className={`w-16 h-16 rounded-2xl flex items-center justify-center text-3xl transition-all duration-300 hover:-translate-y-1 active:translate-y-0 ${
-                mood === Mood.LOVE
-                  ? "bg-pink-400 text-white shadow-lg scale-110 ring-4 ring-pink-200"
-                  : "bg-white/70 text-pink-500 hover:bg-pink-100 hover:scale-105"
-              }`}
-              title="Love"
-            >
-              <i className="fa-solid fa-heart"></i>
-            </button>
-            <button
-              onClick={() => setMood(Mood.SAD)}
-              className={`w-16 h-16 rounded-2xl flex items-center justify-center text-3xl transition-all duration-300 hover:-translate-y-1 active:translate-y-0 ${
-                mood === Mood.SAD
-                  ? "bg-blue-400 text-white shadow-lg scale-110 ring-4 ring-blue-200"
-                  : "bg-white/70 text-blue-600 hover:bg-blue-100 hover:scale-105"
-              }`}
-              title="Sad"
-            >
-              <i className="fa-solid fa-face-frown"></i>
-            </button>
-            <button
-              onClick={() => setMood(Mood.ANGRY)}
-              className={`w-16 h-16 rounded-2xl flex items-center justify-center text-3xl transition-all duration-300 hover:-translate-y-1 active:translate-y-0 ${
-                mood === Mood.ANGRY
-                  ? "bg-red-500 text-white shadow-lg scale-110 ring-4 ring-red-200"
-                  : "bg-white/70 text-red-600 hover:bg-red-100 hover:scale-105"
-              }`}
-              title="Angry"
-            >
-              <i className="fa-solid fa-face-angry"></i>
-            </button>
-            <div className="w-px h-10 bg-gray-500/20 self-center mx-1"></div>
-            <button
-              onClick={handleGiveFood}
-              className={`w-16 h-16 rounded-2xl flex items-center justify-center text-3xl transition-all duration-300 hover:-translate-y-1 active:translate-y-0 ${
-                mood === Mood.EATING
-                  ? "bg-green-500 text-white shadow-lg scale-110 ring-4 ring-green-200"
-                  : "bg-white/70 text-green-600 hover:bg-green-100 hover:scale-105"
-              }`}
-              title="Give Food"
-            >
-              <i className="fa-solid fa-burger"></i>
-            </button>
-          </div>
-        </div>
-
-        {/* Right Sidebar: Cosplay Panel */}
-        <div className="absolute right-6 top-24 bottom-6 w-80 bg-white/60 backdrop-blur-2xl border border-white/50 rounded-[2rem] shadow-2xl overflow-hidden flex flex-col z-50 hidden md:flex transition-all hover:bg-white/70">
-          <div className="p-6 border-b border-white/30 bg-white/30">
-            <h2 className="text-2xl font-black text-gray-800 flex items-center gap-3">
-              <span className="w-8 h-8 rounded-lg bg-indigo-500 text-white flex items-center justify-center text-sm">
-                <i className="fa-solid fa-shirt"></i>
-              </span>
-              Cosplay
-            </h2>
-          </div>
-
-          {/* Tabs */}
-          <div className="flex p-3 gap-2 bg-black/5 mx-4 mt-4 rounded-xl">
-            <button
-              onClick={() => setCosplayTab("gear")}
-              className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all ${
-                cosplayTab === "gear"
-                  ? "bg-white shadow-sm text-indigo-600"
-                  : "text-gray-600 hover:text-gray-900"
-              }`}
-            >
-              Gear
-            </button>
-            <button
-              onClick={() => setCosplayTab("style")}
-              className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all ${
-                cosplayTab === "style"
-                  ? "bg-white shadow-sm text-pink-600"
-                  : "text-gray-600 hover:text-gray-900"
-              }`}
-            >
-              Style
-            </button>
-          </div>
-
-          <div className="flex-1 overflow-y-auto p-6 space-y-8 custom-scrollbar">
-            {cosplayTab === "gear" ? (
-              <>
-                {/* Hats Section */}
-                <div className="animate-fade-in">
-                  <h3 className="text-xs font-bold text-gray-500 mb-4 uppercase tracking-wider">
-                    Hats Collection
-                  </h3>
-                  <div className="grid grid-cols-2 gap-3">
-                    {(
-                      [
-                        "none",
-                        "tophat",
-                        "beanie",
-                        "crown",
-                        "wizard",
-                      ] as HatType[]
-                    ).map((hat) => (
-                      <button
-                        key={hat}
-                        onClick={() => updateCustomization("hat", hat)}
-                        className={`aspect-[4/3] rounded-2xl flex flex-col items-center justify-center gap-2 border-2 transition-all duration-200 group ${
-                          activeCustomization.hat === hat
-                            ? "border-indigo-500 bg-indigo-50 text-indigo-600 shadow-md ring-2 ring-indigo-200"
-                            : "border-transparent bg-white/50 text-gray-500 hover:bg-white hover:scale-105"
-                        }`}
-                      >
-                        <span className="text-3xl transition-transform group-hover:scale-110 group-active:scale-95">
-                          {hat === "none" ? (
-                            <i className="fa-solid fa-ban text-gray-400"></i>
-                          ) : hat === "tophat" ? (
-                            <i className="fa-brands fa-redhat"></i>
-                          ) : hat === "beanie" ? (
-                            <i className="fa-solid fa-hat-wizard"></i>
-                          ) : hat === "crown" ? (
-                            <i className="fa-solid fa-crown text-yellow-500"></i>
-                          ) : (
-                            <i className="fa-solid fa-wand-magic-sparkles text-purple-500"></i>
-                          )}
-                        </span>
-                        <span className="text-xs font-semibold capitalize">
-                          {hat}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Glasses Section */}
-                <div className="animate-fade-in">
-                  <h3 className="text-xs font-bold text-gray-500 mb-4 uppercase tracking-wider">
-                    Eyewear
-                  </h3>
-                  <div className="grid grid-cols-2 gap-3">
-                    {(
-                      [
-                        "none",
-                        "round",
-                        "aviator",
-                        "star",
-                        "pixel",
-                      ] as GlassesType[]
-                    ).map((gl) => (
-                      <button
-                        key={gl}
-                        onClick={() => updateCustomization("glasses", gl)}
-                        className={`aspect-[4/3] rounded-2xl flex flex-col items-center justify-center gap-2 border-2 transition-all duration-200 group ${
-                          activeCustomization.glasses === gl
-                            ? "border-pink-500 bg-pink-50 text-pink-600 shadow-md ring-2 ring-pink-200"
-                            : "border-transparent bg-white/50 text-gray-500 hover:bg-white hover:scale-105"
-                        }`}
-                      >
-                        <span className="text-3xl transition-transform group-hover:scale-110 group-active:scale-95">
-                          {gl === "none" ? (
-                            <i className="fa-solid fa-ban text-gray-400"></i>
-                          ) : (
-                            <i className="fa-solid fa-glasses"></i>
-                          )}
-                        </span>
-                        <span className="text-xs font-semibold capitalize">
-                          {gl}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </>
-            ) : (
-              <div className="animate-fade-in space-y-6">
-                {/* Colors Section */}
-                <div>
-                  <h3 className="text-xs font-bold text-gray-500 mb-3 uppercase tracking-wider">
-                    Eyes Color
-                  </h3>
-                  <div className="flex flex-wrap gap-3">
-                    {COLOR_PALETTE.map((color) => (
-                      <button
-                        key={color}
-                        onClick={() => updateCustomization("eyeColor", color)}
-                        className={`w-10 h-10 rounded-full border-4 transition-all hover:scale-110 shadow-sm ${
-                          activeCustomization.eyeColor === color
-                            ? "border-gray-800 scale-110 shadow-md"
-                            : "border-white"
-                        }`}
-                        style={{ backgroundColor: color }}
-                        aria-label={`Select color ${color}`}
-                      />
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="text-xs font-bold text-gray-500 mb-3 uppercase tracking-wider">
-                    Eyebrow Color
-                  </h3>
-                  <div className="flex flex-wrap gap-3">
-                    {COLOR_PALETTE.map((color) => (
-                      <button
-                        key={color}
-                        onClick={() =>
-                          updateCustomization("eyebrowColor", color)
-                        }
-                        className={`w-10 h-10 rounded-full border-4 transition-all hover:scale-110 shadow-sm ${
-                          activeCustomization.eyebrowColor === color
-                            ? "border-gray-800 scale-110 shadow-md"
-                            : "border-white"
-                        }`}
-                        style={{ backgroundColor: color }}
-                      />
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="text-xs font-bold text-gray-500 mb-3 uppercase tracking-wider">
-                    Mouth Color
-                  </h3>
-                  <div className="flex flex-wrap gap-3">
-                    {COLOR_PALETTE.map((color) => (
-                      <button
-                        key={color}
-                        onClick={() => updateCustomization("mouthColor", color)}
-                        className={`w-10 h-10 rounded-full border-4 transition-all hover:scale-110 shadow-sm ${
-                          activeCustomization.mouthColor === color
-                            ? "border-gray-800 scale-110 shadow-md"
-                            : "border-white"
-                        }`}
-                        style={{ backgroundColor: color }}
-                      />
-                    ))}
-                  </div>
-                </div>
+              <div className="bg-white/95 backdrop-blur-sm px-8 py-4 rounded-[2rem] shadow-xl text-xl md:text-2xl font-bold text-gray-800 transform scale-100 transition-all border-2 border-white/50">
+                {message}
+                <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-6 h-6 bg-white/95 border-b-2 border-r-2 border-white/50 rotate-45 rounded-sm"></div>
               </div>
+            </div>
+          )}
+
+          {/* Avatar */}
+          <div
+            className={`transform transition-all duration-500 z-10 ${
+              selectedAvatar.type === "shinchan"
+                ? "w-full h-full flex items-center justify-center"
+                : "scale-75 sm:scale-90 md:scale-100 mb-20 mt-12 animate-bob drop-shadow-2xl"
+            }`}
+          >
+            {selectedAvatar.type === "face" ? (
+              <Face mood={mood} customization={activeCustomization} />
+            ) : (
+              <ShinChan showControls={true} />
             )}
           </div>
+
+          {/* Controls Dock (Bottom) - Only show for Sparky/Face */}
+          {selectedAvatar.type === "face" && (
+            <div className="bg-white/40 backdrop-blur-2xl border border-white/50 p-3 rounded-[2rem] shadow-2xl flex gap-4 transition-all hover:bg-white/50 z-50 mx-4 mt-12">
+              <button
+                onClick={() => setMood(Mood.HAPPY)}
+                className={`w-16 h-16 rounded-2xl flex items-center justify-center text-3xl transition-all duration-300 hover:-translate-y-1 active:translate-y-0 ${
+                  mood === Mood.HAPPY
+                    ? "bg-yellow-400 text-white shadow-lg scale-110 ring-4 ring-yellow-200"
+                    : "bg-white/70 text-yellow-600 hover:bg-yellow-100 hover:scale-105"
+                }`}
+                title="Happy"
+              >
+                <i className="fa-solid fa-face-smile"></i>
+              </button>
+              <button
+                onClick={handleLove}
+                className={`w-16 h-16 rounded-2xl flex items-center justify-center text-3xl transition-all duration-300 hover:-translate-y-1 active:translate-y-0 ${
+                  mood === Mood.LOVE
+                    ? "bg-pink-400 text-white shadow-lg scale-110 ring-4 ring-pink-200"
+                    : "bg-white/70 text-pink-500 hover:bg-pink-100 hover:scale-105"
+                }`}
+                title="Love"
+              >
+                <i className="fa-solid fa-heart"></i>
+              </button>
+              <button
+                onClick={() => setMood(Mood.SAD)}
+                className={`w-16 h-16 rounded-2xl flex items-center justify-center text-3xl transition-all duration-300 hover:-translate-y-1 active:translate-y-0 ${
+                  mood === Mood.SAD
+                    ? "bg-blue-400 text-white shadow-lg scale-110 ring-4 ring-blue-200"
+                    : "bg-white/70 text-blue-600 hover:bg-blue-100 hover:scale-105"
+                }`}
+                title="Sad"
+              >
+                <i className="fa-solid fa-face-frown"></i>
+              </button>
+              <button
+                onClick={() => setMood(Mood.ANGRY)}
+                className={`w-16 h-16 rounded-2xl flex items-center justify-center text-3xl transition-all duration-300 hover:-translate-y-1 active:translate-y-0 ${
+                  mood === Mood.ANGRY
+                    ? "bg-red-500 text-white shadow-lg scale-110 ring-4 ring-red-200"
+                    : "bg-white/70 text-red-600 hover:bg-red-100 hover:scale-105"
+                }`}
+                title="Angry"
+              >
+                <i className="fa-solid fa-face-angry"></i>
+              </button>
+              <div className="w-px h-10 bg-gray-500/20 self-center mx-1"></div>
+              <button
+                onClick={handleGiveFood}
+                className={`w-16 h-16 rounded-2xl flex items-center justify-center text-3xl transition-all duration-300 hover:-translate-y-1 active:translate-y-0 ${
+                  mood === Mood.EATING
+                    ? "bg-green-500 text-white shadow-lg scale-110 ring-4 ring-green-200"
+                    : "bg-white/70 text-green-600 hover:bg-green-100 hover:scale-105"
+                }`}
+                title="Give Food"
+              >
+                <i className="fa-solid fa-burger"></i>
+              </button>
+            </div>
+          )}
         </div>
+
+        {/* Right Sidebar: Cosplay Panel - Only show if current avatar supports it (i.e., Face) */}
+        {selectedAvatar.type === "face" && (
+          <div className="absolute right-6 top-24 bottom-6 w-80 bg-white/60 backdrop-blur-2xl border border-white/50 rounded-[2rem] shadow-2xl overflow-hidden flex flex-col z-50 hidden md:flex transition-all hover:bg-white/70">
+            <div className="p-6 border-b border-white/30 bg-white/30">
+              <h2 className="text-2xl font-black text-gray-800 flex items-center gap-3">
+                <span className="w-8 h-8 rounded-lg bg-indigo-500 text-white flex items-center justify-center text-sm">
+                  <i className="fa-solid fa-shirt"></i>
+                </span>
+                Cosplay
+              </h2>
+            </div>
+
+            {/* Tabs */}
+            <div className="flex p-3 gap-2 bg-black/5 mx-4 mt-4 rounded-xl">
+              <button
+                onClick={() => setCosplayTab("gear")}
+                className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all ${
+                  cosplayTab === "gear"
+                    ? "bg-white shadow-sm text-indigo-600"
+                    : "text-gray-600 hover:text-gray-900"
+                }`}
+              >
+                Gear
+              </button>
+              <button
+                onClick={() => setCosplayTab("style")}
+                className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all ${
+                  cosplayTab === "style"
+                    ? "bg-white shadow-sm text-pink-600"
+                    : "text-gray-600 hover:text-gray-900"
+                }`}
+              >
+                Style
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-6 space-y-8 custom-scrollbar">
+              {cosplayTab === "gear" ? (
+                <>
+                  {/* Hats Section */}
+                  <div className="animate-fade-in">
+                    <h3 className="text-xs font-bold text-gray-500 mb-4 uppercase tracking-wider">
+                      Hats Collection
+                    </h3>
+                    <div className="grid grid-cols-2 gap-3">
+                      {(
+                        [
+                          "none",
+                          "tophat",
+                          "beanie",
+                          "crown",
+                          "wizard",
+                        ] as HatType[]
+                      ).map((hat) => (
+                        <button
+                          key={hat}
+                          onClick={() => updateCustomization("hat", hat)}
+                          className={`aspect-[4/3] rounded-2xl flex flex-col items-center justify-center gap-2 border-2 transition-all duration-200 group ${
+                            activeCustomization.hat === hat
+                              ? "border-indigo-500 bg-indigo-50 text-indigo-600 shadow-md ring-2 ring-indigo-200"
+                              : "border-transparent bg-white/50 text-gray-500 hover:bg-white hover:scale-105"
+                          }`}
+                        >
+                          <span className="text-3xl transition-transform group-hover:scale-110 group-active:scale-95">
+                            {hat === "none" ? (
+                              <i className="fa-solid fa-ban text-gray-400"></i>
+                            ) : hat === "tophat" ? (
+                              <i className="fa-brands fa-redhat"></i>
+                            ) : hat === "beanie" ? (
+                              <i className="fa-solid fa-hat-wizard"></i>
+                            ) : hat === "crown" ? (
+                              <i className="fa-solid fa-crown text-yellow-500"></i>
+                            ) : (
+                              <i className="fa-solid fa-wand-magic-sparkles text-purple-500"></i>
+                            )}
+                          </span>
+                          <span className="text-xs font-semibold capitalize">
+                            {hat}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Glasses Section */}
+                  <div className="animate-fade-in">
+                    <h3 className="text-xs font-bold text-gray-500 mb-4 uppercase tracking-wider">
+                      Eyewear
+                    </h3>
+                    <div className="grid grid-cols-2 gap-3">
+                      {(
+                        [
+                          "none",
+                          "round",
+                          "aviator",
+                          "star",
+                          "pixel",
+                        ] as GlassesType[]
+                      ).map((gl) => (
+                        <button
+                          key={gl}
+                          onClick={() => updateCustomization("glasses", gl)}
+                          className={`aspect-[4/3] rounded-2xl flex flex-col items-center justify-center gap-2 border-2 transition-all duration-200 group ${
+                            activeCustomization.glasses === gl
+                              ? "border-pink-500 bg-pink-50 text-pink-600 shadow-md ring-2 ring-pink-200"
+                              : "border-transparent bg-white/50 text-gray-500 hover:bg-white hover:scale-105"
+                          }`}
+                        >
+                          <span className="text-3xl transition-transform group-hover:scale-110 group-active:scale-95">
+                            {gl === "none" ? (
+                              <i className="fa-solid fa-ban text-gray-400"></i>
+                            ) : (
+                              <i className="fa-solid fa-glasses"></i>
+                            )}
+                          </span>
+                          <span className="text-xs font-semibold capitalize">
+                            {gl}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div className="animate-fade-in space-y-6">
+                  {/* Colors Section */}
+                  <div>
+                    <h3 className="text-xs font-bold text-gray-500 mb-3 uppercase tracking-wider">
+                      Eyes Color
+                    </h3>
+                    <div className="flex flex-wrap gap-3">
+                      {COLOR_PALETTE.map((color) => (
+                        <button
+                          key={color}
+                          onClick={() => updateCustomization("eyeColor", color)}
+                          className={`w-10 h-10 rounded-full border-4 transition-all hover:scale-110 shadow-sm ${
+                            activeCustomization.eyeColor === color
+                              ? "border-gray-800 scale-110 shadow-md"
+                              : "border-white"
+                          }`}
+                          style={{ backgroundColor: color }}
+                          aria-label={`Select color ${color}`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="text-xs font-bold text-gray-500 mb-3 uppercase tracking-wider">
+                      Eyebrow Color
+                    </h3>
+                    <div className="flex flex-wrap gap-3">
+                      {COLOR_PALETTE.map((color) => (
+                        <button
+                          key={color}
+                          onClick={() =>
+                            updateCustomization("eyebrowColor", color)
+                          }
+                          className={`w-10 h-10 rounded-full border-4 transition-all hover:scale-110 shadow-sm ${
+                            activeCustomization.eyebrowColor === color
+                              ? "border-gray-800 scale-110 shadow-md"
+                              : "border-white"
+                          }`}
+                          style={{ backgroundColor: color }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="text-xs font-bold text-gray-500 mb-3 uppercase tracking-wider">
+                      Mouth Color
+                    </h3>
+                    <div className="flex flex-wrap gap-3">
+                      {COLOR_PALETTE.map((color) => (
+                        <button
+                          key={color}
+                          onClick={() =>
+                            updateCustomization("mouthColor", color)
+                          }
+                          className={`w-10 h-10 rounded-full border-4 transition-all hover:scale-110 shadow-sm ${
+                            activeCustomization.mouthColor === color
+                              ? "border-gray-800 scale-110 shadow-md"
+                              : "border-white"
+                          }`}
+                          style={{ backgroundColor: color }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -1100,15 +1124,33 @@ const Avatar: React.FC = () => {
       {/* Top section */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 mb-8">
         {/* Main Display Avatar Card */}
-        <div className="md:col-span-2 bg-gray-50 rounded-2xl relative overflow-hidden shadow-md flex items-center justify-center aspect-[16/9] group">
+        <div
+          className={`md:col-span-2 rounded-2xl relative overflow-hidden flex items-center justify-center aspect-[16/9] group ${
+            selectedAvatar.type === "shinchan"
+              ? "bg-transparent shadow-none"
+              : "bg-gray-50 shadow-md"
+          }`}
+        >
           {renderMainContent()}
           {/* Overlays */}
           <>
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent pointer-events-none rounded-2xl"></div>
-            <div className="absolute bottom-6 left-6 text-white space-y-1 z-10">
-              <h1 className="text-3xl sm:text-4xl font-bold">Sparky</h1>
+            {selectedAvatar.type === "face" && (
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent pointer-events-none rounded-2xl"></div>
+            )}
+            <div
+              className={`absolute bottom-6 left-6 space-y-1 z-10 ${
+                selectedAvatar.type === "shinchan"
+                  ? "text-gray-800"
+                  : "text-white"
+              }`}
+            >
+              <h1 className="text-3xl sm:text-4xl font-bold">
+                {selectedAvatar.type === "shinchan" ? "ShinChan" : "Sparky"}
+              </h1>
               <p className="text-lg sm:text-xl font-medium opacity-80">
-                Level 4 Adventurer
+                {selectedAvatar.type === "shinchan"
+                  ? "Troublemaker"
+                  : "Level 4 Adventurer"}
               </p>
               {selectedAvatar.type === "face" && (
                 <p className="text-xs sm:text-sm font-light opacity-70">
@@ -1121,7 +1163,10 @@ const Avatar: React.FC = () => {
               className="absolute bottom-6 right-6 bg-yellow-500 hover:bg-yellow-600 transition-colors text-white px-4 py-2 rounded-full text-sm font-semibold flex items-center gap-2 shadow-lg z-10 cursor-pointer"
             >
               <EyeIcon />
-              <span>View Sparky</span>
+              <span>
+                View{" "}
+                {selectedAvatar.type === "shinchan" ? "ShinChan" : "Sparky"}
+              </span>
             </button>
           </>
         </div>
@@ -1181,6 +1226,11 @@ const Avatar: React.FC = () => {
                         avatar.customization || DEFAULT_CUSTOMIZATION
                       }
                     />
+                  </div>
+                )}
+                {avatar.type === "shinchan" && (
+                  <div className="transform scale-[0.3]">
+                    <ShinChan showControls={false} />
                   </div>
                 )}
                 {avatar.type === "image" && avatar.image && (
