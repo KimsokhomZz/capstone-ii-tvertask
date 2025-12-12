@@ -21,8 +21,9 @@ router.get(
 router.get(
   "/google/callback",
   passport.authenticate("google", {
-    failureRedirect: `${process.env.FRONTEND_URL || "http://localhost:5174"
-      }/login?error=auth_failed`,
+    failureRedirect: `${
+      process.env.FRONTEND_URL || "http://localhost:5174"
+    }/login?error=auth_failed`,
   }),
   function (req, res) {
     try {
