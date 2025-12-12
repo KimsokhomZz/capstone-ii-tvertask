@@ -80,7 +80,7 @@ const Dashboard = () => {
     <div className="min-h-screen">
       <div className="mx-auto" style={{ maxWidth: "1117px" }}>
         {/* Header */}
-        <h1 className="text-4xl font-bold text-gray-900 mb-6">Dashboard</h1>
+        <h1 className="text-4xl font-bold text-gray-900 mb-6">📊 Dashboard</h1>
 
         {/* Tabs */}
         <div className="flex gap-4 mb-8 border-b border-gray-200">

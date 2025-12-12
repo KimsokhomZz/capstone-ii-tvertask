@@ -5,7 +5,7 @@ import {
   Route,
   useNavigate,
 } from "react-router-dom";
-import ProtectedRoute from "./Components/ProtectedRoute.tsx";
+import ProtectedRoute from "./components/ProtectedRoute.tsx";
 
 // @ts-ignore
 import Login from "./Pages/Authentication/Login.jsx";
