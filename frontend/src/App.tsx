@@ -32,6 +32,7 @@ import { Navigate } from "react-router-dom";
 import AvatarTask from "./Pages/Avatar/Avatartask.tsx"; // add or adjust path/casing if needed
 import AnalyticsPage from "./Pages/Analytics/analytic.tsx";
 import NotificationsPageComponent from "./Pages/Notifications/Notifications.tsx";
+import Support from "./Pages/Spport/Support.tsx";
 
 function DashboardPage() {
   return <DashboardTask />;
@@ -97,7 +98,7 @@ function App() {
               <Route path="/analytics" element={<AnalyticsPage />} />
               <Route path="/notifications" element={<NotificationsPage />} />
               <Route path="/settings" element={<SettingsPage />} />
-              <Route path="/support" element={<SupportPage />} />
+              <Route path="/support" element={<Support />} />
               <Route
                 path="/profile"
                 element={
