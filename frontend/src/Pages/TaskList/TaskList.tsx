@@ -125,6 +125,24 @@ export default function TodoList() {
     }
   };
 
+  // Force light theme for the entire TaskList page
+  useEffect(() => {
+    document.documentElement.classList.remove('dark');
+    document.documentElement.style.colorScheme = 'light';
+    
+    return () => {
+      // Cleanup function to restore dark mode if needed when leaving the page
+      const darkMode = localStorage.getItem('app.theme') ? 
+        JSON.parse(localStorage.getItem('app.theme') || '{}').darkMode : 
+        window.matchMedia('(prefers-color-scheme: dark)').matches;
+      
+      if (darkMode) {
+        document.documentElement.classList.add('dark');
+        document.documentElement.style.colorScheme = 'dark';
+      }
+    };
+  }, []);
+
   return (
     <div className="bg-white p-8 md:p-10 rounded-[28px] shadow-md w-full max-w-4xl border border-gray-100">
       {/* Header */}

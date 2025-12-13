@@ -154,7 +154,7 @@ const FocusSessionLeaderboard = () => {
         </div>
 
         {/* Leaderboard Table */}
-        <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+        <div className="bg-white/5 rounded-2xl shadow-lg overflow-hidden">
           <div className="bg-gray-200 py-4 px-6 grid grid-cols-3 font-bold text-gray-700 uppercase text-sm">
             <div>Rank</div>
             <div>User</div>

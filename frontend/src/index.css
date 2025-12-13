@@ -370,3 +370,65 @@ h1 {
     box-shadow: none !important;
   }
 }
+
+/* background movement*/
+@keyframes bg-scroll {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: -2000px 0;
+    background-size: auto 100%;
+  }
+}
+
+.bg-scroll {
+  animation: bg-scroll 40s linear infinite;
+}
+
+@keyframes bg-drift {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: -800px 0px;
+  }
+}
+
+.bg-drift {
+  animation: bg-drift 90s linear infinite;
+}
+/* background movement*/
+
+/* promodoro run time*/
+@keyframes floating {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+.progress-value {
+  stroke: #22c55e; /* green */
+  stroke-width: 10;
+  stroke-linecap: round;
+  filter: none !important; /* remove blur */
+}
+
+.animate-floating {
+  animation: floating 2.5s ease-in-out infinite;
+}
+
+.paused-animation {
+  animation-play-state: paused !important;
+}
+
+.paused-animation {
+  animation-play-state: paused;
+}
+/* promodoro run time*/
