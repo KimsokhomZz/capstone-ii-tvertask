@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import ShinChan from "./ShinChan";
+import Doraemon from "./Doraemon";
+import Egg, { Emotion as EggEmotion } from "./Egg";
 
 // --- Metadata ---
 const metadata = {
@@ -658,7 +660,7 @@ const EyeIcon: React.FC = () => (
 
 interface AvatarItem {
   id: number;
-  type: "face" | "image" | "shinchan";
+  type: "face" | "image" | "shinchan" | "doraemon" | "egg";
   image?: string;
   locked: boolean;
   customization?: CustomizationState;
@@ -667,6 +669,8 @@ interface AvatarItem {
 const initialAvatars: AvatarItem[] = [
   { id: 1, type: "face", locked: false, customization: DEFAULT_CUSTOMIZATION },
   { id: 2, type: "shinchan", locked: false },
+  { id: 3, type: "doraemon", locked: false },
+  { id: 4, type: "egg", locked: false },
 ];
 
 const Avatar: React.FC = () => {
@@ -758,6 +762,24 @@ const Avatar: React.FC = () => {
     }
   };
 
+  // Helper to map global mood to Egg emotion
+  const getEggEmotion = (currentMood: Mood): EggEmotion => {
+    switch (currentMood) {
+      case Mood.ANGRY:
+        return EggEmotion.ANGRY;
+      case Mood.SAD:
+        return EggEmotion.SAD;
+      case Mood.LOVE:
+        return EggEmotion.LOVE;
+      case Mood.HAPPY:
+        return EggEmotion.NEUTRAL;
+      case Mood.EATING:
+        return EggEmotion.NEUTRAL; // Fallback
+      default:
+        return EggEmotion.NEUTRAL;
+    }
+  };
+
   const xpProgress = 230;
   const maxXP = 500;
   const energy = 78;
@@ -775,6 +797,18 @@ const Avatar: React.FC = () => {
           <ShinChan showControls={false} />
         </div>
       );
+    } else if (selectedAvatar.type === "doraemon") {
+      return (
+        <div className="transform scale-50 sm:scale-75 transition-transform duration-500 ease-in-out group-hover:scale-90">
+          <Doraemon showControls={false} />
+        </div>
+      );
+    } else if (selectedAvatar.type === "egg") {
+      return (
+        <div className="transform scale-50 sm:scale-75 transition-transform duration-500 ease-in-out group-hover:scale-90">
+          <Egg emotion={getEggEmotion(mood)} />
+        </div>
+      );
     }
     return (
       <img
@@ -784,6 +818,70 @@ const Avatar: React.FC = () => {
       />
     );
   };
+
+  const renderAvatarGridItem = (avatar: AvatarItem) => (
+    <div
+      key={avatar.id}
+      className={`relative w-28 h-28 sm:w-32 sm:h-32 lg:w-32 lg:h-32 bg-gray-200 rounded-xl flex items-center justify-center overflow-hidden transition-all duration-200 ease-in-out ${
+        selectedAvatarId === avatar.id
+          ? "border-4 border-green-500 shadow-lg"
+          : "border border-gray-200 hover:border-gray-300"
+      } ${
+        avatar.locked
+          ? "cursor-not-allowed grayscale opacity-75"
+          : "cursor-pointer"
+      }`}
+      onClick={() => handleAvatarClick(avatar.id, avatar.locked)}
+      role="button"
+      aria-pressed={selectedAvatarId === avatar.id}
+      aria-label={`Select avatar ${avatar.id}`}
+    >
+      {/* Grid Item Content */}
+      {avatar.type === "face" && (
+        <div className="transform scale-[0.45]">
+          <Face
+            mood={mood}
+            customization={avatar.customization || DEFAULT_CUSTOMIZATION}
+          />
+        </div>
+      )}
+      {avatar.type === "shinchan" && (
+        <div className="transform scale-[0.3]">
+          <ShinChan showControls={false} />
+        </div>
+      )}
+      {avatar.type === "doraemon" && (
+        <div className="transform scale-[0.3]">
+          <Doraemon showControls={false} />
+        </div>
+      )}
+      {avatar.type === "egg" && (
+        <div className="transform scale-[0.3]">
+          <Egg emotion={getEggEmotion(mood)} />
+        </div>
+      )}
+      {avatar.type === "image" && avatar.image && (
+        <img
+          src={avatar.image}
+          alt={`Avatar ${avatar.id}`}
+          className="w-full h-full object-cover"
+        />
+      )}
+
+      {/* Lock Overlay */}
+      {avatar.locked && (
+        <div className="absolute inset-0 bg-black/30 flex items-center justify-center rounded-xl z-20">
+          <i className="fa-solid fa-lock text-white text-3xl opacity-90"></i>
+        </div>
+      )}
+      {/* Selection Checkmark */}
+      {selectedAvatarId === avatar.id && !avatar.locked && (
+        <div className="absolute top-2 right-2 bg-green-500 rounded-full p-1 shadow-md z-20">
+          <CheckmarkIcon />
+        </div>
+      )}
+    </div>
+  );
 
   // --- Play Mode ---
   if (viewMode === "play") {
@@ -844,19 +942,23 @@ const Avatar: React.FC = () => {
           {/* Avatar */}
           <div
             className={`transform transition-all duration-500 z-10 ${
-              selectedAvatar.type === "shinchan"
+              ["shinchan", "doraemon", "egg"].includes(selectedAvatar.type)
                 ? "w-full h-full flex items-center justify-center"
                 : "scale-75 sm:scale-90 md:scale-100 mb-20 mt-12 animate-bob drop-shadow-2xl"
             }`}
           >
             {selectedAvatar.type === "face" ? (
               <Face mood={mood} customization={activeCustomization} />
-            ) : (
+            ) : selectedAvatar.type === "shinchan" ? (
               <ShinChan showControls={true} />
+            ) : selectedAvatar.type === "doraemon" ? (
+              <Doraemon showControls={true} />
+            ) : (
+              <Egg emotion={getEggEmotion(mood)} showControls={true} />
             )}
           </div>
 
-          {/* Controls Dock (Bottom) - Only show for Sparky/Face */}
+          {/* Controls Dock (Bottom) - Show only for Sparky/Face, NOT Egg */}
           {selectedAvatar.type === "face" && (
             <div className="bg-white/40 backdrop-blur-2xl border border-white/50 p-3 rounded-[2rem] shadow-2xl flex gap-4 transition-all hover:bg-white/50 z-50 mx-4 mt-12">
               <button
@@ -919,7 +1021,7 @@ const Avatar: React.FC = () => {
           )}
         </div>
 
-        {/* Right Sidebar: Cosplay Panel - Only show if current avatar supports it (i.e., Face) */}
+        {/* Right Sidebar: Cosplay Panel - Only show for Face */}
         {selectedAvatar.type === "face" && (
           <div className="absolute right-6 top-24 bottom-6 w-80 bg-white/60 backdrop-blur-2xl border border-white/50 rounded-[2rem] shadow-2xl overflow-hidden flex flex-col z-50 hidden md:flex transition-all hover:bg-white/70">
             <div className="p-6 border-b border-white/30 bg-white/30">
@@ -1128,6 +1230,10 @@ const Avatar: React.FC = () => {
           className={`md:col-span-2 rounded-2xl relative overflow-hidden flex items-center justify-center aspect-[16/9] group ${
             selectedAvatar.type === "shinchan"
               ? "bg-transparent shadow-none"
+              : selectedAvatar.type === "doraemon"
+              ? "bg-sky-50 shadow-md"
+              : selectedAvatar.type === "egg"
+              ? "bg-amber-50 shadow-md"
               : "bg-gray-50 shadow-md"
           }`}
         >
@@ -1141,15 +1247,26 @@ const Avatar: React.FC = () => {
               className={`absolute bottom-6 left-6 space-y-1 z-10 ${
                 selectedAvatar.type === "shinchan"
                   ? "text-gray-800"
+                  : selectedAvatar.type === "doraemon" ||
+                    selectedAvatar.type === "egg"
+                  ? "text-gray-800"
                   : "text-white"
               }`}
             >
               <h1 className="text-3xl sm:text-4xl font-bold">
-                {selectedAvatar.type === "shinchan" ? "ShinChan" : "Sparky"}
+                {selectedAvatar.type === "shinchan" ||
+                selectedAvatar.type === "doraemon" ||
+                selectedAvatar.type === "egg"
+                  ? "Anime"
+                  : "Sparky"}
               </h1>
               <p className="text-lg sm:text-xl font-medium opacity-80">
                 {selectedAvatar.type === "shinchan"
-                  ? "Troublemaker"
+                  ? "ShinChan"
+                  : selectedAvatar.type === "doraemon"
+                  ? "Doraemon"
+                  : selectedAvatar.type === "egg"
+                  ? "Eggbert"
                   : "Level 4 Adventurer"}
               </p>
               {selectedAvatar.type === "face" && (
@@ -1165,7 +1282,11 @@ const Avatar: React.FC = () => {
               <EyeIcon />
               <span>
                 View{" "}
-                {selectedAvatar.type === "shinchan" ? "ShinChan" : "Sparky"}
+                {selectedAvatar.type === "shinchan" ||
+                selectedAvatar.type === "doraemon" ||
+                selectedAvatar.type === "egg"
+                  ? "Anime"
+                  : "Sparky"}
               </span>
             </button>
           </>
@@ -1195,66 +1316,27 @@ const Avatar: React.FC = () => {
 
       {/* Bottom section: Avatar Grid and Progress Bars */}
       <div className="space-y-8 md:space-y-10">
+        {/* Standard Avatars Section */}
         <div className="bg-gray-50 rounded-2xl p-6 sm:p-8 shadow-md">
           <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-6">
             Avatar
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {avatars.map((avatar) => (
-              <div
-                key={avatar.id}
-                className={`relative w-28 h-28 sm:w-32 sm:h-32 lg:w-32 lg:h-32 bg-gray-200 rounded-xl flex items-center justify-center overflow-hidden transition-all duration-200 ease-in-out ${
-                  selectedAvatarId === avatar.id
-                    ? "border-4 border-green-500 shadow-lg"
-                    : "border border-gray-200 hover:border-gray-300"
-                } ${
-                  avatar.locked
-                    ? "cursor-not-allowed grayscale opacity-75"
-                    : "cursor-pointer"
-                }`}
-                onClick={() => handleAvatarClick(avatar.id, avatar.locked)}
-                role="button"
-                aria-pressed={selectedAvatarId === avatar.id}
-                aria-label={`Select avatar ${avatar.id}`}
-              >
-                {/* Grid Item Content */}
-                {avatar.type === "face" && (
-                  <div className="transform scale-[0.45]">
-                    <Face
-                      mood={mood}
-                      customization={
-                        avatar.customization || DEFAULT_CUSTOMIZATION
-                      }
-                    />
-                  </div>
-                )}
-                {avatar.type === "shinchan" && (
-                  <div className="transform scale-[0.3]">
-                    <ShinChan showControls={false} />
-                  </div>
-                )}
-                {avatar.type === "image" && avatar.image && (
-                  <img
-                    src={avatar.image}
-                    alt={`Avatar ${avatar.id}`}
-                    className="w-full h-full object-cover"
-                  />
-                )}
+            {avatars
+              .filter((a) => !["shinchan", "doraemon", "egg"].includes(a.type))
+              .map(renderAvatarGridItem)}
+          </div>
+        </div>
 
-                {/* Lock Overlay */}
-                {avatar.locked && (
-                  <div className="absolute inset-0 bg-black/30 flex items-center justify-center rounded-xl z-20">
-                    <i className="fa-solid fa-lock text-white text-3xl opacity-90"></i>
-                  </div>
-                )}
-                {/* Selection Checkmark */}
-                {selectedAvatarId === avatar.id && !avatar.locked && (
-                  <div className="absolute top-2 right-2 bg-green-500 rounded-full p-1 shadow-md z-20">
-                    <CheckmarkIcon />
-                  </div>
-                )}
-              </div>
-            ))}
+        {/* Anime Section */}
+        <div className="bg-gray-50 rounded-2xl p-6 sm:p-8 shadow-md">
+          <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-6">
+            Anime
+          </h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            {avatars
+              .filter((a) => ["shinchan", "doraemon", "egg"].includes(a.type))
+              .map(renderAvatarGridItem)}
           </div>
         </div>
 
