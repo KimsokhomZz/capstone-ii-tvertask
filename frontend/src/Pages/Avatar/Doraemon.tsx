@@ -9,158 +9,140 @@ export enum FaceState {
   SLEEP = "SLEEP",
 }
 
-interface DoraemonProps {
-  showControls?: boolean;
-}
+const BUTTONS = [
+  { type: "action", id: "copter", label: "Copter", icon: "fa-fan", spin: true },
+  { type: "action", id: "fly", label: "Fly", icon: "fa-wind" },
+  { type: "action", id: "cape", label: "Cape", icon: "fa-user-secret" },
+  { type: "sep" },
+  {
+    type: "mood",
+    id: FaceState.HAPPY,
+    label: "Happy",
+    icon: "😆",
+    cls: "bg-pink-300",
+  },
+  {
+    type: "mood",
+    id: FaceState.ANGRY,
+    label: "Angry",
+    icon: "💢",
+    cls: "bg-red-500 text-white",
+  },
+  {
+    type: "mood",
+    id: FaceState.SHOCK,
+    label: "Mouse!",
+    icon: "🐭",
+    cls: "bg-purple-400",
+  },
+  {
+    type: "mood",
+    id: FaceState.SLEEP,
+    label: "Sleep",
+    icon: "😴",
+    cls: "bg-blue-300",
+  },
+  {
+    type: "mood",
+    id: FaceState.EAT,
+    label: "Eat",
+    icon: "🍪",
+    cls: "bg-orange-400",
+  },
+];
 
-const Doraemon: React.FC<DoraemonProps> = ({ showControls = true }) => {
-  const [faceState, setFaceState] = useState<FaceState>(FaceState.IDLE);
-  const [hasCopter, setHasCopter] = useState(false);
-  const [isFlying, setIsFlying] = useState(false);
-  const [isInvisible, setIsInvisible] = useState(false);
+const Doraemon: React.FC<{ showControls?: boolean }> = ({
+  showControls = true,
+}) => {
+  const [face, setFace] = useState<FaceState>(FaceState.IDLE);
+  const [opts, setOpts] = useState({
+    copter: false,
+    flying: false,
+    invis: false,
+  });
+  const [pos, setPos] = useState({ x: 0, y: 0 });
+  const [drag, setDrag] = useState(false);
+  const ref = useRef({ x: 0, y: 0 });
 
-  // Dragging State
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [isDragging, setIsDragging] = useState(false);
-  const dragStartPos = useRef({ x: 0, y: 0 });
-
-  // Automatically reset face state to idle after reaction animations
   useEffect(() => {
-    if (faceState !== FaceState.IDLE && faceState !== FaceState.SLEEP) {
-      const timer = setTimeout(() => setFaceState(FaceState.IDLE), 2500);
-      return () => clearTimeout(timer);
+    if (face !== FaceState.IDLE && face !== FaceState.SLEEP) {
+      const t = setTimeout(() => setFace(FaceState.IDLE), 2500);
+      return () => clearTimeout(t);
     }
-  }, [faceState]);
+  }, [face]);
 
-  // Reset position when flying stops
   useEffect(() => {
-    if (!isFlying) {
-      setPosition({ x: 0, y: 0 });
-    }
-  }, [isFlying]);
+    if (!opts.flying) setPos({ x: 0, y: 0 });
+  }, [opts.flying]);
 
-  // Drag Handlers
-  const handlePointerDown = (e: React.PointerEvent) => {
-    if (!isFlying) return;
+  const handlePD = (e: React.PointerEvent) => {
+    if (!opts.flying) return;
     e.preventDefault();
-    setIsDragging(true);
-    dragStartPos.current = {
-      x: e.clientX - position.x,
-      y: e.clientY - position.y,
-    };
+    setDrag(true);
+    ref.current = { x: e.clientX - pos.x, y: e.clientY - pos.y };
   };
 
   useEffect(() => {
-    const handlePointerMove = (e: PointerEvent) => {
-      if (!isDragging) return;
+    if (!drag) return;
+    const move = (e: PointerEvent) => {
       e.preventDefault();
-      setPosition({
-        x: e.clientX - dragStartPos.current.x,
-        y: e.clientY - dragStartPos.current.y,
-      });
+      setPos({ x: e.clientX - ref.current.x, y: e.clientY - ref.current.y });
     };
-
-    const handlePointerUp = () => {
-      setIsDragging(false);
-    };
-
-    if (isDragging) {
-      window.addEventListener("pointermove", handlePointerMove);
-      window.addEventListener("pointerup", handlePointerUp);
-    }
+    const up = () => setDrag(false);
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", up);
     return () => {
-      window.removeEventListener("pointermove", handlePointerMove);
-      window.removeEventListener("pointerup", handlePointerUp);
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", up);
     };
-  }, [isDragging]);
+  }, [drag]);
 
-  const toggleCopter = () => {
-    const newState = !hasCopter;
-    setHasCopter(newState);
-    if (!newState) setIsFlying(false); // Can't fly without copter
+  const toggle = (k: keyof typeof opts) => {
+    if (k === "flying" && !opts.copter) return;
+    if (k === "copter" && opts.copter)
+      setOpts((p) => ({ ...p, copter: false, flying: false }));
+    else setOpts((p) => ({ ...p, [k]: !p[k] }));
   };
 
-  const toggleFly = () => {
-    if (!hasCopter) return;
-    setIsFlying(!isFlying);
-  };
-
-  const toggleInvisible = () => {
-    setIsInvisible(!isInvisible);
-  };
-
-  const triggerFace = (state: FaceState) => {
-    setFaceState(state);
-  };
-
-  const isEating = faceState === FaceState.EAT;
-  const isShocked = faceState === FaceState.SHOCK;
-  const isHappy = faceState === FaceState.HAPPY;
-  const isAngry = faceState === FaceState.ANGRY;
-  const isSleeping = faceState === FaceState.SLEEP;
-
-  // Message Logic
-  let message = null;
-  if (isAngry) message = "KDM Ah Thai";
-  else if (isSleeping) message = "Dek hx all nop";
-  else if (isEating) message = "C ey kor ch'nganh dal";
-  else if (isFlying) message = "Dak nhom jos lern";
+  const msg =
+    face === FaceState.ANGRY
+      ? "KDM Ah Thai"
+      : face === FaceState.SLEEP
+      ? "Dek hx all nop"
+      : face === FaceState.EAT
+      ? "C ey kor ch'nganh dal"
+      : opts.flying
+      ? "Dak nhom jos lern"
+      : null;
+  const is = (s: FaceState) => face === s;
 
   return (
     <div className="flex flex-col items-center justify-center w-full h-full">
-      {/* Animation Stage */}
-      {/* Wrapper for Drag Translation */}
       <div
-        onPointerDown={handlePointerDown}
+        onPointerDown={handlePD}
         style={{
-          transform: `translate(${position.x}px, ${position.y}px)`,
-          cursor: isFlying ? (isDragging ? "grabbing" : "grab") : "default",
+          transform: `translate(${pos.x}px, ${pos.y}px)`,
+          cursor: opts.flying ? (drag ? "grabbing" : "grab") : "default",
           touchAction: "none",
-          // Smooth transition only when NOT dragging to avoid lag
-          transition: isDragging
+          transition: drag
             ? "none"
             : "transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1)",
         }}
         className={`relative z-20 ${showControls ? "mb-8" : ""}`}
       >
-        {/* Inner Wrapper for Float Animation and Opacity */}
         <div
-          className={`relative w-72 h-72 md:w-80 md:h-80 mx-auto transition-all duration-1000 ease-in-out ${
-            isFlying ? "animate-float" : ""
-          } ${isInvisible ? "opacity-20 blur-[1px]" : "opacity-100"}`}
+          className={`relative w-72 h-72 md:w-80 md:h-80 mx-auto transition-all duration-1000 ${
+            opts.flying ? "animate-float" : ""
+          } ${opts.invis ? "opacity-20 blur-[1px]" : "opacity-100"}`}
         >
           <style>{`
-            @keyframes float-fly {
-                0%, 100% { transform: translateY(0px) rotate(5deg); }
-                50% { transform: translateY(-30px) rotate(-5deg); }
-            }
-            @keyframes blade-spin {
-                0% { transform: scaleX(1); }
-                50% { transform: scaleX(0.1); }
-                100% { transform: scaleX(1); }
-            }
-            @keyframes blink {
-                0%, 96%, 100% { transform: scaleY(1); }
-                98% { transform: scaleY(0.1); }
-            }
-            @keyframes chew {
-                0%, 100% { transform: scaleY(1); }
-                50% { transform: scaleY(0.8); }
-            }
-            @keyframes bell-ring {
-                0%, 100% { transform: rotate(0deg); }
-                25% { transform: rotate(15deg); }
-                75% { transform: rotate(-15deg); }
-            }
-            @keyframes snot-bubble {
-                0% { transform: scale(0); opacity: 0; }
-                50% { transform: scale(1.2); opacity: 0.8; }
-                100% { transform: scale(1); opacity: 0.6; }
-            }
-            @keyframes steam-rise {
-                0% { transform: translateY(0) scale(1); opacity: 0.8; }
-                100% { transform: translateY(-30px) scale(2); opacity: 0; }
-            }
+            @keyframes float-fly { 0%,100%{transform:translateY(0px) rotate(5deg);} 50%{transform:translateY(-30px) rotate(-5deg);} }
+            @keyframes blade-spin { 0%{transform:scaleX(1);} 50%{transform:scaleX(0.1);} 100%{transform:scaleX(1);} }
+            @keyframes blink { 0%,96%,100%{transform:scaleY(1);} 98%{transform:scaleY(0.1);} }
+            @keyframes chew { 0%,100%{transform:scaleY(1);} 50%{transform:scaleY(0.8);} }
+            @keyframes bell-ring { 0%,100%{transform:rotate(0);} 25%{transform:rotate(15deg);} 75%{transform:rotate(-15deg);} }
+            @keyframes snot-bubble { 0%{transform:scale(0);opacity:0;} 50%{transform:scale(1.2);opacity:0.8;} 100%{transform:scale(1);opacity:0.6;} }
+            @keyframes steam-rise { 0%{transform:translateY(0) scale(1);opacity:0.8;} 100%{transform:translateY(-30px) scale(2);opacity:0;} }
             .animate-float { animation: float-fly 2s infinite ease-in-out; }
             .animate-blade { animation: blade-spin 0.08s infinite linear; transform-box: fill-box; transform-origin: center; }
             .animate-blink { animation: blink 4s infinite; transform-box: fill-box; transform-origin: center; }
@@ -168,25 +150,23 @@ const Doraemon: React.FC<DoraemonProps> = ({ showControls = true }) => {
             .animate-bell { animation: bell-ring 1s infinite; transform-origin: 150px 255px; }
             .animate-snot { animation: snot-bubble 2s infinite ease-in-out; transform-origin: 150px 155px; }
             .animate-steam { animation: steam-rise 1s infinite linear; }
-            `}</style>
+          `}</style>
 
-          {/* Speech Bubble */}
-          {message && (
+          {msg && (
             <div className="absolute -top-24 left-1/2 -translate-x-1/2 z-50 animate-bounce whitespace-nowrap pointer-events-none">
-              <div className="bg-white border-4 border-black px-5 py-3 rounded-2xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] relative">
+              <div className="bg-white border-4 border-black px-5 py-3 rounded-2xl shadow-lg relative">
                 <span
-                  className={`text-lg font-black tracking-wide ${
-                    isAngry ? "text-red-600" : "text-black"
+                  className={`text-lg font-black ${
+                    is(FaceState.ANGRY) ? "text-red-600" : "text-black"
                   }`}
                 >
-                  {message}
+                  {msg}
                 </span>
                 <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-6 h-6 bg-white border-b-4 border-r-4 border-black rotate-45"></div>
               </div>
             </div>
           )}
-
-          {isAngry && (
+          {is(FaceState.ANGRY) && (
             <div className="absolute top-0 right-10 z-20">
               <div className="text-4xl animate-steam absolute">💢</div>
               <div
@@ -202,18 +182,15 @@ const Doraemon: React.FC<DoraemonProps> = ({ showControls = true }) => {
             viewBox="0 0 300 320"
             className="w-full h-full drop-shadow-2xl"
             fill="none"
-            xmlns="http://www.w3.org/2000/svg"
           >
-            {/* --- BAMBOO COPTER (Take-copter) --- */}
             <g
               className={`transition-all duration-500 ${
-                hasCopter
+                opts.copter
                   ? "opacity-100 translate-y-0"
                   : "opacity-0 -translate-y-10"
               }`}
               style={{ transformOrigin: "bottom center" }}
             >
-              {/* Shaft */}
               <rect
                 x="146"
                 y="15"
@@ -229,8 +206,6 @@ const Doraemon: React.FC<DoraemonProps> = ({ showControls = true }) => {
                 stroke="#000"
                 strokeWidth="2"
               />
-
-              {/* Blades */}
               <ellipse
                 cx="150"
                 cy="15"
@@ -239,12 +214,9 @@ const Doraemon: React.FC<DoraemonProps> = ({ showControls = true }) => {
                 fill="#FFD700"
                 stroke="#000"
                 strokeWidth="2"
-                className={hasCopter ? "animate-blade" : ""}
+                className={opts.copter ? "animate-blade" : ""}
               />
             </g>
-
-            {/* --- HEAD BASE --- */}
-            {/* Blue Head */}
             <circle
               cx="150"
               cy="160"
@@ -253,8 +225,6 @@ const Doraemon: React.FC<DoraemonProps> = ({ showControls = true }) => {
               stroke="#000"
               strokeWidth="3"
             />
-
-            {/* White Face Area */}
             <circle
               cx="150"
               cy="175"
@@ -263,14 +233,15 @@ const Doraemon: React.FC<DoraemonProps> = ({ showControls = true }) => {
               stroke="#000"
               strokeWidth="3"
             />
-
-            {/* --- EYES --- */}
             <g
               className={
-                isShocked || isSleeping || isAngry ? "" : "animate-blink"
+                is(FaceState.SHOCK) ||
+                is(FaceState.SLEEP) ||
+                is(FaceState.ANGRY)
+                  ? ""
+                  : "animate-blink"
               }
             >
-              {/* Left Eye */}
               <ellipse
                 cx="120"
                 cy="115"
@@ -280,7 +251,6 @@ const Doraemon: React.FC<DoraemonProps> = ({ showControls = true }) => {
                 stroke="#000"
                 strokeWidth="3"
               />
-              {/* Right Eye */}
               <ellipse
                 cx="180"
                 cy="115"
@@ -290,73 +260,44 @@ const Doraemon: React.FC<DoraemonProps> = ({ showControls = true }) => {
                 stroke="#000"
                 strokeWidth="3"
               />
-
-              {isShocked ? (
-                // Shocked Pupils (Small dots)
+              {is(FaceState.SHOCK) ? (
                 <>
                   <circle cx="120" cy="115" r="3" fill="#000" />
                   <circle cx="180" cy="115" r="3" fill="#000" />
-                  {/* Sweat drops */}
                   <path
                     d="M 230,130 Q 240,130 235,145 Q 230,130 230,130"
                     fill="#00F"
                     opacity="0.6"
                   />
                 </>
-              ) : isHappy ? (
-                // Happy Arches
+              ) : is(FaceState.HAPPY) ? (
                 <>
                   <path
-                    d="M 105,115 Q 120,105 135,115"
-                    fill="none"
-                    stroke="#000"
-                    strokeWidth="4"
-                    strokeLinecap="round"
-                  />
-                  <path
-                    d="M 165,115 Q 180,105 195,115"
-                    fill="none"
+                    d="M 105,115 Q 120,105 135,115 M 165,115 Q 180,105 195,115"
                     stroke="#000"
                     strokeWidth="4"
                     strokeLinecap="round"
                   />
                 </>
-              ) : isEating ? (
-                // Closed content eyes
+              ) : is(FaceState.EAT) ? (
                 <>
                   <path
-                    d="M 110,120 L 130,120"
-                    stroke="#000"
-                    strokeWidth="3"
-                    strokeLinecap="round"
-                  />
-                  <path
-                    d="M 170,120 L 190,120"
+                    d="M 110,120 L 130,120 M 170,120 L 190,120"
                     stroke="#000"
                     strokeWidth="3"
                     strokeLinecap="round"
                   />
                 </>
-              ) : isSleeping ? (
-                // Sleeping Eyes (U shape inverted or simple lines)
+              ) : is(FaceState.SLEEP) ? (
                 <>
                   <path
-                    d="M 110,120 Q 120,130 130,120"
-                    fill="none"
-                    stroke="#000"
-                    strokeWidth="3"
-                    strokeLinecap="round"
-                  />
-                  <path
-                    d="M 170,120 Q 180,130 190,120"
-                    fill="none"
+                    d="M 110,120 Q 120,130 130,120 M 170,120 Q 180,130 190,120"
                     stroke="#000"
                     strokeWidth="3"
                     strokeLinecap="round"
                   />
                 </>
-              ) : isAngry ? (
-                // Angry Eyes (Slanted lines)
+              ) : is(FaceState.ANGRY) ? (
                 <>
                   <line
                     x1="105"
@@ -365,7 +306,6 @@ const Doraemon: React.FC<DoraemonProps> = ({ showControls = true }) => {
                     y2="120"
                     stroke="#000"
                     strokeWidth="4"
-                    strokeLinecap="round"
                   />
                   <line
                     x1="195"
@@ -374,21 +314,17 @@ const Doraemon: React.FC<DoraemonProps> = ({ showControls = true }) => {
                     y2="120"
                     stroke="#000"
                     strokeWidth="4"
-                    strokeLinecap="round"
                   />
                   <circle cx="120" cy="125" r="4" fill="#000" />
                   <circle cx="180" cy="125" r="4" fill="#000" />
                 </>
               ) : (
-                // Normal Pupils
                 <>
                   <circle cx="128" cy="120" r="6" fill="#000" />
                   <circle cx="172" cy="120" r="6" fill="#000" />
                 </>
               )}
             </g>
-
-            {/* --- NOSE --- */}
             <circle
               cx="150"
               cy="155"
@@ -398,21 +334,16 @@ const Doraemon: React.FC<DoraemonProps> = ({ showControls = true }) => {
               strokeWidth="3"
             />
             <circle cx="146" cy="151" r="4" fill="#FFF" opacity="0.6" />
-
-            {/* Sleeping Snot Bubble */}
-            {isSleeping && (
+            {is(FaceState.SLEEP) && (
               <circle
                 cx="160"
                 cy="160"
                 r="15"
-                fill="rgba(173, 216, 230, 0.5)"
+                fill="rgba(173,216,230,0.5)"
                 stroke="#50E0FF"
-                strokeWidth="1"
                 className="animate-snot"
               />
             )}
-
-            {/* Philtrum */}
             <line
               x1="150"
               y1="167"
@@ -421,22 +352,16 @@ const Doraemon: React.FC<DoraemonProps> = ({ showControls = true }) => {
               stroke="#000"
               strokeWidth="3"
             />
-
-            {/* --- WHISKERS --- */}
             <g stroke="#000" strokeWidth="2">
-              {/* Left */}
               <line x1="80" y1="160" x2="130" y2="170" />
               <line x1="75" y1="180" x2="130" y2="180" />
               <line x1="80" y1="200" x2="130" y2="190" />
-              {/* Right */}
               <line x1="220" y1="160" x2="170" y2="170" />
               <line x1="225" y1="180" x2="170" y2="180" />
               <line x1="220" y1="200" x2="170" y2="190" />
             </g>
-
-            {/* --- MOUTH --- */}
             <g className="transition-all duration-300">
-              {isShocked ? (
+              {is(FaceState.SHOCK) ? (
                 <ellipse
                   cx="150"
                   cy="220"
@@ -446,7 +371,7 @@ const Doraemon: React.FC<DoraemonProps> = ({ showControls = true }) => {
                   stroke="#000"
                   strokeWidth="3"
                 />
-              ) : isEating ? (
+              ) : is(FaceState.EAT) ? (
                 <g className="animate-chew">
                   <path
                     d="M 120,215 Q 150,245 180,215"
@@ -454,7 +379,6 @@ const Doraemon: React.FC<DoraemonProps> = ({ showControls = true }) => {
                     stroke="#000"
                     strokeWidth="3"
                   />
-                  {/* Dorayaki */}
                   <path
                     d="M 130,225 Q 150,210 170,225 Q 170,245 150,245 Q 130,245 130,225"
                     fill="#CD853F"
@@ -462,21 +386,21 @@ const Doraemon: React.FC<DoraemonProps> = ({ showControls = true }) => {
                     strokeWidth="2"
                   />
                 </g>
-              ) : isHappy ? (
+              ) : is(FaceState.HAPPY) ? (
                 <path
                   d="M 90,195 Q 150,260 210,195"
                   fill="#A00"
                   stroke="#000"
                   strokeWidth="3"
                 />
-              ) : isAngry ? (
+              ) : is(FaceState.ANGRY) ? (
                 <path
                   d="M 110,225 Q 150,205 190,225"
                   fill="none"
                   stroke="#000"
                   strokeWidth="3"
                 />
-              ) : isSleeping ? (
+              ) : is(FaceState.SLEEP) ? (
                 <circle
                   cx="150"
                   cy="220"
@@ -486,7 +410,6 @@ const Doraemon: React.FC<DoraemonProps> = ({ showControls = true }) => {
                   strokeWidth="2"
                 />
               ) : (
-                // Normal Smile
                 <path
                   d="M 100,215 Q 150,250 200,215"
                   fill="none"
@@ -496,8 +419,6 @@ const Doraemon: React.FC<DoraemonProps> = ({ showControls = true }) => {
                 />
               )}
             </g>
-
-            {/* --- COLLAR & BELL --- */}
             <rect
               x="90"
               y="245"
@@ -508,7 +429,7 @@ const Doraemon: React.FC<DoraemonProps> = ({ showControls = true }) => {
               stroke="#000"
               strokeWidth="3"
             />
-            <g className={isFlying ? "animate-bell" : ""}>
+            <g className={opts.flying ? "animate-bell" : ""}>
               <circle
                 cx="150"
                 cy="260"
@@ -546,114 +467,68 @@ const Doraemon: React.FC<DoraemonProps> = ({ showControls = true }) => {
           </svg>
         </div>
       </div>
-
-      {/* Single Row Controls */}
       {showControls && (
-        <div className="flex flex-row flex-nowrap gap-3 w-full max-w-full overflow-x-auto p-4 z-50 items-center justify-start md:justify-center no-scrollbar">
-          <style>{`
-            .no-scrollbar::-webkit-scrollbar {
-              display: none;
-            }
-            .no-scrollbar {
-              -ms-overflow-style: none;
-              scrollbar-width: none;
-            }
-          `}</style>
-
-          {/* GADGETS */}
-          <button
-            onClick={toggleCopter}
-            className={`flex-shrink-0 p-3 border-2 border-black transition-all rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-y-1 active:shadow-none flex flex-col items-center min-w-[80px]
-              ${hasCopter ? "bg-yellow-400" : "bg-white hover:bg-yellow-50"}`}
-          >
-            <i
-              className={`fa-solid fa-fan text-3xl ${
-                hasCopter ? "animate-spin" : ""
-              }`}
-              style={{ animationDuration: "2s" }}
-            ></i>
-            <span className="text-xs font-bold mt-1">Copter</span>
-          </button>
-
-          <button
-            onClick={toggleFly}
-            disabled={!hasCopter}
-            className={`flex-shrink-0 p-3 border-2 border-black transition-all rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-y-1 active:shadow-none flex flex-col items-center min-w-[80px]
-              ${
-                isFlying
-                  ? "bg-sky-400"
-                  : hasCopter
-                  ? "bg-white hover:bg-sky-50"
-                  : "bg-gray-200 text-gray-400 cursor-not-allowed"
-              }`}
-          >
-            <i className="fa-solid fa-wind text-3xl"></i>
-            <span className="text-xs font-bold mt-1">
-              {isFlying ? "Land" : "Fly"}
-            </span>
-          </button>
-
-          <button
-            onClick={toggleInvisible}
-            className={`flex-shrink-0 p-3 border-2 border-black transition-all rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-y-1 active:shadow-none flex flex-col items-center min-w-[80px]
-              ${
-                isInvisible
+        <div className="flex gap-3 w-full overflow-x-auto p-4 z-50 justify-start md:justify-center no-scrollbar">
+          <style>{`.no-scrollbar::-webkit-scrollbar{display:none}.no-scrollbar{-ms-overflow-style:none;scrollbar-width:none}`}</style>
+          {BUTTONS.map((b, i) => {
+            if (b.type === "sep")
+              return <div key={i} className="w-px h-12 bg-gray-300 mx-1"></div>;
+            if (b.type === "action") {
+              const active =
+                b.id === "copter"
+                  ? opts.copter
+                  : b.id === "fly"
+                  ? opts.flying
+                  : b.id === "cape"
+                  ? opts.invis
+                  : false;
+              const cls = active
+                ? b.id === "cape"
                   ? "bg-indigo-400 text-white"
-                  : "bg-white hover:bg-indigo-50"
-              }`}
-          >
-            <i className={`fa-solid fa-user-secret text-3xl`}></i>
-            <span className="text-xs font-bold mt-1">Cape</span>
-          </button>
-
-          <div className="w-px h-12 bg-gray-300 mx-1"></div>
-
-          {/* MOODS / ACTIONS */}
-          <button
-            onClick={() => triggerFace(FaceState.HAPPY)}
-            className="flex-shrink-0 p-3 bg-pink-300 border-2 border-black hover:bg-pink-200 transition-colors rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-y-1 active:shadow-none flex flex-col items-center min-w-[80px]"
-          >
-            <span className="text-3xl">😆</span>
-            <span className="text-xs font-bold mt-1">Happy</span>
-          </button>
-
-          <button
-            onClick={() => triggerFace(FaceState.ANGRY)}
-            className="flex-shrink-0 p-3 bg-red-500 border-2 border-black hover:bg-red-400 text-white transition-colors rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-y-1 active:shadow-none flex flex-col items-center min-w-[80px]"
-          >
-            <span className="text-3xl">💢</span>
-            <span className="text-xs font-bold mt-1">Angry</span>
-          </button>
-
-          <button
-            onClick={() => triggerFace(FaceState.SHOCK)}
-            className="flex-shrink-0 p-3 bg-purple-400 border-2 border-black hover:bg-purple-300 transition-colors rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-y-1 active:shadow-none flex flex-col items-center min-w-[80px]"
-          >
-            <span className="text-3xl">🐭</span>
-            <span className="text-xs font-bold mt-1">Mouse!</span>
-          </button>
-
-          <button
-            onClick={() => triggerFace(FaceState.SLEEP)}
-            className="flex-shrink-0 p-3 bg-blue-300 border-2 border-black hover:bg-blue-200 transition-colors rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-y-1 active:shadow-none flex flex-col items-center min-w-[80px]"
-          >
-            <span className="text-3xl">😴</span>
-            <span className="text-xs font-bold mt-1">Sleep</span>
-          </button>
-
-          <button
-            onClick={() => triggerFace(FaceState.EAT)}
-            className="flex-shrink-0 p-3 bg-orange-400 border-2 border-black hover:bg-orange-300 transition-colors rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-y-1 active:shadow-none flex flex-col items-center min-w-[80px]"
-          >
-            <span className="text-3xl">
-              <i className="fa-solid fa-cookie-bite"></i>
-            </span>
-            <span className="text-xs font-bold mt-1">Eat</span>
-          </button>
+                  : b.id === "fly"
+                  ? "bg-sky-400"
+                  : "bg-yellow-400"
+                : b.id === "fly" && !opts.copter
+                ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                : "bg-white";
+              return (
+                <button
+                  key={i}
+                  onClick={() =>
+                    toggle(
+                      b.id === "cape"
+                        ? "invis"
+                        : b.id === "fly"
+                        ? "flying"
+                        : "copter"
+                    )
+                  }
+                  disabled={b.id === "fly" && !opts.copter}
+                  className={`flex-shrink-0 p-3 border-2 border-black rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-y-1 active:shadow-none flex flex-col items-center min-w-[80px] ${cls}`}
+                >
+                  <i
+                    className={`fa-solid ${b.icon} text-3xl ${
+                      b.spin && active ? "animate-spin" : ""
+                    }`}
+                  ></i>
+                  <span className="text-xs font-bold mt-1">{b.label}</span>
+                </button>
+              );
+            }
+            return (
+              <button
+                key={i}
+                onClick={() => setFace(b.id as FaceState)}
+                className={`flex-shrink-0 p-3 ${b.cls} border-2 border-black rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-y-1 active:shadow-none flex flex-col items-center min-w-[80px]`}
+              >
+                <span className="text-3xl">{b.icon}</span>
+                <span className="text-xs font-bold mt-1">{b.label}</span>
+              </button>
+            );
+          })}
         </div>
       )}
     </div>
   );
 };
-
 export default Doraemon;
