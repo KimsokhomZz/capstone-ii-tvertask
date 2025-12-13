@@ -10,10 +10,6 @@ const FocusSessionLeaderboard = () => {
   const [leaderboardData, setLeaderboardData] =
     useState<LeaderboardData | null>(null);
 
-  // Sample data - in a real app, this would come from your backend
-  // const avatarUrl =
-  // "https://gratisography.com/wp-content/uploads/2024/11/gratisography-augmented-reality-800x525.jpg";
-
   useEffect(() => {
     const getLeaderboardData = async () => {
       const data = await fetchLeaderboard();
@@ -32,46 +28,60 @@ const FocusSessionLeaderboard = () => {
   const restOfList = currentData.slice(3);
 
   return (
-    <div className="min-h-screen py-8 px-4">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen py-8 px-4 relative overflow-hidden">
+      <style>{`
+        @keyframes float-fly { 0%,100%{transform:translateY(0px) rotate(5deg);} 50%{transform:translateY(-30px) rotate(-5deg);} }
+        @keyframes blade-spin { 0%{transform:scaleX(1);} 50%{transform:scaleX(0.1);} 100%{transform:scaleX(1);} }
+        @keyframes blink { 0%,96%,100%{transform:scaleY(1);} 98%{transform:scaleY(0.1);} }
+        @keyframes chew { 0%,100%{transform:scaleY(1);} 50%{transform:scaleY(0.8);} }
+        @keyframes bell-ring { 0%,100%{transform:rotate(0);} 25%{transform:rotate(15deg);} 75%{transform:rotate(-15deg);} }
+        @keyframes snot-bubble { 0%{transform:scale(0);opacity:0;} 50%{transform:scale(1.2);opacity:0.8;} 100%{transform:scale(1);opacity:0.6;} }
+        @keyframes steam-rise { 0%{transform:translateY(0) scale(1);opacity:0.8;} 100%{transform:translateY(-30px) scale(2);opacity:0;} }
+        .animate-float { animation: float-fly 2s infinite ease-in-out; }
+        .animate-blade { animation: blade-spin 0.08s infinite linear; transform-box: fill-box; transform-origin: center; }
+        .animate-blink { animation: blink 4s infinite; transform-box: fill-box; transform-origin: center; }
+        .animate-chew { animation: chew 0.4s infinite; transform-box: fill-box; transform-origin: center; }
+        .animate-bell { animation: bell-ring 1s infinite; transform-origin: 150px 255px; }
+        .animate-snot { animation: snot-bubble 2s infinite ease-in-out; transform-origin: 150px 155px; }
+        .animate-steam { animation: steam-rise 1s infinite linear; }
+      `}</style>
+
+      {/* Animated Background Elements */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-30">
+        {/* Floating trophies */}
+        <div className="absolute top-20 left-30 text-6xl animate-float">🏆</div>
+        <div className="absolute top-90 left-10 text-5xl animate-float">🚀</div>
+        <div
+          className="absolute top-40 right-20 text-5xl animate-float"
+          style={{ animationDelay: "0.5s" }}
+        >
+          ⭐
+        </div>
+        <div
+          className="absolute bottom-32 left-1/4 text-4xl animate-float"
+          style={{ animationDelay: "1s" }}
+        >
+          👑
+        </div>
+        <div
+          className="absolute top-60 right-1/3 text-5xl animate-float"
+          style={{ animationDelay: "1.5s" }}
+        >
+          🎖️
+        </div>
+        <div
+          className="absolute bottom-20 right-10 text-6xl animate-float"
+          style={{ animationDelay: "2s" }}
+        >
+          🥇
+        </div>
+      </div>
+
+      <div className="max-w-4xl mx-auto relative z-10">
         {/* Header */}
         <h1 className="text-4xl font-bold text-center mb-8 text-gray-800">
           🏆 Leaderboard
         </h1>
-
-        {/* Tabs */}
-        <div className="flex justify-center gap-2 mb-12">
-          {/* <button
-            onClick={() => setActiveTab("weekly")}
-            className={`px-8 py-3 rounded-full font-medium transition-all ${
-              activeTab === "weekly"
-                ? "bg-yellow-400 text-gray-800 shadow-md"
-                : "bg-gray-200 text-gray-600 hover:bg-gray-300"
-            }`}
-          >
-            Weekly
-          </button>
-          <button
-            onClick={() => setActiveTab("monthly")}
-            className={`px-8 py-3 rounded-full font-medium transition-all ${
-              activeTab === "monthly"
-                ? "bg-yellow-400 text-gray-800 shadow-md"
-                : "bg-gray-200 text-gray-600 hover:bg-gray-300"
-            }`}
-          >
-            Monthly
-          </button>
-          <button
-            onClick={() => setActiveTab("global")}
-            className={`px-8 py-3 rounded-full font-medium transition-all ${
-              activeTab === "global"
-                ? "bg-yellow-400 text-gray-800 shadow-md"
-                : "bg-gray-200 text-gray-600 hover:bg-gray-300"
-            }`}
-          >
-            Global
-          </button> */}
-        </div>
 
         {/* Podium */}
         <div className="flex items-end justify-center gap-4 mb-12 px-4">

@@ -1,5 +1,14 @@
 import React from "react";
-import { Star, ArrowUpRight, Flame, Trophy, CheckCircle2, Clock3, BarChart3, Heart } from "lucide-react";
+import {
+  Star,
+  ArrowUpRight,
+  Flame,
+  Trophy,
+  CheckCircle2,
+  Clock3,
+  BarChart3,
+  Heart,
+} from "lucide-react";
 
 interface StatCardProps {
   label: string;
@@ -17,7 +26,9 @@ function StatCard({ label, value, subLabel, icon }: StatCardProps) {
             {icon}
           </div>
         )}
-        <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">{label}</p>
+        <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+          {label}
+        </p>
       </div>
       <p className="text-2xl font-semibold text-gray-900">{value}</p>
       {subLabel && <p className="text-xs text-gray-400">{subLabel}</p>}
@@ -61,7 +72,7 @@ export default function AnalyticsOverviewTab() {
             S
           </div>
           <div className="space-y-1">
-            <p className="text-sm font-semibold text-gray-900">Sparky</p>
+            <p className="text-md font-bold text-gray-900">Sparky</p>
             <p className="text-xs text-gray-700">Productivity Cat</p>
             <div className="w-full max-w-xs h-2.5 bg-white/60 rounded-full overflow-hidden">
               <div className="h-full w-2/3 bg-[#FF9F1C] rounded-full" />
@@ -104,28 +115,42 @@ export default function AnalyticsOverviewTab() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-5 space-y-3">
-          <h3 className="text-sm font-semibold text-gray-900">Recent Achievements</h3>
+          <h3 className="text-sm font-semibold text-gray-900">
+            Recent Achievements
+          </h3>
           <div className="space-y-3">
             <div className="bg-[#FFF5D6] rounded-2xl px-4 py-3 flex items-center justify-between">
               <div>
                 <p className="text-sm font-semibold text-gray-900">Day One</p>
-                <p className="text-xs text-gray-600">Complete your first full day!</p>
+                <p className="text-xs text-gray-600">
+                  Complete your first full day!
+                </p>
               </div>
-              <span className="text-[11px] font-semibold text-[#FF9F1C]">+150 XP</span>
+              <span className="text-[11px] font-semibold text-[#FF9F1C]">
+                +150 XP
+              </span>
             </div>
             <div className="bg-[#FFF5D6] rounded-2xl px-4 py-3 flex items-center justify-between">
               <div>
                 <p className="text-sm font-semibold text-gray-900">Task Day</p>
-                <p className="text-xs text-gray-600">Finish your first task today!</p>
+                <p className="text-xs text-gray-600">
+                  Finish your first task today!
+                </p>
               </div>
-              <span className="text-[11px] font-semibold text-[#FF9F1C]">+75 XP</span>
+              <span className="text-[11px] font-semibold text-[#FF9F1C]">
+                +75 XP
+              </span>
             </div>
             <div className="bg-[#FFF5D6] rounded-2xl px-4 py-3 flex items-center justify-between">
               <div>
-                <p className="text-sm font-semibold text-gray-900">Getting Started</p>
+                <p className="text-sm font-semibold text-gray-900">
+                  Getting Started
+                </p>
                 <p className="text-xs text-gray-600">Add your first task!</p>
               </div>
-              <span className="text-[11px] font-semibold text-[#FF9F1C]">+50 XP</span>
+              <span className="text-[11px] font-semibold text-[#FF9F1C]">
+                +50 XP
+              </span>
             </div>
           </div>
         </div>
@@ -152,7 +177,6 @@ export default function AnalyticsOverviewTab() {
           </dl>
         </div>
       </div>
-
     </div>
   );
 }
