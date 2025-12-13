@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { ToastContainer, Flip } from "react-toastify";
+import { ToastContainer, Bounce } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ProtectedRoute from "./components/ProtectedRoute.tsx";
 
@@ -125,7 +125,7 @@ function App() {
           draggable
           pauseOnHover
           theme="light"
-          transition={Flip}
+          transition={Bounce}
         />
       </NotificationProvider>
     </AuthProvider>

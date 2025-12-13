@@ -27,6 +27,8 @@ type Task = {
   duration?: string;
   name?: string;
   status?: string;
+  short_break?: number;
+  long_break?: number;
 };
 
 // Define NewTask type for creating/updating tasks
@@ -34,6 +36,8 @@ type NewTask = {
   title: string;
   description?: string | null;
   duration?: string | number;
+  short_break?: number | string;
+  long_break?: number | string;
 };
 
 export default function TodoList() {
@@ -91,7 +95,7 @@ export default function TodoList() {
     const success = await deleteTask(id);
     if (success) {
       setTasks((prev) => prev.filter((t) => t.id !== id));
-  showToast("Task deleted successfully! 🎉", "success");
+      showToast("Task deleted successfully! 🎉", "success");
     } else {
       showToast("Failed to delete task. 🚫", "error");
     }
@@ -145,7 +149,7 @@ export default function TodoList() {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => setShowCreate(true)}
-          className="flex items-center gap-2 rounded-xl bg-yellow-400 hover:bg-yellow-500 text-white px-4 py-2.5 text-sm font-semibold shadow-md hover:shadow-lg transition-all"
+          className="flex items-center gap-2 rounded-xl bg-yellow-400 hover:bg-yellow-500 text-white px-4 py-2.5 text-sm font-semibold shadow-md hover:shadow-lg transition-all cursor-pointer"
         >
           <Plus className="w-4 h-4" />
           Add Task
@@ -229,6 +233,8 @@ export default function TodoList() {
                         duration:
                           task.focus_time ?? Number(task.duration) ?? 25,
                         taskId: task.id,
+                        short_break: task.short_break ?? 5, 
+                        long_break: task.long_break ?? 15,
                       },
                     })
                   }
@@ -254,6 +260,8 @@ export default function TodoList() {
             title: t.title,
             description: t.description,
             focus_time: Number(t.duration ?? "25"),
+            short_break: Number(t.short_break ?? 5),
+            long_break: Number(t.long_break ?? 15),
             status: "todo",
           };
           const created = await createTask(payload);
@@ -276,11 +284,14 @@ export default function TodoList() {
         onClose={() => setEditingTask(null)}
         onSubmit={async (t: NewTask) => {
           if (editingTask) {
-            await handleUpdateTask(editingTask.id, {
+            const payload = {
               title: t.title,
               description: t.description,
               focus_time: Number(t.duration ?? "25"),
-            });
+              short_break: Number(t.short_break ?? 5),
+              long_break: Number(t.long_break ?? 15),
+            };
+            await handleUpdateTask(editingTask.id, payload);
             setEditingTask(null);
           }
         }}

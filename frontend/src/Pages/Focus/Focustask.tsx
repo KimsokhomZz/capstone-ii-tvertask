@@ -167,6 +167,13 @@ export default function Focustask() {
   const location = useLocation() as {
     state?: { title?: string; description?: string; taskId?: number | string };
   };
+  const task: {
+    short_break?: number;
+    long_break?: number;
+  } = {
+    short_break: (location.state as any)?.short_break ?? 5,
+    long_break: (location.state as any)?.long_break ?? 15,
+  };
   const taskTitle = location.state?.title ?? "Task 1";
   const taskDescription = location.state?.description ?? "";
   const taskDuration = (() => {
@@ -215,18 +222,11 @@ export default function Focustask() {
       return;
     }
     try {
-      console.log("calling awardXp with userId:", userId);
       const result = await awardXp(userId, 20, "pomodoro-complete");
       console.log("awardXp result:", result);
-      if (result?.success) {
-        console.log("XP awarded:", result.data);
-        alert("Awarded 20 XP");
-      } else {
-        alert("Failed to award XP (server returned unsuccessful).");
-      }
     } catch (err) {
       console.error("Failed to award XP", err);
-      alert("Error awarding XP. See console for details.");
+      toastify.error("Failed to award XP. Please try again later. 🚨");
     }
   };
 
@@ -301,6 +301,7 @@ export default function Focustask() {
         </div>
 
         <PomodoroTimerCard
+          task={task}
           taskTitle={taskTitle}
           defaultFocus={taskDuration}
           onComplete={onSessionComplete}

@@ -4,6 +4,8 @@ export type NewTask = {
   title: string;
   description: string;
   duration?: string;
+  short_break?: number;
+  long_break?: number;
 };
 
 type TaskFormProps = {
@@ -21,6 +23,10 @@ export default function TaskForm({
   const [description, setDescription] = useState(initial?.description ?? "");
   const [error, setError] = useState<string | null>(null);
   const [duration, setDuration] = useState<string>(initial?.duration ?? "25");
+  const [shortBreak, setShortBreak] = useState<number>(
+    initial?.short_break ?? 5
+  );
+  const [longBreak, setLongBreak] = useState<number>(initial?.long_break ?? 15);
   const [preset, setPreset] = useState<
     "baby" | "popular" | "medium" | "extended" | "custom"
   >("custom");
@@ -54,6 +60,8 @@ export default function TaskForm({
       title: title.trim(),
       description: description.trim(),
       duration,
+      short_break: shortBreak,
+      long_break: longBreak,
     });
   };
 
@@ -100,6 +108,8 @@ export default function TaskForm({
                 onClick={() => {
                   setPreset(p.key);
                   setDuration(String(p.focus));
+                  setShortBreak(p.short);
+                  setLongBreak(p.long);
                 }}
                 className={`px-3 py-2 rounded-xl border text-left text-sm cursor-pointer transition-colors hover:shadow-md ${
                   active

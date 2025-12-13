@@ -1,16 +1,20 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-// import { Target } from "lucide-react";
+import { toast } from "react-toastify";
 import Header from "./header";
-import ClaimXpModal from "./ClaimXpModal";
 import FocusMusicApp from "../Pages/music/Musictask";
 
 type PomodoroTimerCardProps = {
+  task?: {
+    short_break?: number;
+    long_break?: number;
+  };
   taskTitle?: string;
   defaultFocus?: number;
   onComplete?: () => void;
 };
 
 export default function PomodoroTimerCard({
+  task,
   taskTitle = "Task 1",
   defaultFocus = 25,
   onComplete,
@@ -26,8 +30,8 @@ export default function PomodoroTimerCard({
   const [completedRests, setCompletedRests] = useState(0);
   const [completedLongRests, setCompletedLongRests] = useState(0);
   const [shortsSinceLong, setShortsSinceLong] = useState(0);
-  const [shortBreak, setShortBreak] = useState<number>(5);
-  const [longBreak, setLongBreak] = useState<number>(15);
+  const [shortBreak, setShortBreak] = useState(task?.short_break ?? 5);
+  const [longBreak, setLongBreak] = useState(task?.long_break ?? 15);
   const [showPicker, setShowPicker] = useState(false);
   const [sliderMinutes, setSliderMinutes] = useState<number>(defaultFocus);
   const [sliderShort, setSliderShort] = useState<number>(5);
@@ -38,9 +42,7 @@ export default function PomodoroTimerCard({
     "baby" | "popular" | "medium" | "extended" | "custom"
   >("custom");
 
-  // UI: show claim modal when a pomodoro completes
-  const [showClaimModal, setShowClaimModal] = useState(false);
-  const CLAIM_XP_AMOUNT = 20; // change if you want variable amount
+  const CLAIM_XP_AMOUNT = 20;
 
   const presets = [
     { key: "baby" as const, label: "Baby step", focus: 10, short: 5, long: 10 },
@@ -84,10 +86,12 @@ export default function PomodoroTimerCard({
           if (timerRef.current) clearInterval(timerRef.current);
           if (!isBreak) {
             setCompletedPomodoros((v) => v + 1);
-            // Open claim modal instead of immediately notifying parent.
-            // Parent will be called when user clicks "Claim XP".
+            onComplete?.();
             setIsRunning(false);
-            setShowClaimModal(true);
+            toast.success(`🎉 Pomodoro complete! Added ${CLAIM_XP_AMOUNT} XP!`);
+            setIsBreak(true);
+            const isLong = shortsSinceLong === 4;
+            setTimeLeft((isLong ? longBreak : shortBreak) * 60);
             return 0; // show 00:00 until user picks claim / later
           } else {
             const wasLong = shortsSinceLong === 4;
@@ -395,10 +399,19 @@ export default function PomodoroTimerCard({
           <button
             onClick={() => {
               if (!isBreak) {
-                // manual completion: show claim modal, don't immediately call parent
                 setCompletedPomodoros((v) => v + 1);
                 setIsRunning(false);
-                setShowClaimModal(true);
+                toast.success(
+                  `🎉 Pomodoro complete! Added ${CLAIM_XP_AMOUNT} XP!`,
+                  {
+                    className: "text-sm font-medium",
+                  }
+                );
+                setIsBreak(true);
+                const isLong = shortsSinceLong === 4;
+                setTimeLeft((isLong ? longBreak : shortBreak) * 60);
+                onComplete?.();
+                return 0;
               } else {
                 const wasLong = shortsSinceLong === 4;
                 if (wasLong) {
@@ -452,29 +465,6 @@ export default function PomodoroTimerCard({
           </div>
         </div>
       )}
-
-      <ClaimXpModal
-        open={showClaimModal}
-        xpAmount={CLAIM_XP_AMOUNT}
-        onClaim={async () => {
-          try {
-            await onComplete?.();
-          } catch (e) {
-            console.warn("onComplete handler threw:", e);
-          } finally {
-            const isLong = shortsSinceLong === 4;
-            setShowClaimModal(false);
-            setIsBreak(true);
-            setTimeLeft((isLong ? longBreak : shortBreak) * 60);
-          }
-        }}
-        onClose={() => {
-          const isLong = shortsSinceLong === 4;
-          setShowClaimModal(false);
-          setIsBreak(true);
-          setTimeLeft((isLong ? longBreak : shortBreak) * 60);
-        }}
-      />
     </div>
   );
 }

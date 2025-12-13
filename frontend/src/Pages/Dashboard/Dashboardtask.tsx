@@ -229,9 +229,9 @@ const Dashboard: React.FC = () => {
     <div className="min-h-screen bg-gray-50 p-4 sm:p-6 md:p-8">
       <div className="mx-auto max-w-7xl">
         {/* Header */}
-        <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">
-          Dashboard
-        </h1>
+        <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">
+          🚀 Dashboard
+        </h2>
 
         {/* Tabs */}
         <div className="flex flex-wrap gap-x-4 gap-y-2 mb-8 border-b border-gray-200">

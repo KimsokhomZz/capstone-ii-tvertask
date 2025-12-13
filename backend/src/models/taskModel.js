@@ -28,6 +28,16 @@ const Task = sequelize.define('Task', {
         type: DataTypes.INTEGER,
         allowNull: false,
     },
+    short_break: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 5,
+    },
+    long_break: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 15,
+    },
     status: {
         type: DataTypes.STRING,
         allowNull: false,

@@ -15,13 +15,15 @@ exports.getAllTasks = async (req, res) => {
 // Create a new task
 exports.createTask = async (req, res) => {
   try {
-    const { user_id, title, description, focus_time, status } = req.body;
+    const { user_id, title, description, focus_time, status, short_break, long_break } = req.body;
     const task = await Task.create({
       user_id,
       title,
       description,
       focus_time,
       status,
+      short_break,  
+      long_break, 
     });
     res.status(201).json(task);
   } catch (error) {
@@ -33,7 +35,7 @@ exports.createTask = async (req, res) => {
 exports.updateTask = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, description, focus_time, status } = req.body;
+    const { title, description, focus_time, status, short_break, long_break } = req.body;
     const task = await Task.findByPk(id);
     if (!task) {
       return res.status(404).json({ message: "Task not found" });
@@ -42,6 +44,8 @@ exports.updateTask = async (req, res) => {
     task.description = description ?? task.description;
     task.focus_time = focus_time ?? task.focus_time;
     task.status = status ?? task.status;
+    task.short_break = short_break ?? task.short_break;
+    task.long_break = long_break ?? task.long_break;
     await task.save();
     res.json(task);
   } catch (error) {
