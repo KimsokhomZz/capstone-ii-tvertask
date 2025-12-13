@@ -16,9 +16,13 @@ const API = "http://localhost:3000/api/tasks/";
 // Fetch tasks from the API
 export async function fetchTask(): Promise<Task[] | undefined> {
   try {
-    console.log("Starting to fetch task data...");
-    const response = await axios.get<Task[]>(API);
-    console.log("Fetched task data:", response.data);
+    const token = localStorage.getItem("token");
+    const response = await axios.get(API, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      withCredentials: true, // if your backend uses cookies
+    });
     return response.data;
   } catch (error) {
     console.error("Error fetching task:", error);

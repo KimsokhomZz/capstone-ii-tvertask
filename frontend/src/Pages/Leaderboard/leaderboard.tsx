@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Crown } from "lucide-react";
 import { fetchLeaderboard } from "@/api/leaderboardApi";
 import type { LeaderboardData } from "@/api/leaderboardApi";
@@ -25,78 +25,9 @@ const FocusSessionLeaderboard = () => {
     getLeaderboardData();
   }, []);
 
-  // const leaderboardData = {
-  //   weekly: [
-  //     {
-  //       rank: 1,
-  //       name: "Lina",
-  //       xp: 2450,
-  //       avatar: avatarUrl,
-  //     },
-  //     {
-  //       rank: 2,
-  //       name: "Maya",
-  //       xp: 2100,
-  //       avatar: avatarUrl,
-  //     },
-  //     {
-  //       rank: 3,
-  //       name: "Noah",
-  //       xp: 1850,
-  //       avatar: avatarUrl,
-  //     },
-  //     {
-  //       rank: 4,
-  //       name: "Evan",
-  //       xp: 1350,
-  //       avatar: avatarUrl,
-  //     },
-  //     {
-  //       rank: 5,
-  //       name: "Sam",
-  //       xp: 1250,
-  //       avatar: avatarUrl,
-  //     },
-  //     {
-  //       rank: 6,
-  //       name: "Ava",
-  //       xp: 1150,
-  //       avatar: avatarUrl,
-  //     },
-  //     {
-  //       rank: 7,
-  //       name: "Oli",
-  //       xp: 1050,
-  //       avatar: avatarUrl,
-  //     },
-  //     {
-  //       rank: 8,
-  //       name: "Rae",
-  //       xp: 950,
-  //       avatar: avatarUrl,
-  //     },
-  //     {
-  //       rank: 9,
-  //       name: "Kai",
-  //       xp: 850,
-  //       avatar: avatarUrl,
-  //     },
-  //   ],
-  //   monthly: [
-  //     // fallback sample for monthly (uses same image)
-  //     { rank: 1, name: "Lina", xp: 9800, avatar: avatarUrl },
-  //     { rank: 2, name: "Maya", xp: 9200, avatar: avatarUrl },
-  //     { rank: 3, name: "Noah", xp: 8700, avatar: avatarUrl },
-  //   ],
-  //   global: [
-  //     // fallback sample for global
-  //     { rank: 1, name: "Lina", xp: 45200, avatar: avatarUrl },
-  //     { rank: 2, name: "Maya", xp: 43000, avatar: avatarUrl },
-  //     { rank: 3, name: "Noah", xp: 41000, avatar: avatarUrl },
-  //   ],
-  // };
-
-  const currentData = leaderboardData ? leaderboardData[activeTab] ?? leaderboardData.weekly: [];
+  const currentData = leaderboardData
+    ? leaderboardData[activeTab] ?? leaderboardData.weekly
+    : [];
   const topThree = currentData.slice(0, 3);
   const restOfList = currentData.slice(3);
 
@@ -105,12 +36,12 @@ const FocusSessionLeaderboard = () => {
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <h1 className="text-4xl font-bold text-center mb-8 text-gray-800">
-          Focus Session
+          🏆 Leaderboard
         </h1>
 
         {/* Tabs */}
         <div className="flex justify-center gap-2 mb-12">
-          <button
+          {/* <button
             onClick={() => setActiveTab("weekly")}
             className={`px-8 py-3 rounded-full font-medium transition-all ${
               activeTab === "weekly"
@@ -139,7 +70,7 @@ const FocusSessionLeaderboard = () => {
             }`}
           >
             Global
-          </button>
+          </button> */}
         </div>
 
         {/* Podium */}
@@ -147,7 +78,7 @@ const FocusSessionLeaderboard = () => {
           {/* 2nd Place */}
           <div className="flex flex-col items-center">
             <div className="relative mb-3">
-              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-gray-300 to-gray-400 flex items-center justify-center overflow-hidden border-4 border-gray-400 shadow-lg">
+              <div className="w-20 h-20 rounded-full bg-linear-to-br from-gray-300 to-gray-400 flex items-center justify-center overflow-hidden border-4 border-gray-400 shadow-lg">
                 <img
                   src={topThree[1]?.avatar}
                   alt={topThree[1]?.name}

@@ -5,7 +5,11 @@ const notificationService = require("../services/notificationService");
 // Get all tasks
 exports.getAllTasks = async (req, res) => {
   try {
-    const tasks = await Task.findAll();
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ message: "Unauthorized: No user" });
+    }
+    const userId = req.user.id;
+    const tasks = await Task.findAll({ where: { user_id: userId } });
     res.json(tasks);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -22,8 +26,8 @@ exports.createTask = async (req, res) => {
       description,
       focus_time,
       status,
-      short_break,  
-      long_break, 
+      short_break,
+      long_break,
     });
     res.status(201).json(task);
   } catch (error) {

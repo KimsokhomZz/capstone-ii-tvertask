@@ -1,3 +1,4 @@
+require("dotenv").config();
 const { faker } = require("@faker-js/faker");
 const sequelize = require("../config/database");
 const {

@@ -5,14 +5,15 @@ interface Task {
   id: number;
   text: string;
   completed: boolean;
-  time: string; // Duration of the task in minutes
-  createdAt: Date; // Timestamp for when the task was created
+  time: string;
+  createdAt: Date;
 }
 
 const Dashboard: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<
-    "Daily" | "Weekly" | "Monthly" | "All-time"
-  >("Monthly");
+  // const [activeTab, setActiveTab] = useState<
+  //   "Daily" | "Weekly" | "Monthly" | "All-time"
+  // >("Monthly");
+  const [activeTab, setActiveTab] = useState<"All-time">("All-time");
   const [allTasks, setAllTasks] = useState<Task[]>([]); // Stores all tasks
   const [filteredTasks, setFilteredTasks] = useState<Task[]>([]); // Tasks visible based on activeTab
   const [selectedMood, setSelectedMood] = useState<number | null>(null);
@@ -21,7 +22,8 @@ const Dashboard: React.FC = () => {
   const [taskTime, setTaskTime] = useState("15"); // Default task time in minutes
   const [showCompleted, setShowCompleted] = useState(true);
 
-  const tabs = ["Daily", "Weekly", "Monthly", "All-time"] as const;
+  // const tabs = ["Daily", "Weekly", "Monthly", "All-time"] as const;
+  const tabs = ["All-time"] as const;
 
   // Simulate initial task loading (replace with backend fetch)
   useEffect(() => {
@@ -75,44 +77,44 @@ const Dashboard: React.FC = () => {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Filter tasks based on the active tab and update KPIs
-  useEffect(() => {
-    const now = new Date();
-    const todayStart = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      now.getDate()
-    );
+  // useEffect(() => {
+  //   const now = new Date();
+  //   const todayStart = new Date(
+  //     now.getFullYear(),
+  //     now.getMonth(),
+  //     now.getDate()
+  //   );
 
-    const sevenDaysAgo = new Date(todayStart);
-    sevenDaysAgo.setDate(todayStart.getDate() - 6); // Current day + past 6 days = 7 days
+  //   const sevenDaysAgo = new Date(todayStart);
+  //   sevenDaysAgo.setDate(todayStart.getDate() - 6); // Current day + past 6 days = 7 days
 
-    const thirtyDaysAgo = new Date(todayStart);
-    thirtyDaysAgo.setDate(todayStart.getDate() - 29); // Current day + past 29 days = 30 days
+  //   const thirtyDaysAgo = new Date(todayStart);
+  //   thirtyDaysAgo.setDate(todayStart.getDate() - 29); // Current day + past 29 days = 30 days
 
-    let tasksToShow: Task[] = [];
-    switch (activeTab) {
-      case "Daily":
-        tasksToShow = allTasks.filter(
-          (task) => new Date(task.createdAt) >= todayStart
-        );
-        break;
-      case "Weekly":
-        tasksToShow = allTasks.filter(
-          (task) => new Date(task.createdAt) >= sevenDaysAgo
-        );
-        break;
-      case "Monthly":
-        tasksToShow = allTasks.filter(
-          (task) => new Date(task.createdAt) >= thirtyDaysAgo
-        );
-        break;
-      case "All-time":
-      default:
-        tasksToShow = allTasks;
-        break;
-    }
-    setFilteredTasks(tasksToShow);
-  }, [activeTab, allTasks]);
+  //   let tasksToShow: Task[] = [];
+  //   switch (activeTab) {
+  //     case "Daily":
+  //       tasksToShow = allTasks.filter(
+  //         (task) => new Date(task.createdAt) >= todayStart
+  //       );
+  //       break;
+  //     case "Weekly":
+  //       tasksToShow = allTasks.filter(
+  //         (task) => new Date(task.createdAt) >= sevenDaysAgo
+  //       );
+  //       break;
+  //     case "Monthly":
+  //       tasksToShow = allTasks.filter(
+  //         (task) => new Date(task.createdAt) >= thirtyDaysAgo
+  //       );
+  //       break;
+  //     case "All-time":
+  //     default:
+  //       tasksToShow = allTasks;
+  //       break;
+  //   }
+  //   setFilteredTasks(tasksToShow);
+  // }, [activeTab, allTasks]);
 
   const addTask = useCallback(() => {
     if (newTask.trim()) {
@@ -226,7 +228,7 @@ const Dashboard: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 sm:p-6 md:p-8">
+    <div className="min-h-screen p-4 sm:p-6 md:p-8">
       <div className="mx-auto max-w-7xl">
         {/* Header */}
         <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">
