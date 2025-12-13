@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 // @ts-ignore
 import { useAuth } from "../../context/AuthContext.jsx";
-import EditProfile from "../../Components/Profile/EditProfile";
-import ChangePassword from "../../Components/Profile/ChangePassword";
-import ProgressStats from "../../Components/Profile/ProgressStats";
-import AvatarUploadModal from "../../Components/Profile/AvatarUploadModal";
+import EditProfile from "../../components/Profile/EditProfile";
+import ChangePassword from "../../components/Profile/ChangePassword";
+import ProgressStats from "../../components/Profile/ProgressStats";
+import AvatarUploadModal from "../../components/Profile/AvatarUploadModal";
 import { User, Edit, Lock, BarChart3, Camera } from "lucide-react";
 
 const Profile = () => {

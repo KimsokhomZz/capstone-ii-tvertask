@@ -1,12 +1,12 @@
 import { useEffect, useState, useContext } from "react";
-import TaskBar from "@/Components/taskbar";
+import TaskBar from "@/components/taskbar";
 import { useNavigate } from "react-router-dom";
-import TaskForm, { type NewTask } from "@/Components/TaskForm";
-import DeleteConfirmation from "@/Components/DeleteConfirmation";
-import Header from "@/Components/header";
+import TaskForm, { type NewTask } from "@/components/TaskForm";
+import DeleteConfirmation from "@/components/DeleteConfirmation";
+import Header from "@/components/header";
 import { Toast } from "@/components/ConfirmDialog";
 import { fetchTask } from "../../api/taskApi";
-import { Target } from "lucide-react";
+// Target import removed as it's not used
 import {
   createTask,
   updateTask,
@@ -71,16 +71,16 @@ export default function TodoList() {
     }
   };
 
-  // Update only status
-  const handleUpdateTaskStatus = async (id: number, status: string) => {
-    const updated = await updateTaskStatus(id, status);
-    if (updated) {
-      setTasks((prev) => prev.map((t) => (t.id === id ? updated : t)));
-      showToast("Task status updated!", "success");
-    } else {
-      showToast("Failed to update status", "error");
-    }
-  };
+  // Status update handler (commented out as it's not currently used)
+  // const handleUpdateTaskStatus = async (id: number, status: string) => {
+  //   const updated = await updateTaskStatus(id, status);
+  //   if (updated) {
+  //     setTasks((prev) => prev.map((t) => (t.id === id ? updated : t)));
+  //     showToast("Task status updated!", "success");
+  //   } else {
+  //     showToast("Failed to update status", "error");
+  //   }
+  // };
 
   // Delete a task
   const handleDeleteTask = async (id: number) => {
@@ -93,9 +93,28 @@ export default function TodoList() {
     }
   };
 
+  // Force light theme for the entire TaskList page
+  useEffect(() => {
+    document.documentElement.classList.remove('dark');
+    document.documentElement.style.colorScheme = 'light';
+    
+    return () => {
+      // Cleanup function to restore dark mode if needed when leaving the page
+      const darkMode = localStorage.getItem('app.theme') ? 
+        JSON.parse(localStorage.getItem('app.theme') || '{}').darkMode : 
+        window.matchMedia('(prefers-color-scheme: dark)').matches;
+      
+      if (darkMode) {
+        document.documentElement.classList.add('dark');
+        document.documentElement.style.colorScheme = 'dark';
+      }
+    };
+  }, []);
+
   return (
-    <div className="bg-white p-8 md:p-10 rounded-[28px] shadow-xl w-full max-w-4xl border border-gray-100">
-      <div className="flex items-center justify-between">
+    <div className="w-full max-w-4xl mx-auto mt-6 bg-white dark:bg-white">
+      <div className="p-6 md:p-8 rounded-[28px] shadow-xl bg-white text-black">
+        <div className="flex items-center justify-between">
         <Header
           title="Focus Session"
           icon={<span className="text-4xl">🎯</span>}
@@ -103,7 +122,7 @@ export default function TodoList() {
         />
         <button
           onClick={() => setShowCreate(true)}
-          className="rounded-xl bg-yellow-400 border border-gray-200 hover:bg-yellow-50 hover:shadow-md text-white hover:text-yellow-400 px-3 py-2 text-sm cursor-pointer transition-all font-semibold"
+          className="rounded-xl bg-yellow-400 border border-gray-200 hover:bg-yellow-50 hover:shadow-md text-black hover:text-yellow-400 px-3 py-2 text-sm cursor-pointer transition-all font-semibold"
         >
           ➕ Add Task
         </button>
@@ -246,6 +265,7 @@ export default function TodoList() {
           onClose={() => setToast(null)}
         />
       )}
+      </div>
     </div>
   );
 }

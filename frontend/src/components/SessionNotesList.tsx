@@ -1,4 +1,4 @@
-import DeleteConfirmation from "@/Components/DeleteConfirmation";
+import DeleteConfirmation from "@/components/DeleteConfirmation";
 import { Toast } from "@/components/ConfirmDialog";
 import { useState } from "react";
 

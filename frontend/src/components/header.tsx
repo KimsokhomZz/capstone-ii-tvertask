@@ -16,22 +16,17 @@ export default function Header({
 }: HeaderProps) {
   return (
     <div
-      className={`flex items-center gap-2 text-foreground mb-4 ${
+      className={`flex items-center gap-2 text-black mb-4 ${
         containerClassName ?? ""
       }`}
     >
-      {/* {icon && (
-        <span className="p-2 bg-yellow-100 text-yellow-500 rounded-full flex items-center justify-center">
-          {icon}
-        </span>
-      )} */}
       {icon && (
         <span className="flex items-center justify-center">
           {icon}
         </span>
       )}
 
-      <div className={`font-bold text-md ${titleClassName ?? "text-foreground"}`}>
+      <div className={`font-bold text-md ${titleClassName ?? "text-black"}`}>
         <h1>{title}</h1>
       </div>
     </div>
