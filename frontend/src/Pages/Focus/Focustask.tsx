@@ -11,7 +11,7 @@ import ThemeCard from "../../components/ThemeCard";
 import ThemeGallery, { type ThemeOption } from "../../components/ThemeGallery";
 import { awardXp } from "../../api/userXpApi";
 import useTaskNotes from "../../hooks/useTaskNotes";
-import { ToastContainer, toast as toastify } from "react-toastify";
+import { toast as toastify } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 // type Note = { id: number; text: string; editing?: boolean };
@@ -24,7 +24,6 @@ export default function Focustask() {
   const [transparentCards, setTransparentCards] = useState(false);
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [bgId, setBgId] = useState<string | undefined>(undefined);
-  const [toast, setToast] = useState<{ message: string } | null>(null);
   const bgOptions: ThemeOption[] = [
     // None option - available in both themes
     {
@@ -233,15 +232,17 @@ export default function Focustask() {
 
   const handleAddNote = async () => {
     const text = draft?.trim();
-    if (!text) return alert("Please write a note before adding.");
+    if (!text) {
+      toastify.error("Please write a note before adding. 🚨");
+      return;
+    }
 
     const tempId = -Date.now();
     setNotes((prev) => [{ id: tempId, text }, ...prev]);
     setDraft("");
 
     if (!taskId) {
-      setToast({ message: "Note saved locally (no task selected)." });
-      setTimeout(() => setToast(null), 2000);
+      toastify.info("Note saved locally (no task selected). 📝");
       return;
     }
 
@@ -257,12 +258,11 @@ export default function Focustask() {
       const userId = getStoredUserId();
       if (userId) {
         await awardXp(userId, 5, "note-add");
-        toastify.success("You received 5 XP for adding a note!");
+        toastify.success("You received 5 XP for adding a note! 🥳");
       }
     } catch (err) {
-      console.error("Failed to save note", err);
-      setToast({ message: "Failed to save note" });
-      setTimeout(() => setToast(null), 2000);
+      console.error("🚨 Failed to save note", err);
+      toastify.error("Failed to save note. Please try again. 🚨");
     }
   };
 
@@ -357,7 +357,6 @@ export default function Focustask() {
         selectedId={bgId}
         onSelect={(id) => setBgId(id)}
       />
-      <ToastContainer />
     </div>
   );
 }

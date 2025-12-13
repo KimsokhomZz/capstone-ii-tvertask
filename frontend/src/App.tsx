@@ -1,10 +1,6 @@
-import { useEffect, useState } from "react";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  useNavigate,
-} from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { ToastContainer, Flip } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import ProtectedRoute from "./components/ProtectedRoute.tsx";
 
 // @ts-ignore
@@ -37,11 +33,6 @@ import AvatarTask from "./Pages/Avatar/Avatartask.tsx"; // add or adjust path/ca
 import AnalyticsPage from "./Pages/Analytics/analytic.tsx";
 import NotificationsPageComponent from "./Pages/Notifications/Notifications.tsx";
 
-interface Task {
-  id: number;
-  title: string;
-}
-
 function DashboardPage() {
   return <DashboardTask />;
 }
@@ -71,37 +62,6 @@ function SupportPage() {
     <div className="bg-white p-8 md:p-10 rounded-[28px] shadow-xl w-full max-w-4xl border border-gray-100">
       <h1 className="text-2xl font-bold mb-2">Support</h1>
       <p className="text-gray-500">Coming soon...</p>
-    </div>
-  );
-}
-
-function HomePage() {
-  const navigate = useNavigate();
-  const [tasks, setTasks] = useState<Task[]>([]);
-
-  useEffect(() => {
-    fetch("/api/tasks")
-      .then((res) => res.json())
-      .then((data) => setTasks(data));
-  }, []);
-
-  return (
-    <div>
-      <h1>Tver Task</h1>
-      <ul>
-        {tasks.map((task) => (
-          <li key={task.id}>{task.title}</li>
-        ))}
-      </ul>
-      <h1 className="text-3xl font-bold underline text-pink-500">
-        Hello world!
-      </h1>
-      <button
-        onClick={() => navigate("/login")}
-        className="bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-md py-2 px-4 mt-4"
-      >
-        Go to Login
-      </button>
     </div>
   );
 }
@@ -152,6 +112,21 @@ function App() {
             <Route path="/tasks" element={<Navigate to="/focus" replace />} />
           </Routes>
         </Router>
+
+        <ToastContainer
+          position="bottom-right"
+          autoClose={3000}
+          toastClassName="text-sm font-medium"
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick={false}
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
+          transition={Flip}
+        />
       </NotificationProvider>
     </AuthProvider>
   );

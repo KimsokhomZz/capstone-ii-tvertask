@@ -1,5 +1,6 @@
 import DeleteConfirmation from "@/components/DeleteConfirmation";
-import { Toast } from "@/components/ConfirmDialog";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { useState } from "react";
 
 type Note = { id: number; text: string; editing?: boolean };
@@ -22,7 +23,6 @@ export default function SessionNotesList({
   error = null,
 }: SessionNotesListProps) {
   const [deleteId, setDeleteId] = useState<number | null>(null);
-  const [toast, setToast] = useState<{ message: string } | null>(null);
 
   if (loading && notes.length === 0) {
     return (
@@ -99,11 +99,9 @@ export default function SessionNotesList({
                             x.id === n.id ? { ...x, editing: false } : x
                           )
                         );
-                        setToast({ message: "Note updated successfully!" });
-                        setTimeout(() => setToast(null), 2000);
+                        toast.success("Note updated successfully! 👏");
                       } catch {
-                        setToast({ message: "Failed to update note." });
-                        setTimeout(() => setToast(null), 2000);
+                        toast.error("Failed to update note. 🚨");
                       }
                     }}
                   >
@@ -191,25 +189,19 @@ export default function SessionNotesList({
             if (deleteId < 0) {
               setNotes((prev) => prev.filter((x) => x.id !== deleteId));
               setDeleteId(null);
-              setToast({ message: "Local note removed." });
-              setTimeout(() => setToast(null), 2000);
+              toast.success("Local note removed. 🗑️");
               return;
             }
 
             if (onDelete) await onDelete(deleteId);
             setNotes((prev) => prev.filter((x) => x.id !== deleteId));
             setDeleteId(null);
-            setToast({ message: "Note deleted successfully!" });
-            setTimeout(() => setToast(null), 2000);
+            toast.success("Note deleted successfully! 🗑️");
           } catch {
-            setToast({ message: "Failed to delete note." });
-            setTimeout(() => setToast(null), 2000);
+            toast.error("Failed to delete note. 🚨");
           }
         }}
       />
-      {toast && (
-        <Toast message={toast.message} onClose={() => setToast(null)} />
-      )}
     </div>
   );
 }

@@ -15,7 +15,7 @@ import { Plus, Target } from "lucide-react";
 import CreateTaskModal from "./components/CreateTaskModal";
 import EditTaskModal from "./components/EditTaskModal";
 import ConfirmCompleteModal from "./components/ConfirmCompleteModal";
-import { ToastContainer, toast as showToastify, Bounce } from "react-toastify";
+import { toast as showToastify } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 // Use the Task type from your API if possible, otherwise define here:
@@ -80,9 +80,9 @@ export default function TodoList() {
     const updated = await updateTask(id, updates);
     if (updated) {
       setTasks((prev) => prev.map((t) => (t.id === id ? updated : t)));
-      showToast("🎉 Task updated successfully!", "success");
+      showToast("Task updated successfully! 🎉", "success");
     } else {
-      showToast("🚫 Failed to update task", "error");
+      showToast("Failed to update task. 🚫", "error");
     }
   };
 
@@ -91,9 +91,9 @@ export default function TodoList() {
     const success = await deleteTask(id);
     if (success) {
       setTasks((prev) => prev.filter((t) => t.id !== id));
-      showToast("🎉 Task deleted successfully!", "success");
+  showToast("Task deleted successfully! 🎉", "success");
     } else {
-      showToast("🚫 Failed to delete task", "error");
+      showToast("Failed to delete task. 🚫", "error");
     }
   };
 
@@ -115,9 +115,9 @@ export default function TodoList() {
         prev.map((t) => (t.id === id ? { ...t, status: "completed" } : t))
       );
       setCheckedMap((prev) => ({ ...prev, [id]: true }));
-      showToast(`🏆 Task completed! You earned ${xp} XP.`, "success");
+      showToast(`Task completed! You earned ${xp} XP. 🏆`, "success");
     } else {
-      showToast("🚫 Failed to complete task", "error");
+      showToast("Failed to complete task. 🚫", "error");
     }
   };
 
@@ -246,7 +246,7 @@ export default function TodoList() {
         onClose={() => setShowCreate(false)}
         onSubmit={async (t: NewTask) => {
           if (!user) {
-            showToast("⛔ User not found. Please log in.", "error");
+            showToast("User not found. Please log in. ⛔", "error");
             return;
           }
           const payload = {
@@ -260,9 +260,9 @@ export default function TodoList() {
           if (created) {
             setTasks((prev) => [...prev, created]);
             setShowCreate(false);
-            showToast("🚀 Task created successfully!", "success");
+            showToast("Task created successfully! 🚀", "success");
           } else {
-            showToast("🚫 Failed to create task", "error");
+            showToast("Failed to create task. 🚫", "error");
           }
         }}
         user={user}
@@ -316,20 +316,6 @@ export default function TodoList() {
           handleDeleteTask(deleteId);
           setDeleteId(null);
         }}
-      />
-
-      <ToastContainer
-        position="bottom-right"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick={false}
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="light"
-        transition={Bounce}
       />
     </div>
   );
