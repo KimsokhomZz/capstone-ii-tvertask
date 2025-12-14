@@ -35,7 +35,6 @@ export default function Focustask() {
   const [draft, setDraft] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   const [showMusic, setShowMusic] = useState(false);
-  const [transparentCards, setTransparentCards] = useState(false);
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [bgId, setBgId] = useState<string>();
   const bgOptions: ThemeOption[] = [
@@ -287,14 +286,17 @@ export default function Focustask() {
     <div
       className={`min-h-screen p-4 text-black transition-colors ${selectedBg}`}
     >
-      <div className="max-w-4xl mx-auto space-y-8">
+      <div className="max-w-4xl mx-auto space-y-4">
         <div className="flex items-center justify-between">
           <Link
             to="/focus"
-            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-black hover:bg-accent"
+            className="group inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 hover:text-gray-900 transition-all duration-200"
           >
-            <ArrowLeft size={16} />
-            <span>Back To TaskList</span>
+            <ArrowLeft
+              size={16}
+              className="transition-transform group-hover:-translate-x-1"
+            />
+            <span className="text-sm font-medium">Back to TaskList</span>
           </Link>
 
           <ThemeCard onOpenGallery={() => setGalleryOpen(true)} />

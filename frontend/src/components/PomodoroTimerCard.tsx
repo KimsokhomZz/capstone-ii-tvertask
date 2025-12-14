@@ -4,13 +4,13 @@ import Header from "./header";
 import FocusMusicApp from "../Pages/music/Musictask";
 import {
   Settings,
-  Play,
-  Pause,
-  Check,
-  RotateCcw,
-  Maximize,
-  Minimize,
-  Music,
+  // Play,
+  // Pause,
+  // Check,
+  // RotateCcw,
+  // Maximize,
+  // Minimize,
+  // Music,
 } from "lucide-react";
 
 type PomodoroTimerCardProps = {
@@ -223,17 +223,32 @@ export default function PomodoroTimerCard({
             <div>
               <button
                 onClick={() => setShowPicker((s) => !s)}
-                className="px-3 py-1 rounded-xl bg-secondary text-black border border-border hover:bg-accent hover:shadow-md text-sm transition-colors cursor-pointer"
+                className="px-3 py-1 rounded-full bg-secondary border border-border hover:bg-accent hover:shadow-md text-md transition-colors cursor-pointer"
               >
-                <Settings size={20} className="w-6 h-6 " />
+                🛠️
               </button>
 
               {/* Change time / presets popup (restored from modified) */}
               {showPicker && (
-                <div className="absolute right-0 mt-2 z-10 bg-popover text-popover-foreground border border-border rounded-xl shadow-lg p-3 w-64">
-                  <div className="mb-3">
-                    <div className="text-sm font-semibold text-foreground mb-2">
-                      Customize focus level
+                <div className="absolute right-0 mt-2 z-10 bg-white border border-gray-200 rounded-2xl shadow-2xl p-5 w-72 max-h-[80vh] overflow-y-auto">
+                  {/* Header */}
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-base font-semibold   text-gray-800 flex items-center gap-2">
+                      ⚙️ Timer Settings
+                    </h3>
+                    <button
+                      onClick={() => setShowPicker(false)}
+                      className="p-1 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors"
+                      aria-label="Close"
+                    >
+                      ✕
+                    </button>
+                  </div>
+
+                  {/* Presets Section */}
+                  <div className="mb-5">
+                    <div className="text-sm font-semibold text-gray-600 mb-2">
+                      📋 Quick Presets
                     </div>
                     <div className="space-y-1">
                       {presets.map((p) => {
@@ -257,30 +272,34 @@ export default function PomodoroTimerCard({
                               setTimeLeft(f * 60);
                               setShowPicker(false);
                             }}
-                            className={`w-full flex items-center justify-between px-2 py-1.5 rounded-lg text-left border ${
+                            className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-left border-2 transition-all duration-200 ${
                               active
-                                ? "bg-accent/50 border-primary"
-                                : "border-border hover:bg-accent/30 hover:shadow-md dark:bg-gray-800/50"
-                            } ${
-                              active
-                                ? "text-black"
-                                : "text-black/90 hover:text-black"
-                            } cursor-pointer`}
+                                ? "bg-linear-to-r from-blue-50 to-indigo-50 border-blue-400 shadow-md"
+                                : "border-gray-200 hover:border-gray-300 hover:bg-gray-50 hover:shadow-sm"
+                            }`}
                           >
-                            <div className="flex items-center gap-2">
-                              <span
-                                className={`inline-block h-3.5 w-3.5 rounded-full border ${
+                            <div className="flex items-center gap-2.5">
+                              <div
+                                className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all ${
                                   active
-                                    ? "border-primary ring-2 ring-primary/60"
-                                    : "border-border dark:border-gray-600"
+                                    ? "border-blue-500 bg-blue-500"
+                                    : "border-gray-300"
                                 }`}
-                              />
-                              <span className="text-sm text-black">
+                              >
+                                {active && (
+                                  <div className="w-1.5 h-1.5 rounded-full bg-white" />
+                                )}
+                              </div>
+                              <span
+                                className={`text-sm font-medium ${
+                                  active ? "text-blue-700" : "text-gray-700"
+                                }`}
+                              >
                                 {p.label}
                               </span>
                             </div>
-                            <span className="text-md text-foreground">
-                              {p.focus} • {p.short} • {p.long} min
+                            <span className="text-xs font-semibold text-gray-500">
+                              {p.focus} • {p.short} • {p.long}
                             </span>
                           </button>
                         );
@@ -288,98 +307,126 @@ export default function PomodoroTimerCard({
                     </div>
                   </div>
 
-                  <div className="text-sm font-medium text-foreground mb-2">
-                    Custom (1–100 min)
-                  </div>
-                  <div className="space-y-3">
-                    <div>
-                      <div className="flex items-center justify-between text-md text-foreground mb-1">
-                        <span>Pomodoro</span>
-                        <span>{sliderMinutes} min</span>
-                      </div>
-                      <input
-                        type="range"
-                        min={1}
-                        max={100}
-                        value={sliderMinutes}
-                        onChange={(e) => {
-                          setSelectedPreset("custom");
-                          setSliderMinutes(
-                            Math.min(100, Math.max(1, Number(e.target.value)))
-                          );
-                        }}
-                        className="w-full"
-                      />
-                    </div>
+                  {/* Divider */}
+                  <div className="border-t border-gray-200 my-2" />
 
-                    <div>
-                      <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
-                        <span>Rest</span>
-                        <span>{sliderShort} min</span>
-                      </div>
-                      <input
-                        type="range"
-                        min={1}
-                        max={100}
-                        value={sliderShort}
-                        onChange={(e) => {
-                          setSelectedPreset("custom");
-                          setSliderShort(
-                            Math.min(100, Math.max(1, Number(e.target.value)))
-                          );
-                        }}
-                        className="w-full"
-                      />
+                  {/* Custom Settings */}
+                  <div>
+                    <div className="text-sm font-semibold text-gray-600 mb-2 flex items-center gap-2">
+                      🎨 Custom Duration
                     </div>
-
-                    <div>
-                      <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
-                        <span>Long Rest</span>
-                        <span>{sliderLong} min</span>
+                    <div className="space-y-2">
+                      {/* Pomodoro Slider */}
+                      <div className="bg-linear-to-br from-red-50 to-orange-50 rounded-xl p-3 border border-red-100">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium text-gray-700 flex items-center gap-1.5">
+                            🎯 Focus
+                          </span>
+                          <span className="text-sm font-bold text-red-600 bg-white px-2 py-0.5 rounded-full">
+                            {sliderMinutes} min
+                          </span>
+                        </div>
+                        <input
+                          type="range"
+                          min={1}
+                          max={100}
+                          value={sliderMinutes}
+                          onChange={(e) => {
+                            setSelectedPreset("custom");
+                            setSliderMinutes(
+                              Math.min(100, Math.max(1, Number(e.target.value)))
+                            );
+                          }}
+                          className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-red-500"
+                        />
                       </div>
-                      <input
-                        type="range"
-                        min={1}
-                        max={100}
-                        value={sliderLong}
-                        onChange={(e) => {
-                          setSelectedPreset("custom");
-                          setSliderLong(
-                            Math.min(100, Math.max(1, Number(e.target.value)))
-                          );
-                        }}
-                        className="w-full"
-                      />
-                    </div>
 
-                    <button
-                      onClick={() => {
-                        const focusVal = Math.min(
-                          100,
-                          Math.max(1, sliderMinutes)
-                        );
-                        const restVal = Math.min(100, Math.max(1, sliderShort));
-                        const longVal = Math.min(100, Math.max(1, sliderLong));
-                        setIsRunning(false);
-                        setIsBreak(false);
-                        setSelectedFocus(focusVal);
-                        setShortBreak(restVal);
-                        setLongBreak(longVal);
-                        setTimeLeft(focusVal * 60);
-                        setShowPicker(false);
-                        setSelectedPreset("custom");
-                      }}
-                      className="w-full px-2.5 py-1 rounded-lg bg-primary border border-border text-black text-sm hover:bg-accent hover:text-foreground hover:shadow-md cursor-pointer transition-colors"
-                    >
-                      Apply
-                    </button>
+                      {/* Short Break Slider */}
+                      <div className="bg-linear-to-br from-yellow-50 to-amber-50 rounded-xl p-3 border border-yellow-100">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium text-gray-700 flex items-center gap-1.5">
+                            ☕ Short Rest
+                          </span>
+                          <span className="text-sm font-bold text-yellow-600 bg-white px-2 py-0.5 rounded-full">
+                            {sliderShort} min
+                          </span>
+                        </div>
+                        <input
+                          type="range"
+                          min={1}
+                          max={100}
+                          value={sliderShort}
+                          onChange={(e) => {
+                            setSelectedPreset("custom");
+                            setSliderShort(
+                              Math.min(100, Math.max(1, Number(e.target.value)))
+                            );
+                          }}
+                          className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-yellow-500"
+                        />
+                      </div>
+
+                      {/* Long Break Slider */}
+                      <div className="bg-linear-to-br from-green-50 to-emerald-50 rounded-xl p-3 border border-green-100">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium text-gray-700 flex items-center gap-1.5">
+                            🌴 Long Rest
+                          </span>
+                          <span className="text-sm font-bold text-green-600 bg-white px-2 py-0.5 rounded-full">
+                            {sliderLong} min
+                          </span>
+                        </div>
+                        <input
+                          type="range"
+                          min={1}
+                          max={100}
+                          value={sliderLong}
+                          onChange={(e) => {
+                            setSelectedPreset("custom");
+                            setSliderLong(
+                              Math.min(100, Math.max(1, Number(e.target.value)))
+                            );
+                          }}
+                          className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-green-500"
+                        />
+                      </div>
+
+                      {/* Apply Button */}
+                      <button
+                        onClick={() => {
+                          const focusVal = Math.min(
+                            100,
+                            Math.max(1, sliderMinutes)
+                          );
+                          const restVal = Math.min(
+                            100,
+                            Math.max(1, sliderShort)
+                          );
+                          const longVal = Math.min(
+                            100,
+                            Math.max(1, sliderLong)
+                          );
+                          setIsRunning(false);
+                          setIsBreak(false);
+                          setSelectedFocus(focusVal);
+                          setShortBreak(restVal);
+                          setLongBreak(longVal);
+                          setTimeLeft(focusVal * 60);
+                          setShowPicker(false);
+                          setSelectedPreset("custom");
+                        }}
+                        className="w-full px-4 py-3 rounded-xl bg-linear-to-r from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700 text-white font-semibold text-sm shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 active:scale-95"
+                      >
+                        ✓ Apply Settings
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}
             </div>
           )}
           <span
-            className={`bg-accent text-accent-foreground px-4 py-1.5 rounded-full ${
+            className={`text-xs bg-yellow-100 text-yellow-700 border border-yellow-200 px-3 py-2 rounded-full ${
               isFullscreen ? "text-base font-medium" : "text-sm"
             }`}
           >
@@ -514,7 +561,7 @@ export default function PomodoroTimerCard({
               cx="100"
               cy="100"
               r={radius}
-              strokeWidth="16"
+              strokeWidth="12"
               fill="transparent"
               stroke="url(#bgRingGradient)"
               filter="url(#innerShadow)"
@@ -539,7 +586,7 @@ export default function PomodoroTimerCard({
               cy="100"
               r={radius}
               stroke="url(#progressGradient)"
-              strokeWidth="14"
+              strokeWidth="8"
               fill="none"
               strokeDasharray={circumference}
               strokeDashoffset={circumference * (1 - clampedProgress)}
@@ -563,8 +610,8 @@ export default function PomodoroTimerCard({
                       ? "/promodoro/ben10-running.gif"
                       : "/promodoro/ben10-stand.gif"
                   }
-                  width="38"
-                  height="38"
+                  width="36"
+                  height="36"
                   x="-15"
                   y="-22"
                 />
@@ -696,7 +743,7 @@ export default function PomodoroTimerCard({
           <div className="bg-white rounded-2xl p-4 md:p-6 relative shadow-xl w-[944px] h-auto max-h-[90vh] overflow-auto">
             <button
               onClick={() => setIsMusicOpen(false)}
-              className="absolute top-3 right-3 px-3 py-1 rounded-md bg-gray-100 hover:bg-gray-200 !cursor-pointer"
+              className="absolute top-3 right-3 px-3 py-1 rounded-md bg-gray-100 hover:bg-gray-200 cursor-pointer!"
             >
               Close
             </button>

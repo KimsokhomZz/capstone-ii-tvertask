@@ -206,11 +206,11 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
           transition={{ delay: 0.1 }}
           className="flex items-center gap-4 mb-8"
         >
-          <div className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-3xl flex items-center justify-center shadow-lg">
-            <span className="text-3xl">🎵</span>
+          <div className="w-16 h-16 bg-linear-to-br from-yellow-400/90 to-orange-500/90 rounded-3xl flex items-center justify-center shadow-lg">
+            <span className="text-3xl">🎧</span>
           </div>
           <div className="flex-1">
-            <h3 className="text-3xl font-bold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
+            <h3 className="text-3xl font-bold bg-linear-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
               Focus Music
             </h3>
             <p className="text-sm text-gray-600">
@@ -224,7 +224,7 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
               whileTap={{ scale: 0.95 }}
               aria-label="Show compact music card"
               onClick={() => setShowCompact(true)}
-              className="p-3 rounded-2xl bg-white shadow-md hover:shadow-lg transition-all"
+              className="p-3 rounded-2xl bg-white/80 backdrop-blur-sm border border-gray-200 shadow-sm hover:shadow-lg transition-all duration-75"
             >
               <ChevronDown className="w-6 h-6 text-yellow-500" />
             </motion.button>
@@ -252,7 +252,7 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
                 }}
                 className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-medium transition-all whitespace-nowrap ${
                   isActive
-                    ? `bg-gradient-to-r ${tab.color} text-white shadow-lg`
+                    ? `bg-linear-to-r ${tab.color} text-white shadow-lg`
                     : "bg-white text-gray-600 hover:bg-gray-50 shadow-sm"
                 }`}
               >
@@ -289,7 +289,7 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05 }}
-                    className={`bg-white rounded-3xl p-6 shadow-md hover:shadow-xl transition-all relative overflow-hidden ${
+                    className={`bg-white/80 backdrop-blur-sm border border-gray-200 rounded-2xl px-4 py-3 shadow-sm hover:shadow-md transition-all duration-200 relative overflow-hidden ${
                       isPlaying ? "ring-2 ring-yellow-400" : ""
                     }`}
                   >
