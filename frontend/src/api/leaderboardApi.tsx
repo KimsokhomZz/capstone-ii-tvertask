@@ -7,19 +7,21 @@ interface Player {
   name: string;
   xp: number;
   avatar: string;
+  level: number;
 }
 
 export interface LeaderboardData {
-  weekly: Player[];
-  monthly: Player[];
-  global: Player[];
+  leaderboard: Player[];
 }
 
-export async function fetchLeaderboard() {
-    try {
-        const res = await axios.post<LeaderboardData>(API_URL+`/?page=0&limit=10`);
-        return res.data
-    } catch (error) {
-        console.error("Error fetching leaderboard: ", error)
-    }
+export async function fetchLeaderboard(page = 0, limit = 10) {
+  try {
+    const res = await axios.get<LeaderboardData>(
+      API_URL + `/?page=${page}&limit=${limit}`
+    );
+    return res.data;
+  } catch (error) {
+    console.error("Error fetching leaderboard: ", error);
+    throw error;
+  }
 }
