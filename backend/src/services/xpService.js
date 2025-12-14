@@ -172,19 +172,20 @@ exports.getStatus = async (userId) => {
   const xp = Number(userXP.total_xp ?? userXP.xp ?? 0);
   const pendingXP = Number(userXP.pendingXP ?? 0);
 
-  const { level, nextLevelXp } = calculateLevel(xp);
+  // Get all level info at once
+  const { level, nextLevelXp, prevLevelTotal, nextLevelTotal } = calculateLevel(xp);
 
-  // progressPercent = (currentXP / XP required for next level)
+  // progressPercent = (currentXP in this level / XP required for this level)
   const progressPercent = Math.round(
-    ((xp - calculateLevel(xp).prevLevelTotal) /
-      (calculateLevel(xp).nextLevelTotal - calculateLevel(xp).prevLevelTotal)) *
-      100
+    ((xp - prevLevelTotal) / (nextLevelTotal - prevLevelTotal)) * 100
   );
 
   return {
     xp,
     level,
-    nextLevelXp,
+    nextLevelXp, // keep for legacy, but don't use for progress bar
+    prevLevelXp: prevLevelTotal,
+    nextLevelTotal,
     pendingXP,
     progressPercent: Number.isFinite(progressPercent) ? progressPercent : 0,
   };

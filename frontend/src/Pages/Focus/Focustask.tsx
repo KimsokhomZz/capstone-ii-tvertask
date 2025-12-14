@@ -9,24 +9,11 @@ import { ArrowLeft } from "lucide-react";
 import { useTheme } from "../../context/ThemeContext";
 import ThemeCard from "../../components/ThemeCard";
 import ThemeGallery from "../../components/ThemeGallery";
-import { themeOptions } from "../../components/ThemeOptions"; // ⬅ NEW IMPORT
+import { themeOptions } from "../../components/ThemeOptions";
 import { awardXp } from "../../api/userXpApi";
 import useTaskNotes from "../../hooks/useTaskNotes";
 import { toast as toastify } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
-type ThemeOption = {
-  id: string;
-  name: string;
-  light: {
-    className: string;
-    preview: string;
-  };
-  dark: {
-    className: string;
-    preview: string;
-  };
-};
 
 // type Note = { id: number; text: string; editing?: boolean };
 
@@ -37,146 +24,11 @@ export default function Focustask() {
   const [showMusic, setShowMusic] = useState(false);
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [bgId, setBgId] = useState<string>();
-  const bgOptions: ThemeOption[] = [
-    // None option - available in both themes
-    {
-      id: "none",
-      name: "None",
-      light: {
-        className: "",
-        preview: "bg-white",
-      },
-      dark: {
-        className: "dark:bg-black",
-        preview: "bg-black",
-      },
-    },
-    // Light theme only options
-    {
-      id: "sunset",
-      name: "Sunset",
-      light: {
-        className:
-          "bg-gradient-to-br from-orange-300/40 via-pink-300/30 to-fuchsia-300/40",
-        preview:
-          "bg-gradient-to-br from-orange-100 via-pink-100 to-fuchsia-100",
-      },
-      dark: {
-        className: "",
-        preview: "",
-      },
-    },
-    {
-      id: "ocean",
-      name: "Ocean",
-      light: {
-        className:
-          "bg-gradient-to-br from-cyan-400/40 via-blue-500/30 to-indigo-600/40",
-        preview: "bg-gradient-to-br from-cyan-100 via-blue-100 to-indigo-100",
-      },
-      dark: {
-        className: "",
-        preview: "",
-      },
-    },
-    {
-      id: "forest",
-      name: "Forest",
-      light: {
-        className:
-          "bg-gradient-to-br from-emerald-400/40 via-teal-400/30 to-lime-400/40",
-        preview: "bg-gradient-to-br from-emerald-100 via-teal-100 to-lime-100",
-      },
-      dark: {
-        className: "",
-        preview: "",
-      },
-    },
-    {
-      id: "ice",
-      name: "Ice",
-      light: {
-        className: "bg-gradient-to-br from-blue-200 to-cyan-200",
-        preview: "bg-gradient-to-br from-blue-100 to-cyan-100",
-      },
-      dark: {
-        className: "",
-        preview: "",
-      },
-    },
-    {
-      id: "sunrise",
-      name: "Sunrise",
-      light: {
-        className: "bg-gradient-to-br from-yellow-200 to-pink-300",
-        preview: "bg-gradient-to-br from-yellow-100 to-pink-100",
-      },
-      dark: {
-        className: "",
-        preview: "",
-      },
-    },
-    // Dark theme only options
-    {
-      id: "aurora",
-      name: "Aurora",
-      light: {
-        className: "",
-        preview: "",
-      },
-      dark: {
-        className:
-          "dark:bg-gradient-to-br dark:from-indigo-900/40 dark:via-purple-900/30 dark:to-fuchsia-900/40",
-        preview:
-          "bg-gradient-to-br from-indigo-900/80 via-purple-900/80 to-fuchsia-900/80",
-      },
-    },
-    {
-      id: "midnight",
-      name: "Midnight",
-      light: {
-        className: "",
-        preview: "",
-      },
-      dark: {
-        className:
-          "dark:bg-gradient-to-br dark:from-slate-800/80 dark:via-slate-900/80 dark:to-black/80",
-        preview: "bg-gradient-to-br from-slate-800 via-slate-900 to-black",
-      },
-    },
-    {
-      id: "dawn",
-      name: "Dawn",
-      light: {
-        className: "",
-        preview: "",
-      },
-      dark: {
-        className:
-          "dark:bg-gradient-to-br dark:from-rose-900/30 dark:to-sky-900/30",
-        preview: "bg-gradient-to-br from-rose-900/80 to-sky-900/80",
-      },
-    },
-    {
-      id: "peaks",
-      name: "Peaks",
-      light: {
-        className: "",
-        preview: "",
-      },
-      dark: {
-        className:
-          "dark:bg-gradient-to-b dark:from-slate-800/60 dark:to-slate-900/60",
-        preview: "bg-gradient-to-b from-slate-800 to-slate-900",
-      },
-    },
-  ];
-
   const selectedBg =
     bgId && bgId !== "none"
       ? darkMode
-        ? bgOptions.find((o) => o.id === bgId)?.dark.className ?? ""
-        : bgOptions.find((o) => o.id === bgId)?.light.className ?? ""
+        ? themeOptions.find((o) => o.id === bgId)?.dark?.className ?? ""
+        : themeOptions.find((o) => o.id === bgId)?.light?.className ?? ""
       : "";
   const location = useLocation() as {
     state?: { title?: string; description?: string; taskId?: number | string };
@@ -321,7 +173,7 @@ export default function Focustask() {
               {taskDescription ? (
                 <span className="italic text-green-400">{taskDescription}</span>
               ) : (
-                <span className="italic text-green-400">
+                <span className="italic text-gray-400">
                   No description added yet ✨
                 </span>
               )}

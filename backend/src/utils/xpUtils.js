@@ -23,10 +23,11 @@ function calculateLevel(totalXp) {
         if (level > 1000) break; // safety
     }
 
+    const prevLevelTotal = xpForLevel(level);
     const nextLevelTotal = xpForLevel(level + 1);
     const nextLevelXp = Math.max(0, nextLevelTotal - totalXp);
 
-    return { level, nextLevelXp };
+    return { level, nextLevelXp, prevLevelTotal, nextLevelTotal };
 }
 
 function updateStreak(userXP) {

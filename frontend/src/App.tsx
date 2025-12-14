@@ -58,14 +58,6 @@ function SettingsPage() {
     </div>
   );
 }
-function SupportPage() {
-  return (
-    <div className="bg-white p-8 md:p-10 rounded-[28px] shadow-xl w-full max-w-4xl border border-gray-100">
-      <h1 className="text-2xl font-bold mb-2">Support</h1>
-      <p className="text-gray-500">Coming soon...</p>
-    </div>
-  );
-}
 
 function App() {
   return (

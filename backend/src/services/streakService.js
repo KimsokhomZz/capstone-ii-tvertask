@@ -46,8 +46,8 @@ exports.updateStrike = async (userId) => {
   const diffDays = Math.floor((now - last) / (1000 * 60 * 60 * 24));
 
   if (diffDays === 0) {
-    // Same day → continue existing streak
-    xp.current_streak += 1;
+    // Already active today, no need increment streak
+    // Optionally, can skip updating streak at all
   } else if (diffDays === 1) {
     // Yesterday → streak continues
     xp.current_streak += 1;
@@ -55,9 +55,7 @@ exports.updateStrike = async (userId) => {
     // Lost streak → reset
     xp.current_streak = 1;
   }
-
   xp.last_active_date = now;
-
   await xp.save();
 
   // Notify on streak milestones (3, 7, 14, 30, etc.)

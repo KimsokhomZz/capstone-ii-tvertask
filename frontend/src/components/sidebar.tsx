@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   Home,
   Target,
@@ -19,12 +19,32 @@ interface SidebarProps {
   onLogout?: () => void;
 }
 
+const moods = [
+  { emoji: "😊", label: "Happy" },
+  { emoji: "😌", label: "Calm" },
+  { emoji: "🙏", label: "Thankful" },
+  { emoji: "💡", label: "Focused" },
+  { emoji: "💪", label: "Growing" },
+  { emoji: "🔥", label: "Motivated" },
+  { emoji: "😤", label: "Determined" },
+  { emoji: "😴", label: "Tired" },
+  { emoji: "😥", label: "Anxious" },
+  { emoji: "😇", label: "Content" },
+  { emoji: "😋", label: "Hungry" },
+  { emoji: "🌟", label: "Inspired" },
+];
+
 const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { logout } = useAuth();
   const { user } = useContext(AuthContext) as any;
   const { unreadCount, fetchUnreadCount } = useContext(NotificationContext)!;
+
+  const [selectedMood, setSelectedMood] = useState<number | null>(() => {
+    const stored = localStorage.getItem("selectedMood");
+    return stored !== null ? Number(stored) : null;
+  });
 
   useEffect(() => {
     if (user?.id) {
@@ -35,6 +55,30 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
       return () => clearInterval(interval);
     }
   }, [user?.id, fetchUnreadCount]);
+
+  // Listen to localStorage changes from other components
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const stored = localStorage.getItem("selectedMood");
+      setSelectedMood(stored !== null ? Number(stored) : null);
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+
+    // Also poll localStorage for changes within the same tab
+    const interval = setInterval(() => {
+      const stored = localStorage.getItem("selectedMood");
+      const current = stored !== null ? Number(stored) : null;
+      if (current !== selectedMood) {
+        setSelectedMood(current);
+      }
+    }, 1000);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      clearInterval(interval);
+    };
+  }, [selectedMood]);
 
   const handleLogout = async () => {
     try {
@@ -63,13 +107,13 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="p-6 pb-8"
+          className="w-full mb-4"
         >
-          <div className="relative w-full border-b-2 border-yellow-200 pb-4">
+          <div className="relative w-full border-b-2 border-yellow-200 pb-4 flex justify-center items-center">
             <img
               src="../src/assets/logo1.svg"
               alt="TverTask Logo"
-              className="w-full h-full object-contain rounded-2xl"
+              className="w-48 object-contain rounded-2xl"
             />
           </div>
         </motion.div>
@@ -170,6 +214,30 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
             )}
           </motion.button>
         </div>
+
+        {/* Mood Display - Moved above logout */}
+        {selectedMood !== null && moods[selectedMood] && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-linear-to-r from-purple-50 to-pink-50 border-2 border-purple-300 rounded-2xl p-3 shadow-md hover:shadow-lg transition-all"
+          >
+            <div className="flex items-center gap-2">
+              <span className="text-2xl animate-bounce">
+                {moods[selectedMood].emoji}
+              </span>
+              <div className="flex flex-col flex-1 min-w-0">
+                <span className="text-xs text-purple-500 font-semibold uppercase tracking-wide">
+                  Current Mood
+                </span>
+                <span className="text-sm font-bold text-purple-700 truncate">
+                  {moods[selectedMood].label}
+                </span>
+              </div>
+              <div className="w-2 h-2 bg-orange-400 rounded-full animate-pulse shrink-0"></div>
+            </div>
+          </motion.div>
+        )}
 
         {/* Logout Section */}
         <motion.button

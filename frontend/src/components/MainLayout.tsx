@@ -6,7 +6,7 @@ export default function MainLayout() {
   const location = useLocation();
   const isFocusPage = location.pathname.includes("/focus");
   const isTaskListPage =
-    location.pathname === "/tasklist" || location.pathname === "/";
+    location.pathname === "/focus" || location.pathname === "/";
 
   return (
     <div className={`min-h-screen flex bg-[#FFFBF6]`}>
@@ -26,7 +26,9 @@ export default function MainLayout() {
         <div
           className={`min-h-screen overflow-y-auto ${
             isTaskListPage
-              ? "max-w-4xl mx-auto pt-12 px-4"
+              ? "max-w-5xl mx-auto pt-12 px-4"
+              : location.pathname.includes("/pomodoro")
+              ? "w-full"
               : "max-w-5xl mx-auto py-12"
           }`}
         >
