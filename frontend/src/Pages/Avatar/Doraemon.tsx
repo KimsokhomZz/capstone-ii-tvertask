@@ -1,13 +1,14 @@
 import React, { useEffect, useState, useRef } from "react";
 
-export enum FaceState {
-  IDLE = "IDLE",
-  HAPPY = "HAPPY",
-  SHOCK = "SHOCK",
-  EAT = "EAT",
-  ANGRY = "ANGRY",
-  SLEEP = "SLEEP",
-}
+export type FaceState = "IDLE" | "HAPPY" | "SHOCK" | "EAT" | "ANGRY" | "SLEEP";
+export const FaceState = {
+  IDLE: "IDLE" as FaceState,
+  HAPPY: "HAPPY" as FaceState,
+  SHOCK: "SHOCK" as FaceState,
+  EAT: "EAT" as FaceState,
+  ANGRY: "ANGRY" as FaceState,
+  SLEEP: "SLEEP" as FaceState,
+};
 
 const BUTTONS = [
   { type: "action", id: "copter", label: "Copter", icon: "fa-fan", spin: true },
@@ -153,7 +154,7 @@ const Doraemon: React.FC<{ showControls?: boolean }> = ({
           `}</style>
 
           {msg && (
-            <div className="absolute -top-24 left-1/2 -translate-x-1/2 z-50 animate-bounce whitespace-nowrap pointer-events-none">
+            <div className="absolute -top-6 left-1/2 -translate-x-1/2 z-50 animate-bounce whitespace-nowrap pointer-events-none">
               <div className="bg-white border-4 border-black px-5 py-3 rounded-2xl shadow-lg relative">
                 <span
                   className={`text-lg font-black ${

@@ -1,17 +1,29 @@
 import React, { useEffect, useState } from "react";
 
-export enum AnimationState {
-  IDLE = "IDLE",
-  WIGGLE = "WIGGLE",
-  SHOCK = "SHOCK",
-  SHY = "SHY",
-  TALKING = "TALKING",
-  LAUGHING = "LAUGHING",
-  LOVE = "LOVE",
-  CRY = "CRY",
-  EAT = "EAT",
-  ANGRY = "ANGRY",
-}
+export type AnimationState =
+  | "IDLE"
+  | "WIGGLE"
+  | "SHOCK"
+  | "SHY"
+  | "TALKING"
+  | "LAUGHING"
+  | "LOVE"
+  | "CRY"
+  | "EAT"
+  | "ANGRY";
+
+export const AnimationState = {
+  IDLE: "IDLE" as AnimationState,
+  WIGGLE: "WIGGLE" as AnimationState,
+  SHOCK: "SHOCK" as AnimationState,
+  SHY: "SHY" as AnimationState,
+  TALKING: "TALKING" as AnimationState,
+  LAUGHING: "LAUGHING" as AnimationState,
+  LOVE: "LOVE" as AnimationState,
+  CRY: "CRY" as AnimationState,
+  EAT: "EAT" as AnimationState,
+  ANGRY: "ANGRY" as AnimationState,
+};
 
 const CONTROLS = [
   {
@@ -72,7 +84,7 @@ const ShinChan: React.FC<{ showControls?: boolean; className?: string }> = ({
     >
       <div
         className={`relative w-64 h-64 md:w-80 md:h-80 mx-auto flex items-center justify-center transition-transform duration-300 ${
-          showControls ? "mb-12" : ""
+          showControls ? "mb-4" : ""
         }`}
       >
         <style>{`
@@ -103,7 +115,7 @@ const ShinChan: React.FC<{ showControls?: boolean; className?: string }> = ({
         `}</style>
 
         {s(AnimationState.ANGRY) && (
-          <div className="absolute -top-20 left-1/2 -translate-x-1/2 z-50 animate-bounce whitespace-nowrap">
+          <div className="absolute -top-10 left-1/2 -translate-x-1/2 z-50 animate-bounce whitespace-nowrap">
             <div className="bg-white border-4 border-black px-6 py-3 rounded-2xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] relative">
               <span className="text-2xl font-black text-red-600 tracking-widest uppercase">
                 KDM AH THAI !!!
