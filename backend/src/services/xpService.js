@@ -1,4 +1,5 @@
-const { UserXP, XPLog } = require("../models");
+const { UserXP, XPLog, ProgressLog } = require("../models");
+const { Op } = require("sequelize");
 const { calculateLevel } = require("../utils/xpUtils");
 const badgeService = require("./badgeService");
 const streakService = require("./streakService");
@@ -86,6 +87,38 @@ exports.addXP = async ({ userId, amount, source = "xp_add" }) => {
   else logPayload.userId = userId;
 
   await XPLog.create(logPayload);
+
+  // --- NEW: update today's ProgressLog xp_earned (safe, non-blocking) ---
+  try {
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+    const nextDay = new Date(startOfDay);
+    nextDay.setDate(nextDay.getDate() + 1);
+
+    // find today's progress log
+    let progress = await ProgressLog.findOne({
+      where: {
+        userId,
+        date: { [Op.gte]: startOfDay, [Op.lt]: nextDay },
+      },
+    });
+
+    if (!progress) {
+      await ProgressLog.create({
+        userId,
+        date: new Date(),
+        tasks_completed: 0,
+        focus_time: 0,
+        steak: 0,
+        xp_earned: amount,
+      });
+    } else {
+      await progress.increment({ xp_earned: amount });
+    }
+  } catch (err) {
+    console.warn("Failed updating ProgressLog xp_earned:", err.message);
+  }
+  // --- end new block ---
 
   // Streak service (safe)
   try {

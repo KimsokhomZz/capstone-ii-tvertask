@@ -6,8 +6,9 @@ interface Player {
   rank: number;
   name: string;
   xp: number;
-  avatar: string;
-  level: number;
+  avatar?: string;
+  level?: number;
+  xpEarned?: number; // today's XP earned
 }
 
 export interface LeaderboardData {

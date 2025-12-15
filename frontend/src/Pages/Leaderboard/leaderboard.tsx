@@ -176,7 +176,7 @@ const FocusSessionLeaderboard = () => {
                 </p>
                 <p className="text-gray-600 text-sm">{topThree[2]?.xp} XP</p>
                 <p className="text-gray-500 text-xs">
-                  Level {topThree[2]?.level}
+                  Level {topThree[2]?.level ?? "-"}
                 </p>
               </div>
             </div>
@@ -185,16 +185,18 @@ const FocusSessionLeaderboard = () => {
 
         {/* Leaderboard Table */}
         <div className="bg-white/5 rounded-2xl shadow-lg overflow-hidden">
-          <div className="bg-gray-200 py-4 px-6 grid grid-cols-3 font-bold text-gray-700 uppercase text-sm">
+          <div className="bg-gray-200 py-4 px-6 grid grid-cols-4 font-bold text-gray-700 uppercase text-sm">
             <div>Rank</div>
             <div>User</div>
-            <div className="text-right">XP</div>
+            <div className="text-right">XP Earned (today)</div>{" "}
+            {/* replaced column */}
+            <div className="text-right">Total XP</div>
           </div>
           <div className="divide-y divide-gray-200">
-            {restOfList.map((user, index) => (
+            {currentData.map((user, index) => (
               <div
-                key={index}
-                className="py-4 px-6 grid grid-cols-3 items-center hover:bg-gray-50 transition-colors"
+                key={user.rank ?? index}
+                className="py-4 px-6 grid grid-cols-4 items-center hover:bg-gray-50 transition-colors"
               >
                 <div className="text-gray-600 font-medium">{user.rank}</div>
                 <div className="flex items-center gap-3">
@@ -208,12 +210,19 @@ const FocusSessionLeaderboard = () => {
                   <div className="text-gray-800 font-medium">
                     {user.name}
                     <span className="ml-2 text-xs text-gray-500">
-                      Lv. {user.level}
+                      Lv. {user.level ?? "-"}
                     </span>
                   </div>
                 </div>
+
+                {/* xp_earned (today) */}
+                <div className="text-right text-gray-700">
+                  {typeof user.xpEarned === "number" ? user.xpEarned : "-"}
+                </div>
+
+                {/* Total XP */}
                 <div className="text-right text-gray-800 font-semibold">
-                  {user.xp}
+                  {user.xp ?? 0}
                 </div>
               </div>
             ))}
