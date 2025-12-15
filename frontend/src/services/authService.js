@@ -46,8 +46,10 @@ class AuthService {
         throw new Error(data.message || "Registration failed");
       }
 
-      // For email verification flow, don't store token yet
+      // For email verification flow, don't store token or user data yet
       if (data.data?.requiresVerification) {
+        // Clear any existing auth data to prevent confusion
+        this.clearAuthData();
         return data;
       }
 
