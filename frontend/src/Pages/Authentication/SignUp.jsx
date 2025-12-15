@@ -213,8 +213,6 @@ export default function SignUp() {
       errors.email = "This email is already in use";
     } else if (emailCheckStatus === "checking") {
       errors.email = "Please wait while we verify email availability";
-    } else if (emailCheckStatus !== "available" && email.trim()) {
-      errors.email = "Please wait for email verification to complete";
     }
 
     if (!password) {
