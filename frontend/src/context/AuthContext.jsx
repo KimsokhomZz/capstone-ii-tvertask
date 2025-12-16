@@ -123,6 +123,16 @@ export const AuthProvider = ({ children }) => {
             "[AUTH DEBUG] Token and user found, fetching fresh user data..."
           );
 
+          // Skip fetching if user is not verified (email verification in progress)
+          if (!user.isEmailVerified) {
+            console.log(
+              "[AUTH DEBUG] User email not verified, clearing auth data"
+            );
+            authService.clearAuthData();
+            dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: false });
+            return;
+          }
+
           // Always fetch fresh user data from server to get latest bio and location
           try {
             const freshUserResponse = await authService.getCurrentUser();
