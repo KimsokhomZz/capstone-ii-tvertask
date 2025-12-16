@@ -49,10 +49,10 @@ UserQuest.belongsTo(User, { foreignKey: "userId" });
 Quest.hasMany(UserQuest, { foreignKey: "questId" });
 UserQuest.belongsTo(Quest, { foreignKey: "questId" });
 
-User.hasOne(ProgressLog, {
-  foreignKey: "userId",
-});
-ProgressLog.belongsTo(User, { foreignKey: "userId" });
+// User.hasOne(ProgressLog, {
+//   foreignKey: "userId",
+// });
+// ProgressLog.belongsTo(User, { foreignKey: "userId" });
 
 User.hasMany(TaskNote, { foreignKey: "user_id" });
 TaskNote.belongsTo(User, { foreignKey: "user_id" });
@@ -60,6 +60,12 @@ TaskNote.belongsTo(User, { foreignKey: "user_id" });
 // USER → NOTIFICATIONS
 User.hasMany(Notification, { foreignKey: "user_id", onDelete: "CASCADE" });
 Notification.belongsTo(User, { foreignKey: "user_id" });
+
+// USER → PROGRESS LOGS
+User.hasMany(ProgressLog, {
+  foreignKey: "userId",
+});
+ProgressLog.belongsTo(User);
 
 module.exports = {
   sequelize,
