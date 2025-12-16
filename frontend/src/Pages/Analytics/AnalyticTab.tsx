@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   BarChart3,
   Heart,
@@ -6,10 +6,13 @@ import {
   Clock3,
   TrendingUp,
 } from "lucide-react";
+import { fetchAnalyticsStats } from "@/api/activityApi";
+import type { AnalyticsStats } from "@/api/activityApi";
+import { moods } from "@/utils/moods";
 
 interface StatCardProps {
   label: string;
-  value: string;
+  value: string | number;
   subLabel?: string;
   icon?: React.ReactNode;
 }
@@ -33,45 +36,75 @@ function StatCard({ label, value, subLabel, icon }: StatCardProps) {
   );
 }
 
-type RangeKey = "overview" | "week" | "month";
+type RangeKey = "overview" | "day" | "week" | "month";
 
 export default function AnalyticTab() {
   const [range, setRange] = useState<RangeKey>("overview");
+  const [stats, setStats] = useState<AnalyticsStats | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const statsByRange: Record<
-    RangeKey,
-    {
-      mood: string;
-      taskPerDay: string;
-      focusTime: string;
-      streak: string;
-      subtitle: string;
+  // Get current mood from localStorage
+  const [selectedMood, setSelectedMood] = useState<number | null>(() => {
+    const stored = localStorage.getItem("selectedMood");
+    return stored !== null ? Number(stored) : null;
+  });
+
+  useEffect(() => {
+    let mounted = true;
+    async function loadStats() {
+      try {
+        setLoading(true);
+        const data = await fetchAnalyticsStats(range);
+        if (!mounted) return;
+        setStats(data);
+      } catch (err) {
+        console.error("Failed to load analytics stats:", err);
+      } finally {
+        if (mounted) setLoading(false);
+      }
     }
-  > = {
-    overview: {
-      mood: "5.0/5",
-      taskPerDay: "1.0",
-      focusTime: "0",
-      streak: "1",
-      subtitle: "Last 30 days",
-    },
-    week: {
-      mood: "4.6/5",
-      taskPerDay: "1.3",
-      focusTime: "18",
-      streak: "4",
-      subtitle: "This week",
-    },
-    month: {
-      mood: "4.2/5",
-      taskPerDay: "1.1",
-      focusTime: "22",
-      streak: "9",
-      subtitle: "This month",
-    },
-  };
+    loadStats();
+    return () => {
+      mounted = false;
+    };
+  }, [range]);
 
-  const current = statsByRange[range];
+  // Listen to mood changes
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const stored = localStorage.getItem("selectedMood");
+      setSelectedMood(stored !== null ? Number(stored) : null);
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+
+    const interval = setInterval(() => {
+      const stored = localStorage.getItem("selectedMood");
+      const current = stored !== null ? Number(stored) : null;
+      if (current !== selectedMood) {
+        setSelectedMood(current);
+      }
+    }, 1000);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      clearInterval(interval);
+    };
+  }, [selectedMood]);
+
+  // Display mood emoji + label or fallback
+  const moodDisplay =
+    selectedMood !== null && moods[selectedMood]
+      ? `${moods[selectedMood].emoji} ${moods[selectedMood].label}`
+      : "No mood";
+
+  // Helper function to format minutes into "Xh Ym" format
+  const formatFocusTime = (minutes: number): string => {
+    if (minutes < 60) return `${minutes}m`;
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
+  };
 
   return (
     <div className="space-y-6">
@@ -91,7 +124,7 @@ export default function AnalyticTab() {
 
       <div className="flex justify-end">
         <div className="inline-flex items-center gap-1 bg-gray-100 rounded-full px-1 py-1 text-[11px] font-medium">
-          <button
+          {/* <button
             className={`px-3 py-1 rounded-full ${
               range === "overview"
                 ? "bg-[#FFC94A] text-white shadow-sm"
@@ -100,6 +133,16 @@ export default function AnalyticTab() {
             onClick={() => setRange("overview")}
           >
             Overview
+          </button> */}
+          <button
+            className={`px-3 py-1 rounded-full ${
+              range === "day"
+                ? "bg-[#FFC94A] text-white shadow-sm"
+                : "text-gray-600"
+            }`}
+            onClick={() => setRange("day")}
+          >
+            Day
           </button>
           <button
             className={`px-3 py-1 rounded-full ${
@@ -124,32 +167,38 @@ export default function AnalyticTab() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard
-          label="Avg Mood"
-          value={current.mood}
-          subLabel={current.subtitle}
-          icon={<Heart className="w-4 h-4 text-pink-500" />}
-        />
-        <StatCard
-          label="Task/Day"
-          value={current.taskPerDay}
-          subLabel="Average completed"
-          icon={<CheckCircle2 className="w-4 h-4 text-emerald-500" />}
-        />
-        <StatCard
-          label="Focus Time"
-          value={current.focusTime}
-          subLabel="Minutes/session"
-          icon={<Clock3 className="w-4 h-4 text-sky-500" />}
-        />
-        <StatCard
-          label="Streak"
-          value={current.streak}
-          subLabel="Current streak"
-          icon={<TrendingUp className="w-4 h-4 text-emerald-500" />}
-        />
-      </div>
+      {loading ? (
+        <div className="flex items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <StatCard
+            label="Current Mood"
+            value={moodDisplay}
+            subLabel={stats?.subtitle || ""}
+            icon={<Heart className="w-4 h-4 text-pink-500" />}
+          />
+          <StatCard
+            label="Task/Day"
+            value={stats?.taskPerDay || "0"}
+            subLabel="Average completed"
+            icon={<CheckCircle2 className="w-4 h-4 text-emerald-500" />}
+          />
+          <StatCard
+            label="Focus Time"
+            value={formatFocusTime(stats?.focusTime || 0)}
+            subLabel="Total time"
+            icon={<Clock3 className="w-4 h-4 text-sky-500" />}
+          />
+          <StatCard
+            label="Streak"
+            value={stats?.streak || 0}
+            subLabel="Current streak"
+            icon={<TrendingUp className="w-4 h-4 text-emerald-500" />}
+          />
+        </div>
+      )}
     </div>
   );
 }

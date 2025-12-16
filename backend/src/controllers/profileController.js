@@ -2,6 +2,10 @@ const User = require("../models/userModel");
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
+const { Op } = require("sequelize");
+const Task = require("../models/taskModel");
+const ProgressLog = require("../models/progressLogModel");
+// const Mood = require("../models/moodModel"); // <- ADD THIS (commented out for now)
 
 // Configure multer for file upload
 const storage = multer.diskStorage({
@@ -92,7 +96,7 @@ const updateProfile = async (req, res) => {
       const existingUser = await User.findOne({
         where: {
           email: email.toLowerCase(),
-          id: { [require("sequelize").Op.ne]: userId },
+          id: { [Op.ne]: userId },
         },
       });
 
@@ -581,6 +585,290 @@ const filterActivities = (activities, filter) => {
   );
 };
 
+
+////////////////////////////
+// Get activity statistics
+////////////////////////////
+
+const getActivityStats = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    console.log("🔍 Fetching stats for userId:", userId);
+
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date();
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const startOfWeek = new Date();
+    startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
+    startOfWeek.setHours(0, 0, 0, 0);
+
+    const tasksToday = await Task.count({
+      where: {
+        user_id: userId,
+        createdAt: { [Op.between]: [startOfDay, endOfDay] },
+        status: "completed",
+      },
+    });
+
+    const totalTasks = await Task.count({
+      where: {
+        user_id: userId,
+        status: "completed",
+      },
+    });
+
+    // Focus time: prefer ProgressLog.sum, fallback to Task.sum
+    let focusToday = 0;
+    try {
+      if (ProgressLog && typeof ProgressLog.sum === "function") {
+        // determine FK + date column names (support multiple schemas)
+        const progressUserCol = ProgressLog.rawAttributes?.userId ? "userId" : "user_id";
+        const progressDateCol = ProgressLog.rawAttributes?.date ? "date" : (ProgressLog.rawAttributes?.createdAt ? "createdAt" : "created_at");
+
+        focusToday = (await ProgressLog.sum("focus_time", {
+          where: {
+            [Op.and]: [
+              { [progressUserCol]: userId },
+              { [progressDateCol]: { [Op.between]: [startOfDay, endOfDay] } },
+            ],
+          },
+        })) || 0;
+      } else {
+        // fallback: sum task.focus_time for completed tasks today
+        focusToday = (await Task.sum("focus_time", {
+          where: {
+            user_id: userId,
+            status: "completed",
+            createdAt: { [Op.between]: [startOfDay, endOfDay] },
+          },
+        })) || 0;
+      }
+    } catch (err) {
+      console.error("Error calculating focusToday:", err);
+      focusToday = 0;
+    }
+
+    const avgFocusTime = tasksToday > 0 ? Math.round((focusToday || 0) / tasksToday) : 0;
+
+    const tasksThisWeek = await Task.count({
+      where: {
+        user_id: userId,
+        createdAt: { [Op.gte]: startOfWeek },
+        status: "completed",
+      },
+    });
+
+    const moodsToday = 0; // Temporary default value
+
+    // Calculate stats
+    const daysInWeek = Math.ceil((Date.now() - startOfWeek) / (1000 * 60 * 60 * 24)) || 1;
+    const weeklyAvg = Math.round((tasksThisWeek / daysInWeek) * 10) / 10;
+    const taskPercentage = totalTasks > 0 ? Math.round((tasksToday / totalTasks) * 100) : 0;
+
+    res.json({
+      success: true,
+      data: {
+        tasksToday,
+        taskPercentage,
+        focusTimeToday: focusToday,
+        avgFocusTime,
+        weeklyAvg,
+        moodsToday,
+      },
+    });
+  } catch (error) {
+    console.error("❌ Error fetching activity stats:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+const getWeeklyStats = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const startOfWeek = new Date();
+    startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
+    startOfWeek.setHours(0, 0, 0, 0);
+
+    // Tasks Completed This Week
+    const tasksCompleted = await Task.count({
+      where: {
+        user_id: userId,
+        createdAt: { [Op.gte]: startOfWeek },
+        status: "completed",
+      },
+    });
+
+    // Focus Sessions This Week (count of completed tasks)
+    const focusSessions = await Task.count({
+      where: {
+        user_id: userId,
+        createdAt: { [Op.gte]: startOfWeek },
+        status: "completed",
+      },
+    });
+
+    // Avatar Grow (placeholder - you can track level changes)
+    const avatarGrow = 0; // TODO: Implement avatar growth tracking
+
+    // Focus Time This Week
+    let focusTime = 0;
+    try {
+      if (ProgressLog && typeof ProgressLog.sum === "function") {
+        const progressUserCol = ProgressLog.rawAttributes?.userId ? "userId" : "user_id";
+        const progressDateCol = ProgressLog.rawAttributes?.date ? "date" :
+          (ProgressLog.rawAttributes?.createdAt ? "createdAt" : "created_at");
+
+        focusTime = (await ProgressLog.sum("focus_time", {
+          where: {
+            [Op.and]: [
+              { [progressUserCol]: userId },
+              { [progressDateCol]: { [Op.gte]: startOfWeek } },
+            ],
+          },
+        })) || 0;
+      } else {
+        focusTime = (await Task.sum("focus_time", {
+          where: {
+            user_id: userId,
+            status: "completed",
+            createdAt: { [Op.gte]: startOfWeek },
+          },
+        })) || 0;
+      }
+    } catch (err) {
+      console.error("Error calculating weekly focus time:", err);
+      focusTime = 0;
+    }
+
+    res.json({
+      success: true,
+      data: {
+        tasksCompleted,
+        focusSessions,
+        avatarGrow,
+        focusTime,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching weekly stats:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+const getAnalyticsStats = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { range = "overview" } = req.query; // overview, day, week, month
+
+    const now = new Date();
+    let startDate = new Date(0); // default: all time for overview
+
+    if (range === "day") {
+      startDate = new Date();
+      startDate.setHours(0, 0, 0, 0);
+    } else if (range === "week") {
+      startDate = new Date();
+      startDate.setDate(startDate.getDate() - 7);
+      startDate.setHours(0, 0, 0, 0);
+    } else if (range === "month") {
+      startDate = new Date();
+      startDate.setMonth(startDate.getMonth() - 1);
+      startDate.setHours(0, 0, 0, 0);
+    }
+
+    // 1. Completed tasks in range
+    const tasksCompleted = await Task.count({
+      where: {
+        user_id: userId,
+        status: "completed",
+        createdAt: { [Op.gte]: startDate },
+      },
+    });
+
+    // 2. Average tasks per day
+    const daysInRange =
+      range === "overview"
+        ? Math.ceil((Date.now() - startDate) / (1000 * 60 * 60 * 24)) || 1
+        : range === "day"
+          ? 1
+          : range === "week"
+            ? 7
+            : 30;
+    const taskPerDay = (tasksCompleted / daysInRange).toFixed(1);
+
+    // 3. Total focus time in range (in minutes)
+    let focusTime = 0;
+    try {
+      if (ProgressLog && typeof ProgressLog.sum === "function") {
+        const progressUserCol = ProgressLog.rawAttributes?.userId
+          ? "userId"
+          : "user_id";
+        const progressDateCol = ProgressLog.rawAttributes?.date
+          ? "date"
+          : ProgressLog.rawAttributes?.createdAt
+            ? "createdAt"
+            : "created_at";
+
+        focusTime =
+          (await ProgressLog.sum("focus_time", {
+            where: {
+              [Op.and]: [
+                { [progressUserCol]: userId },
+                { [progressDateCol]: { [Op.gte]: startDate } },
+              ],
+            },
+          })) || 0;
+      } else {
+        focusTime =
+          (await Task.sum("focus_time", {
+            where: {
+              user_id: userId,
+              status: "completed",
+              createdAt: { [Op.gte]: startDate },
+            },
+          })) || 0;
+      }
+    } catch (err) {
+      console.error("Error calculating focus time:", err);
+      focusTime = 0;
+    }
+
+    // 4. Current streak (from UserXP)
+    const UserXP = require("../models/userXPModel");
+    const userXP = await UserXP.findOne({ where: { user_id: userId } });
+    const streak = userXP ? userXP.current_streak : 0;
+
+    // 5. Mood (placeholder - you can implement mood tracking)
+    const mood = "N/A"; // TODO: Implement mood tracking
+
+    const subtitle =
+      range === "overview"
+        ? "All time"
+        : range === "day"
+          ? "Today"
+          : range === "week"
+            ? "Last 7 days"
+            : "Last 30 days";
+
+    res.json({
+      success: true,
+      data: {
+        mood,
+        taskPerDay,
+        focusTime: Math.round(focusTime),
+        streak,
+        subtitle,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching analytics stats:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 module.exports = {
   getProfile,
   updateProfile,
@@ -592,4 +880,8 @@ module.exports = {
   updateSettings,
   deactivateAccount,
   deleteAccount,
+  getActivityStats,
+  getWeeklyStats,
+  getAnalyticsStats,
 };
+

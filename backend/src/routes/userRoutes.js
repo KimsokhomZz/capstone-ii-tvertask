@@ -20,13 +20,16 @@ router.put("/change-password", protect, authController.changePassword);
 // Protected routes - Profile Management
 router.get("/profile", protect, profileController.getProfile);
 router.put("/profile", protect, profileController.updateProfile);
-router.post("/avatar", protect, ...profileController.uploadAvatar);
+router.post("/avatar", protect, profileController.uploadAvatar);
 router.delete("/avatar", protect, profileController.removeAvatar);
+router.get("/activity-stats", protect, profileController.getActivityStats);
+router.get("/analytics-stats", protect, profileController.getAnalyticsStats);
 
 // Protected routes - Stats and Activities
 router.get("/stats", protect, profileController.getStats);
 router.get("/detailed-stats", protect, profileController.getDetailedStats);
 router.get("/activities", protect, profileController.getActivities);
+router.get("/weekly-stats", protect, profileController.getWeeklyStats);
 
 // Protected routes - Settings and Account Management
 router.put("/settings", protect, profileController.updateSettings);

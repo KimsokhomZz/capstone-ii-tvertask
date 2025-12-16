@@ -14,25 +14,11 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import AuthContext, { useAuth } from "@/context/AuthContext";
 import { NotificationContext } from "@/context/NotificationContext";
+import { moods } from "@/utils/moods";
 
 interface SidebarProps {
   onLogout?: () => void;
 }
-
-const moods = [
-  { emoji: "😊", label: "Happy" },
-  { emoji: "😌", label: "Calm" },
-  { emoji: "🙏", label: "Thankful" },
-  { emoji: "💡", label: "Focused" },
-  { emoji: "💪", label: "Growing" },
-  { emoji: "🔥", label: "Motivated" },
-  { emoji: "😤", label: "Determined" },
-  { emoji: "😴", label: "Tired" },
-  { emoji: "😥", label: "Anxious" },
-  { emoji: "😇", label: "Content" },
-  { emoji: "😋", label: "Hungry" },
-  { emoji: "🌟", label: "Inspired" },
-];
 
 const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
   const navigate = useNavigate();

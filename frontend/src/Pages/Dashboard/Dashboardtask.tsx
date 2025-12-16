@@ -115,11 +115,11 @@ const Dashboard: React.FC = () => {
     loadXpStatus();
   }, [user?.id]);
 
-  const formatDate = (date: Date) =>
-    new Intl.DateTimeFormat("en", {
-      month: "short",
-      day: "numeric",
-    }).format(date);
+  // const formatDate = (date: Date) =>
+  //   new Intl.DateTimeFormat("en", {
+  //     month: "short",
+  //     day: "numeric",
+  //   }).format(date);
 
   const sortedTasks = useMemo(
     () =>
@@ -319,6 +319,14 @@ const Dashboard: React.FC = () => {
     },
   };
 
+  // add inside Dashboard component
+  const formatMinutesToHourMinute = (minutes: number) => {
+    const h = Math.floor(minutes / 60);
+    const m = minutes % 60;
+    if (h === 0) return `${m}m`;
+    return m === 0 ? `${h}h` : `${h}h ${m}m`;
+  };
+
   return (
     <motion.div
       className="min-h-screen p-4 sm:p-6 md:p-8"
@@ -434,9 +442,7 @@ const Dashboard: React.FC = () => {
               animate={{ scale: 1 }}
               transition={{ delay: 0.5, type: "spring", stiffness: 200 }}
             >
-              {activeMinutes < 60
-                ? `${activeMinutes} min`
-                : `${(activeMinutes / 60).toFixed(1)} Hours`}
+              {formatMinutesToHourMinute(activeMinutes)}
             </motion.div>
             <p className="text-xs text-gray-400">
               Total time you have been active on the system.

@@ -1,6 +1,8 @@
 const Task = require("../models/taskModel");
 const xpService = require("../services/xpService");
 const notificationService = require("../services/notificationService");
+const ProgressLog = require("../models/progressLogModel"); // ← ADD THIS
+const { Op } = require("sequelize"); // ← ADD THIS
 
 // Get all tasks
 exports.getAllTasks = async (req, res) => {
@@ -101,18 +103,19 @@ exports.completeTask = async (req, res) => {
   try {
     const { userId, taskId, xp } = req.body;
 
-    // Get task details for notification
+    // Get task details
     const task = await Task.findByPk(taskId);
-
     if (!task) {
       return res.status(404).json({ message: "Task not found" });
     }
+
+    // Mark as completed
     if (task.status !== "completed") {
       task.status = "completed";
       await task.save();
     }
 
-    // call XP service
+    // Award XP
     await xpService.addXP({
       userId,
       amount: xp,
@@ -120,18 +123,47 @@ exports.completeTask = async (req, res) => {
       metadata: { taskId },
     });
 
-    // Send task completion notification
+    // ✅ NEW: Update ProgressLog
     try {
-      await notificationService.notifyTaskComplete(
-        userId,
-        task.title,
-        taskId
-      );
+      const startOfDay = new Date();
+      startOfDay.setHours(0, 0, 0, 0);
+      const nextDay = new Date(startOfDay);
+      nextDay.setDate(nextDay.getDate() + 1);
+
+      let progress = await ProgressLog.findOne({
+        where: {
+          userId,
+          date: { [Op.gte]: startOfDay, [Op.lt]: nextDay },
+        },
+      });
+
+      if (!progress) {
+        // Create today's progress log
+        await ProgressLog.create({
+          userId,
+          date: new Date(),
+          tasks_completed: 1,
+          focus_time: task.focus_time || 0,
+          steak: 0,
+          xp_earned: xp,
+        });
+      } else {
+        // Update existing progress log
+        await progress.increment({
+          tasks_completed: 1,
+          focus_time: task.focus_time || 0,
+          xp_earned: xp,
+        });
+      }
     } catch (err) {
-      console.warn(
-        "Failed to send task completion notification:",
-        err.message
-      );
+      console.warn("Failed to update ProgressLog:", err.message);
+    }
+
+    // Send notification
+    try {
+      await notificationService.notifyTaskComplete(userId, task.title, taskId);
+    } catch (err) {
+      console.warn("Failed to send task completion notification:", err.message);
     }
 
     res.status(200).json({ message: "Task completed and XP added." });

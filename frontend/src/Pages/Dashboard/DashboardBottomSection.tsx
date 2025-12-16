@@ -4,6 +4,7 @@ import MoodPopup from "../../components/MoodPopup";
 import QuestCelebration from "../../components/QuestCelebration";
 import { awardXp } from "../../api/userXpApi";
 import { toast } from "react-toastify";
+import { moods } from "@/utils/moods";
 
 interface DashboardBottomSectionProps {
   // Remove these props since we're managing mood internally
@@ -21,21 +22,6 @@ interface Quest {
   claimed?: boolean; // value: has this been claimed?
   progress?: string; // value: "1/3" for in-progress quests
 }
-
-const moods = [
-  { emoji: "😊", label: "Happy" },
-  { emoji: "😌", label: "Calm" },
-  { emoji: "🙏", label: "Thankful" },
-  { emoji: "💡", label: "Focused" },
-  { emoji: "💪", label: "Growing" },
-  { emoji: "🔥", label: "Motivated" },
-  { emoji: "😤", label: "Determined" },
-  { emoji: "😴", label: "Tired" },
-  { emoji: "😥", label: "Anxious" },
-  { emoji: "😇", label: "Content" },
-  { emoji: "😋", label: "Hungry" },
-  { emoji: "🌟", label: "Inspired" },
-];
 
 const DashboardBottomSection: React.FC<DashboardBottomSectionProps> = () => {
   const [selectedMood, setSelectedMood] = useState<number | null>(() => {
