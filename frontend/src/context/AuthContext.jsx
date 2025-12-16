@@ -153,7 +153,6 @@ export const AuthProvider = ({ children }) => {
               "[AUTH DEBUG] Failed to fetch fresh user data:",
               error.message
             );
-
             // Check if it's a network error or server error
             if (
               error.message.includes("fetch") ||
@@ -291,7 +290,6 @@ export const AuthProvider = ({ children }) => {
   const refreshUserData = async () => {
     try {
       console.log("[AUTH DEBUG] Refreshing user data from server...");
-
       const response = await authService.getCurrentUser();
       if (response && response.data) {
         const updatedUser = response.data;

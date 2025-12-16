@@ -1,5 +1,4 @@
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
-console.log("=========[AUTH DEBUG] API_BASE_URL set to:", API_BASE_URL);
 
 class AuthService {
   // Google OAuth login
@@ -142,7 +141,6 @@ class AuthService {
 
         throw new Error(errorMessage);
       }
-
       return data;
     } catch (error) {
       // Only clear auth data for actual authentication errors, not network errors
