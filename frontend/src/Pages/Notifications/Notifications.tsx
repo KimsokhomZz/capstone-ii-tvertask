@@ -164,7 +164,7 @@ export default function NotificationsPage() {
       </div>
 
       {/* Search Bar */}
-      <div className="bg-white p-3 sm:p-4 rounded-2xl sm:rounded-[28px] shadow-lg border border-gray-100">
+      <div className="bg-white p-3 sm:p-4 rounded-2xl sm:rounded-[28px] shadow-md border border-gray-100">
         <div className="relative">
           <Search
             className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-gray-400"
@@ -192,7 +192,7 @@ export default function NotificationsPage() {
       </div>
 
       {/* Filter and Actions Bar */}
-      <div className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-[28px] shadow-lg border border-gray-100">
+      <div className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-[28px] shadow-md border border-gray-100">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
           <div className="flex gap-1.5 sm:gap-2 bg-[#F5F2FF] p-1 rounded-full w-full sm:w-auto">
             <button

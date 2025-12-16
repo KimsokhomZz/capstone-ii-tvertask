@@ -10,7 +10,7 @@ const Support: React.FC = () => {
       href: "tel:097921200",
       color: "from-blue-500 to-cyan-500",
       bgColor: "bg-blue-50",
-      iconColor: "text-blue-600"
+      iconColor: "text-blue-600",
     },
     {
       icon: Send,
@@ -19,7 +19,7 @@ const Support: React.FC = () => {
       href: "https://t.me/visalkorn22",
       color: "from-sky-500 to-blue-500",
       bgColor: "bg-sky-50",
-      iconColor: "text-sky-600"
+      iconColor: "text-sky-600",
     },
     {
       icon: Mail,
@@ -28,8 +28,8 @@ const Support: React.FC = () => {
       href: "mailto:kornvisal222@gmail.com",
       color: "from-purple-500 to-pink-500",
       bgColor: "bg-purple-50",
-      iconColor: "text-purple-600"
-    }
+      iconColor: "text-purple-600",
+    },
   ];
 
   return (
@@ -38,11 +38,10 @@ const Support: React.FC = () => {
       <div className="max-w-4xl mx-auto">
         {/* Page Header */}
         <div className="text-center mb-16">
-          <h1 className="text-5xl font-bold text-gray-900 mb-4">
-            Support
-          </h1>
+          <h1 className="text-5xl font-bold text-gray-900 mb-4">Support</h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            If you need help, feel free to contact us through the following channels.
+            If you need help, feel free to contact us through the following
+            channels.
           </p>
         </div>
 
@@ -54,13 +53,17 @@ const Support: React.FC = () => {
               <a
                 key={index}
                 href={card.href}
-                className="group relative bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100"
+                className="group relative bg-white rounded-2xl p-8 shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-2 border border-gray-100"
               >
                 {/* Gradient Background on Hover */}
-                <div className={`absolute inset-0 bg-gradient-to-br ${card.color} opacity-0 group-hover:opacity-5 rounded-2xl transition-opacity duration-300`}></div>
-                
+                <div
+                  className={`absolute inset-0 bg-gradient-to-br ${card.color} opacity-0 group-hover:opacity-5 rounded-2xl transition-opacity duration-300`}
+                ></div>
+
                 {/* Icon Container */}
-                <div className={`relative ${card.bgColor} w-16 h-16 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}>
+                <div
+                  className={`relative ${card.bgColor} w-16 h-16 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}
+                >
                   <Icon className={`w-8 h-8 ${card.iconColor}`} />
                 </div>
 
@@ -76,8 +79,18 @@ const Support: React.FC = () => {
 
                 {/* Hover Arrow */}
                 <div className="absolute bottom-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                  <svg
+                    className="w-5 h-5 text-blue-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M17 8l4 4m0 0l-4 4m4-4H3"
+                    />
                   </svg>
                 </div>
               </a>
@@ -86,7 +99,7 @@ const Support: React.FC = () => {
         </div>
 
         {/* Additional Help Section */}
-        <div className="mt-16 text-center bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
+        <div className="mt-16 text-center bg-white rounded-2xl p-8 shadow-md border border-gray-100">
           <h2 className="text-2xl font-bold text-gray-900 mb-3">
             Need Immediate Assistance?
           </h2>
