@@ -6,6 +6,56 @@
   "config": {
     "dataSource": "mysql_db_wpck38",
     "fetchStrategy": "databaseTable",
-    "table": "users"
+    "table": "users",
+    "columns": [
+      {
+        "column": "emailVerificationToken",
+        "hiddenInTable": true
+      },
+      {
+        "column": "facebookId",
+        "hiddenInTable": true
+      },
+      {
+        "column": "googleId",
+        "hiddenInTable": true
+      },
+      {
+        "column": "location",
+        "hiddenInTable": true
+      },
+      {
+        "column": "password",
+        "hiddenInTable": true
+      },
+      {
+        "column": "resetPasswordToken",
+        "hiddenInTable": true
+      },
+      {
+        "column": "isEmailVerified",
+        "hiddenInTable": true
+      },
+      {
+        "column": "createdAt",
+        "hiddenInTable": true
+      },
+      {
+        "column": "deactivatedAt",
+        "hiddenInTable": true
+      },
+      {
+        "column": "deletedAt",
+        "hiddenInTable": true
+      },
+      {
+        "column": "emailVerificationExpires",
+        "hiddenInTable": false
+      },
+      {
+        "column": "resetPasswordExpires",
+        "hiddenInTable": true
+      }
+    ]
   }
 }

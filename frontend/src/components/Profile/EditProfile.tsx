@@ -28,6 +28,9 @@ const EditProfile = ({ user, onUpdate }: EditProfileProps) => {
     null
   );
 
+  // Track if form has been initialized to prevent unnecessary resets
+  const isInitializedRef = useRef(false);
+
   // Enhanced email validation function
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -118,7 +121,12 @@ const EditProfile = ({ user, onUpdate }: EditProfileProps) => {
   // Handle email change with debouncing
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const emailValue = e.target.value;
-    handleInputChange(e);
+
+    // Update form data directly without calling handleInputChange
+    setFormData((prev) => ({
+      ...prev,
+      email: emailValue,
+    }));
 
     // Clear previous timeout
     if (emailCheckTimeoutRef.current) {
@@ -137,21 +145,25 @@ const EditProfile = ({ user, onUpdate }: EditProfileProps) => {
     ) {
       emailCheckTimeoutRef.current = setTimeout(() => {
         checkEmailAvailability(emailValue.trim().toLowerCase());
-      }, 800); // 800ms debounce
+      }, 800);
     } else {
       setEmailCheckStatus(null);
     }
   };
 
-  // Update form data when user prop changes (e.g., after successful update)
+  // Update form data when user prop changes ONLY on initial mount or after successful save
   useEffect(() => {
-    setFormData({
-      name: user?.name || "",
-      email: user?.email || "",
-      bio: user?.bio || "",
-      location: user?.location || "",
-    });
-  }, [user]);
+    // Only update if not initialized OR if message indicates successful save
+    if (!isInitializedRef.current || message.includes("successfully")) {
+      setFormData({
+        name: user?.name || "",
+        email: user?.email || "",
+        bio: user?.bio || "",
+        location: user?.location || "",
+      });
+      isInitializedRef.current = true;
+    }
+  }, [user, message]); // Added message dependency to reset after successful save
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -248,6 +260,9 @@ const EditProfile = ({ user, onUpdate }: EditProfileProps) => {
 
         // Call parent onUpdate to refresh Profile component
         onUpdate();
+
+        // Reset initialization flag to allow form reset with new data
+        isInitializedRef.current = false;
       } else {
         setMessage(data.message || "Failed to update profile");
       }
@@ -257,6 +272,15 @@ const EditProfile = ({ user, onUpdate }: EditProfileProps) => {
       setIsLoading(false);
     }
   };
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (emailCheckTimeoutRef.current) {
+        clearTimeout(emailCheckTimeoutRef.current);
+      }
+    };
+  }, []);
 
   return (
     <div className="p-10">

@@ -1,5 +1,7 @@
 {
   "menuPageOrder": [
-    "users"
+    "users",
+    "quests",
+    "dashboard"
   ]
 }

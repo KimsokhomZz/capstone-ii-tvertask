@@ -64,8 +64,13 @@ Notification.belongsTo(User, { foreignKey: "user_id" });
 // USER → PROGRESS LOGS
 User.hasMany(ProgressLog, {
   foreignKey: "userId",
+  as: "progressLogs"
 });
-ProgressLog.belongsTo(User);
+
+ProgressLog.belongsTo(User, {
+  foreignKey: "userId",
+  as: "user"
+});
 
 module.exports = {
   sequelize,

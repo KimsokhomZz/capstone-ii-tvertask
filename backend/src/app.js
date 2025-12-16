@@ -5,7 +5,7 @@ const passport = require("./config/passport");
 const path = require("path");
 
 // routes imports
-// const userRoutes = require("./routes/userRoutes");
+const userRoutes = require("./routes/userRoutes");
 const xpRoutes = require("./routes/xpRoutes");
 const googleAuthRoutes = require("./controllers/googleController");
 const facebookAuthRoutes = require("./controllers/facebookController");

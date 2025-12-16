@@ -1,0 +1,28 @@
+{
+  "version": "3.4",
+  "type": "dashboard",
+  "title": "Dashboard",
+  "hideInSidebar": false,
+  "config": {
+    "withDateRangePicker": true,
+    "stats": [],
+    "cards": [
+      {
+        "key": "card_hwk3a5",
+        "fetchStrategy": "rawSqlQuery",
+        "type": "areaChart",
+        "dataSource": "mysql_db_wpck38",
+        "values": [
+          {
+            "alias": "id",
+            "color": "#1851ff"
+          }
+        ],
+        "dataKeyAlias": "id",
+        "title": "Number of Users",
+        "sqlQuery": "SELECT * FROM `users` ",
+        "span": "12"
+      }
+    ]
+  }
+}

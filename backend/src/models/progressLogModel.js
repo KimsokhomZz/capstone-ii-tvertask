@@ -6,6 +6,7 @@ const ProgressLog = sequelize.define(
   {
     userId: {
       type: DataTypes.INTEGER,
+      allowNull: false,
       references: {
         model: "Users",
         key: "id",

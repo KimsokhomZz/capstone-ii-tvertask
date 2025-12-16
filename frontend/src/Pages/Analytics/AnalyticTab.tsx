@@ -39,7 +39,7 @@ function StatCard({ label, value, subLabel, icon }: StatCardProps) {
 type RangeKey = "overview" | "day" | "week" | "month";
 
 export default function AnalyticTab() {
-  const [range, setRange] = useState<RangeKey>("overview");
+  const [range, setRange] = useState<RangeKey>("day");
   const [stats, setStats] = useState<AnalyticsStats | null>(null);
   const [loading, setLoading] = useState(true);
 
