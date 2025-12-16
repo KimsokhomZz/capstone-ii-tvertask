@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useContext } from "react";
-import { Flame, Target, Trophy } from "lucide-react";
+import { Flame, Target, Trophy, FileDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   createTask,
@@ -17,6 +17,7 @@ import DashboardBottomSection from "./DashboardBottomSection";
 import DashboardTasksSection from "./DashboardTasksSection";
 import { fetchUserStreak } from "../../api/streakApi";
 import { getStatus } from "../../api/userXpApi";
+import { exportToPDF } from "./exportPDF";
 
 const Dashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"All-time">("All-time");
@@ -273,6 +274,29 @@ const Dashboard: React.FC = () => {
     }
   };
 
+  // Helper function to format minutes
+  const formatMinutesToHourMinute = (minutes: number) => {
+    const h = Math.floor(minutes / 60);
+    const m = minutes % 60;
+    if (h === 0) return `${m}m`;
+    return m === 0 ? `${h}h` : `${h}h ${m}m`;
+  };
+
+  // PDF Export Handler
+  const handleExportPDF = () => {
+    exportToPDF({
+      user,
+      dailyProgressPercentage,
+      activeMinutes,
+      streak,
+      xpStatus,
+      totalTasks,
+      completedTasks,
+      visibleTasks,
+      formatMinutesToHourMinute,
+    });
+  };
+
   // Animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -319,14 +343,6 @@ const Dashboard: React.FC = () => {
     },
   };
 
-  // add inside Dashboard component
-  const formatMinutesToHourMinute = (minutes: number) => {
-    const h = Math.floor(minutes / 60);
-    const m = minutes % 60;
-    if (h === 0) return `${m}m`;
-    return m === 0 ? `${h}h` : `${h}h ${m}m`;
-  };
-
   return (
     <motion.div
       className="min-h-screen p-4 sm:p-6 md:p-8"
@@ -343,6 +359,19 @@ const Dashboard: React.FC = () => {
           <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">
             🚀 Dashboard
           </h2>
+
+          {/* Export PDF Button */}
+          <motion.button
+            onClick={handleExportPDF}
+            className="flex items-center gap-2 px-5 py-2.5 bg-white/10 backdrop-blur-md border border-yellow-300/30 text-yellow-500 rounded-xl shadow-lg hover:bg-yellow-500/20 hover:border-yellow-400/50 hover:text-yellow-700 transition-all duration-100 font-semibold text-sm"
+            whileHover={{ scale: 1.05, y: -2 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <div className="p-1 bg-yellow-500/20 rounded-lg">
+              <FileDown className="w-4 h-4" />
+            </div>
+            <span>Export Report</span>
+          </motion.button>
         </motion.div>
 
         {/* Tabs */}
