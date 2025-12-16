@@ -617,20 +617,80 @@ export default function Login() {
           </div>
 
           {/* Tver Task Logo Card */}
-          <div className="relative z-10 bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl p-6 lg:p-8 max-w-xs w-full mx-4 text-center animate-scaleIn border border-amber-100/80">
-            <div className="flex justify-center mb-4 lg:mb-5">
-              <img
-                src={Logo}
-                alt="Tver Task logo"
-                className="h-16 w-auto lg:h-20 mx-auto object-contain"
+          <div className="relative z-10 group">
+            {/* Outer glow */}
+            <div className="absolute -inset-2 bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-300 rounded-[2rem] blur-2xl opacity-20 group-hover:opacity-40 transition duration-700" />
+
+            {/* Main card */}
+            <div className="relative bg-white backdrop-blur-3xl rounded-[1.75rem] shadow-[0_8px_32px_0_rgba(251,191,36,0.37)] p-8 lg:p-10 max-w-xs w-full mx-4 text-center border border-white/40 overflow-hidden">
+              {/* Animated gradient background */}
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(251,191,36,0.1),rgba(255,255,255,0))]" />
+
+              {/* Floating particles */}
+              <div
+                className="absolute top-10 right-8 w-2 h-2 bg-yellow-400 rounded-full animate-float opacity-60"
+                style={{ animationDelay: "0s", animationDuration: "3s" }}
               />
+              <div
+                className="absolute bottom-16 left-10 w-1.5 h-1.5 bg-amber-400 rounded-full animate-float opacity-60"
+                style={{ animationDelay: "1s", animationDuration: "4s" }}
+              />
+              <div
+                className="absolute top-20 left-6 w-1 h-1 bg-yellow-300 rounded-full animate-float opacity-60"
+                style={{ animationDelay: "2s", animationDuration: "5s" }}
+              />
+
+              {/* Logo section */}
+              <div className="relative flex justify-center mb-6 lg:mb-7">
+                <div className="relative group/logo">
+                  {/* Logo glow */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-amber-400 to-yellow-400 rounded-2xl blur-xl opacity-30 group-hover/logo:opacity-50 transition-opacity duration-500" />
+
+                  {/* Logo container */}
+                  <div className="relative bg-gradient-to-br from-amber-50 to-yellow-50 p-5 rounded-2xl shadow-inner border border-amber-100/50">
+                    <img
+                      src={Logo}
+                      alt="Tver Task logo"
+                      className="h-16 w-auto lg:h-20 mx-auto object-contain transform transition-all duration-700 group-hover/logo:scale-110 group-hover/logo:rotate-6 filter drop-shadow-lg"
+                    />
+                  </div>
+
+                  {/* Rotating ring */}
+                  <div className="absolute inset-0 rounded-2xl border-2 border-dashed border-amber-300/40 animate-spin-slow" />
+                </div>
+              </div>
+
+              {/* Title */}
+              <h2 className="relative text-3xl lg:text-4xl font-extrabold mb-3 tracking-tight">
+                <span className="bg-gradient-to-r from-amber-600 via-yellow-500 to-amber-600 bg-clip-text text-transparent drop-shadow-sm">
+                  Tver Task
+                </span>
+              </h2>
+
+              {/* Divider */}
+              <div className="flex items-center justify-center gap-2 mb-3">
+                <div className="w-8 h-0.5 bg-gradient-to-r from-transparent via-amber-400 to-amber-300 rounded-full" />
+                <div className="w-1.5 h-1.5 bg-yellow-400 rounded-full" />
+                <div className="w-8 h-0.5 bg-gradient-to-l from-transparent via-amber-400 to-amber-300 rounded-full" />
+              </div>
+
+              {/* Subtitle */}
+              <p className="relative text-slate-600 text-sm lg:text-base font-semibold tracking-[0.2em] uppercase">
+                <span className="inline-block animate-pulse-subtle">
+                  Your Goals
+                </span>
+                <span className="mx-2 text-amber-500">•</span>
+                <span
+                  className="inline-block animate-pulse-subtle"
+                  style={{ animationDelay: "0.5s" }}
+                >
+                  Your Game
+                </span>
+              </p>
+
+              {/* Bottom accent */}
+              <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-400 rounded-b-[1.75rem]" />
             </div>
-            <h2 className="text-2xl lg:text-3xl font-semibold text-slate-900 mb-1 tracking-tight">
-              Tver Task
-            </h2>
-            <p className="text-slate-500 text-xs lg:text-sm">
-              YOUR GOALS. YOUR GAME
-            </p>
           </div>
         </div>
       </div>
