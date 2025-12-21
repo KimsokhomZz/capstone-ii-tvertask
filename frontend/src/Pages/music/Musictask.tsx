@@ -291,9 +291,16 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
 
   // ensure iframe resumes after entering fullscreen (some browsers pause audio on reflow)
   useEffect(() => {
+    // Only resume on enter if the player was already playing (isPlaying === true).
+    // Include isPlaying in deps so the handler sees the latest play state.
     const onFs = (e: CustomEvent<{ action: string }>) => {
       const action = e?.detail?.action;
-      if (action === "enter" && iframeRef.current && currentTrack?.youtubeId) {
+      if (
+        action === "enter" &&
+        iframeRef.current &&
+        currentTrack?.youtubeId &&
+        isPlaying
+      ) {
         const win = iframeRef.current.contentWindow;
         if (!win) return;
         // small delay to allow fullscreen transition / iframe layout
@@ -312,7 +319,7 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
     window.addEventListener("fullscreenToggled", onFs as EventListener);
     return () =>
       window.removeEventListener("fullscreenToggled", onFs as EventListener);
-  }, [currentTrack?.youtubeId, iframeRef]);
+  }, [currentTrack?.youtubeId, isPlaying]);
 
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60)
@@ -368,6 +375,39 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
     setIsPlaying(true);
   };
 
+  // helper to stop and fully unload the global player
+  const stopPlayback = () => {
+    try {
+      const el = getOrCreateGlobalIframe();
+      // ask youtube iframe to stop (resets playback)
+      try {
+        el.contentWindow?.postMessage(
+          JSON.stringify({ event: "command", func: "stopVideo", args: [] }),
+          "*"
+        );
+      } catch {
+        /* ignore cross-origin errors */
+      }
+      // remove src to guarantee audio is released
+      el.removeAttribute("src");
+    } catch {
+      /* ignore */
+    }
+    // update local state
+    setIsPlaying(false);
+    setCurrentTrackId(null);
+    setIframeSrc(null);
+    setTime(0);
+  };
+
+  // listen for external stop requests (UI can dispatch this)
+  useEffect(() => {
+    const handler = () => stopPlayback();
+    window.addEventListener("requestStopMusic", handler as EventListener);
+    return () =>
+      window.removeEventListener("requestStopMusic", handler as EventListener);
+  }, []);
+
   // UI rendering: always use iframeSrc when rendering the hidden iframe
   if (showCompact) {
     if (embedded) {
@@ -405,7 +445,6 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
             onPrev={handlePrev}
           />
         </motion.div>
-
       </div>
     );
   }
@@ -612,7 +651,6 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
           </motion.div>
         </AnimatePresence>
       </div>
-
     </motion.div>
   );
 };
