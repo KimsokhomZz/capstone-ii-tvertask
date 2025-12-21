@@ -1,17 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "react-toastify";
-import Header from "./header";
+import Header from "../Components/header";
 import FocusMusicApp from "../Pages/music/Musictask";
-import {
-  Settings,
-  // Play,
-  // Pause,
-  // Check,
-  // RotateCcw,
-  // Maximize,
-  // Minimize,
-  // Music,
-} from "lucide-react";
 
 type PomodoroTimerCardProps = {
   task?: {
@@ -53,7 +43,7 @@ export default function PomodoroTimerCard({
   const [isMusicOpen, setIsMusicOpen] = useState(false);
   const [selectedPreset, setSelectedPreset] = useState<
     "baby" | "popular" | "medium" | "extended" | "custom"
-  >("custom");
+  >("popular");
 
   const CLAIM_XP_AMOUNT = 20;
 
@@ -153,6 +143,17 @@ export default function PomodoroTimerCard({
       setIsFullscreen(isFs);
       // when exiting fullscreen hide/stop the music control
       if (!isFs) setIsMusicOpen(false);
+
+      // notify music player about fullscreen change so it can resume audio if needed
+      try {
+        window.dispatchEvent(
+          new CustomEvent("fullscreenToggled", {
+            detail: { action: isFs ? "enter" : "exit" },
+          })
+        );
+      } catch {
+        /* ignore in older browsers */
+      }
     };
     document.addEventListener("fullscreenchange", handler);
     return () => document.removeEventListener("fullscreenchange", handler);
@@ -175,7 +176,6 @@ export default function PomodoroTimerCard({
   // SVG ring values (use r=80 to match modified UI)
   const radius = 80;
   const circumference = 2 * Math.PI * radius;
-  const dash = Math.max(0, Math.min(1, clampedProgress)) * circumference;
 
   return (
     <div
@@ -677,7 +677,10 @@ export default function PomodoroTimerCard({
           </button>
           {isFullscreen && (
             <button
-              onClick={() => setIsMusicOpen(true)}
+              onClick={() => {
+                // just open the music modal — do not pause the global player
+                setIsMusicOpen(true);
+              }}
               className="px-4 py-2 rounded-xl bg-gray-100 border border-gray-200 hover:bg-yellow-50 hover:shadow-md text-gray-800 cursor-pointer transition-colors"
             >
               Music
@@ -737,20 +740,24 @@ export default function PomodoroTimerCard({
           </button>
         </div>
       </div>
-      {/* Music modal (inside the card) */}
-      {isMusicOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-2xl p-4 md:p-6 relative shadow-xl w-[944px] h-auto max-h-[90vh] overflow-auto">
-            <button
-              onClick={() => setIsMusicOpen(false)}
-              className="absolute top-3 right-3 px-3 py-1 rounded-md bg-gray-100 hover:bg-gray-200 cursor-pointer!"
-            >
-              Close
-            </button>
-            <FocusMusicApp embedded={true} />
-          </div>
+      {/* Music modal (kept mounted so player doesn't unmount on close) */}
+      <div
+        // keep mounted to preserve iframe/player state; toggle visibility via opacity & pointer-events
+        className={`fixed inset-0 z-50 flex items-center justify-center bg-black/50 transition-opacity duration-200 ${
+          isMusicOpen
+            ? "opacity-100 pointer-events-auto"
+            : "opacity-0 pointer-events-none"
+        }`}
+        // click outside content closes modal
+        onClick={(e) => {
+          if (e.target === e.currentTarget) setIsMusicOpen(false);
+        }}
+      >
+        <div className="bg-white rounded-2xl p-4 md:p-6 relative shadow-xl w-[944px] h-auto max-h-[90vh] overflow-auto">
+          {/* removed internal Close button — click outside overlay to close */}
+          <FocusMusicApp embedded={true} />
         </div>
-      )}
+      </div>
     </div>
   );
 }

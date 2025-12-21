@@ -36,9 +36,91 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [time, setTime] = useState<number>(0);
   const [showCompact, setShowCompact] = useState<boolean>(false);
-  const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const [iframeSrc, setIframeSrc] = useState<string | null>(null);
+  const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const prevTrackId = useRef<string | null>(null);
+
+  // create or reuse a single global hidden iframe for playback to avoid duplicates
+  const getOrCreateGlobalIframe = () => {
+    let el = document.getElementById(
+      "global-music-iframe"
+    ) as HTMLIFrameElement | null;
+    if (!el) {
+      el = document.createElement("iframe");
+      el.id = "global-music-iframe";
+      el.className = "w-0 h-0 invisible";
+      el.allow = "autoplay; encrypted-media";
+      // keep it visually hidden/offscreen
+      el.style.position = "absolute";
+      el.style.left = "-9999px";
+      el.style.width = "0";
+      el.style.height = "0";
+      document.body.appendChild(el);
+    }
+    iframeRef.current = el;
+    return el;
+  };
+
+  // update the single global iframe src whenever iframeSrc changes
+  useEffect(() => {
+    if (!iframeSrc) {
+      const el = document.getElementById(
+        "global-music-iframe"
+      ) as HTMLIFrameElement | null;
+      if (el) el.removeAttribute("src");
+      return;
+    }
+    const el = getOrCreateGlobalIframe();
+    if (el.src !== iframeSrc) el.src = iframeSrc;
+  }, [iframeSrc]);
+
+  // When this instance starts playing, pause other YouTube iframes on the page
+  useEffect(() => {
+    if (!isPlaying) return;
+    // short delay to allow this instance to initialize before pausing others
+    const t = setTimeout(() => {
+      document.querySelectorAll("iframe").forEach((el) => {
+        // keep our global player (by id) and don't pause it
+        if ((el as HTMLIFrameElement).id === "global-music-iframe") return;
+        const src = el.getAttribute("src") ?? "";
+        if (src.includes("youtube.com/embed")) {
+          try {
+            el.contentWindow?.postMessage(
+              JSON.stringify({
+                event: "command",
+                func: "pauseVideo",
+                args: [],
+              }),
+              "*"
+            );
+          } catch {
+            /* ignore cross-origin */
+          }
+        }
+      });
+    }, 150);
+    return () => clearTimeout(t);
+  }, [isPlaying]);
+
+  // unique instance id to avoid reacting to our own events
+  const instanceId = useRef<string>(Math.random().toString(36).slice(2));
+
+  // notify other windows/components when music state changes
+  useEffect(() => {
+    try {
+      window.dispatchEvent(
+        new CustomEvent("musicStateChanged", {
+          detail: {
+            instanceId: instanceId.current,
+            currentTrackId,
+            isPlaying,
+          },
+        })
+      );
+    } catch {
+      /* ignore */
+    }
+  }, [currentTrackId, isPlaying]);
 
   // ensure imported arrays are treated as Track[]
   const tracks: Track[] = [
@@ -47,6 +129,85 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
     ...(ambient as unknown as Track[]),
     ...(focus as unknown as Track[]),
   ];
+
+  // listen for external music state changes and sync (ignore events from self)
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const ce = e as CustomEvent;
+      const d = ce.detail as
+        | {
+            instanceId?: string;
+            currentTrackId?: string | null;
+            isPlaying?: boolean;
+          }
+        | undefined;
+      if (!d || d.instanceId === instanceId.current) return;
+      if (
+        typeof d.currentTrackId === "string" &&
+        d.currentTrackId !== currentTrackId
+      ) {
+        setCurrentTrackId(d.currentTrackId);
+      }
+      if (typeof d.isPlaying === "boolean" && d.isPlaying !== isPlaying) {
+        setIsPlaying(d.isPlaying);
+      }
+    };
+    window.addEventListener("musicStateChanged", handler as EventListener);
+    return () =>
+      window.removeEventListener("musicStateChanged", handler as EventListener);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentTrackId, isPlaying]);
+
+  // respond to requests to toggle play (dispatched by other components)
+  useEffect(() => {
+    const onRequest = () => {
+      // reuse existing handler logic
+      if (currentTrackId) {
+        setIsPlaying((p) => !p);
+      } else {
+        const visibleTracks = tracks.filter((t) => t.genre === activeTab);
+        const start = visibleTracks[0]?.id ?? tracks[0]?.id ?? null;
+        setCurrentTrackId(start);
+        setTime(0);
+        setIsPlaying(true);
+      }
+    };
+    window.addEventListener("requestTogglePlay", onRequest as EventListener);
+    return () =>
+      window.removeEventListener(
+        "requestTogglePlay",
+        onRequest as EventListener
+      );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentTrackId, activeTab, tracks]);
+
+  // Listen for an external "ensureMusicPaused" event (dispatched when opening modal)
+  // to prevent the embedded player from auto-playing on modal open.
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const ce = e as CustomEvent<{ onlyIfNotPlaying?: boolean }>;
+      // if caller requested "onlyIfNotPlaying", don't pause an already-playing player
+      const onlyIfNotPlaying = !!ce?.detail?.onlyIfNotPlaying;
+      if (onlyIfNotPlaying && isPlaying) return;
+      setIsPlaying(false);
+      const el = getOrCreateGlobalIframe();
+      if (el && el.contentWindow) {
+        try {
+          el.contentWindow.postMessage(
+            JSON.stringify({ event: "command", func: "pauseVideo", args: [] }),
+            "*"
+          );
+        } catch {
+          /* ignore */
+        }
+      }
+    };
+    window.addEventListener("ensureMusicPaused", handler as EventListener);
+    return () =>
+      window.removeEventListener("ensureMusicPaused", handler as EventListener);
+  }, []);
+
+  const visibleTracks = tracks.filter((t) => t.genre === activeTab);
 
   const tabs = [
     {
@@ -75,7 +236,6 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
     },
   ];
 
-  const visibleTracks = tracks.filter((t) => t.genre === activeTab);
   const currentTrack = tracks.find((t) => t.id === currentTrackId);
 
   // internal timer for UI
@@ -128,6 +288,31 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
     }, 350);
     return () => clearTimeout(t);
   }, [currentTrack?.youtubeId, isPlaying]);
+
+  // ensure iframe resumes after entering fullscreen (some browsers pause audio on reflow)
+  useEffect(() => {
+    const onFs = (e: CustomEvent<{ action: string }>) => {
+      const action = e?.detail?.action;
+      if (action === "enter" && iframeRef.current && currentTrack?.youtubeId) {
+        const win = iframeRef.current.contentWindow;
+        if (!win) return;
+        // small delay to allow fullscreen transition / iframe layout
+        setTimeout(() => {
+          try {
+            win.postMessage(
+              JSON.stringify({ event: "command", func: "playVideo", args: [] }),
+              "*"
+            );
+          } catch {
+            /* ignore */
+          }
+        }, 250);
+      }
+    };
+    window.addEventListener("fullscreenToggled", onFs as EventListener);
+    return () =>
+      window.removeEventListener("fullscreenToggled", onFs as EventListener);
+  }, [currentTrack?.youtubeId, iframeRef]);
 
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60)
@@ -201,15 +386,6 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
             onNext={handleNext}
             onPrev={handlePrev}
           />
-          {currentTrack?.youtubeId && iframeSrc && (
-            <iframe
-              ref={iframeRef}
-              className="w-0 h-0 invisible"
-              src={iframeSrc}
-              title={currentTrack.title}
-              allow="autoplay; encrypted-media"
-            />
-          )}
         </motion.div>
       );
     }
@@ -230,15 +406,6 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
           />
         </motion.div>
 
-        {currentTrack?.youtubeId && iframeSrc && (
-          <iframe
-            ref={iframeRef}
-            className="w-0 h-0 invisible"
-            src={iframeSrc}
-            title={currentTrack.title}
-            allow="autoplay; encrypted-media"
-          />
-        )}
       </div>
     );
   }
@@ -446,15 +613,6 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
         </AnimatePresence>
       </div>
 
-      {currentTrack?.youtubeId && iframeSrc && (
-        <iframe
-          ref={iframeRef}
-          className="w-0 h-0 invisible"
-          src={iframeSrc}
-          title={currentTrack.title}
-          allow="autoplay; encrypted-media"
-        />
-      )}
     </motion.div>
   );
 };
