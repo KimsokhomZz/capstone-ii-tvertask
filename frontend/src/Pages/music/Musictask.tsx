@@ -8,9 +8,10 @@ import {
   Pause,
   ChevronDown,
   Clock,
+  Disc3,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import MusicCard from "../../components/MusicCard";
+import MusicCard from "../../Components/MusicCard";
 
 interface Track {
   id: string;
@@ -30,7 +31,6 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
   const [playingTrack, setPlayingTrack] = useState<string | null>(null);
   const [time, setTime] = useState<number>(0);
   const [showCompact, setShowCompact] = useState<boolean>(false);
-  const [volume, setVolume] = useState<number>(50);
 
   useEffect(() => {
     let interval: ReturnType<typeof setInterval> | undefined;
@@ -147,8 +147,13 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
         >
           <MusicCard
             onOpenMusic={() => setShowCompact(false)}
-            volume={volume}
-            onVolumeChange={setVolume}
+            trackTitle={currentTrack?.title}
+            isPlaying={!!playingTrack}
+            onTogglePlay={() =>
+              setPlayingTrack((p) =>
+                p ? null : visibleTracks[0]?.id ?? tracks[0].id
+              )
+            }
           />
           {currentTrack?.youtubeId && (
             <iframe
@@ -170,8 +175,13 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
         >
           <MusicCard
             onOpenMusic={() => setShowCompact(false)}
-            volume={volume}
-            onVolumeChange={setVolume}
+            trackTitle={currentTrack?.title}
+            isPlaying={!!playingTrack}
+            onTogglePlay={() =>
+              setPlayingTrack((p) =>
+                p ? null : visibleTracks[0]?.id ?? tracks[0].id
+              )
+            }
           />
         </motion.div>
         {currentTrack?.youtubeId && (
@@ -213,9 +223,15 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
             <h3 className="text-3xl font-bold bg-linear-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
               Focus Music
             </h3>
-            <p className="text-sm text-gray-600">
-              Curated playlists to boost your productivity
-            </p>
+            {playingTrack ? (
+              <p className="text-sm text-yellow-600 font-medium">
+                ▶ Now Playing: {currentTrack?.title}
+              </p>
+            ) : (
+              <p className="text-sm text-gray-600">
+                Curated playlists to boost your productivity
+              </p>
+            )}
           </div>
 
           {embedded && (
@@ -308,12 +324,17 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
                       <motion.div
                         whileHover={{ rotate: 360 }}
                         transition={{ duration: 0.6 }}
+                        animate={isPlaying ? { rotate: 360 } : {}}
                         className={`w-14 h-14 bg-gradient-to-br ${
                           tabs.find((t) => t.id === track.genre)?.color ||
                           "from-gray-400 to-gray-500"
                         } rounded-2xl flex items-center justify-center flex-shrink-0 shadow-md`}
                       >
-                        <Music className="w-7 h-7 text-white" />
+                        {isPlaying ? (
+                          <Disc3 className="w-7 h-7 text-white animate-spin" />
+                        ) : (
+                          <Music className="w-7 h-7 text-white" />
+                        )}
                       </motion.div>
 
                       <div className="flex-1 min-w-0">
