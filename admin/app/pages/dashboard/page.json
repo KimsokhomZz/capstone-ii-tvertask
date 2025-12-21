@@ -5,7 +5,44 @@
   "hideInSidebar": false,
   "config": {
     "withDateRangePicker": true,
-    "stats": [],
+    "stats": [
+      {
+        "key": "stat_6apj4e",
+        "fetchStrategy": "rawSqlQuery",
+        "type": "ratio",
+        "dataSource": "mysql_db_wpck38",
+        "title": "Pomodoro Session",
+        "sqlQuery": "SELECT COUNT(*) AS total_pomodoro_sessions\nFROM PomodoroSessions WHERE createdAt BETWEEN :period_start_date AND :period_end_date;",
+        "sqlTotalQuery": "SELECT COUNT(*) AS total_pomodorosessions FROM PomodoroSessions WHERE createdAt BETWEEN :period_start_date AND :period_end_date"
+      },
+      {
+        "key": "stat_pagvxa",
+        "fetchStrategy": "rawSqlQuery",
+        "type": "ratio",
+        "dataSource": "mysql_db_wpck38",
+        "title": "Task",
+        "sqlQuery": "SELECT COUNT(*) AS total_task FROM Tasks WHERE createdAt BETWEEN :period_start_date AND :period_end_date",
+        "sqlTotalQuery": "SELECT COUNT(*) AS total_task FROM Tasks"
+      },
+      {
+        "key": "stat_mv67jg",
+        "fetchStrategy": "rawSqlQuery",
+        "type": "ratio",
+        "dataSource": "mysql_db_wpck38",
+        "title": "Task Note",
+        "sqlQuery": "SELECT COUNT(*) AS total_tasknote FROM TaskNotes WHERE createdAt BETWEEN :period_start_date AND :period_end_date",
+        "sqlTotalQuery": "SELECT COUNT(*) AS total_tasknote FROM TaskNotes"
+      },
+      {
+        "key": "stat_mnhyta",
+        "fetchStrategy": "rawSqlQuery",
+        "type": "ratio",
+        "dataSource": "mysql_db_wpck38",
+        "title": "Notification",
+        "sqlQuery": "SELECT COUNT(*) AS notification FROM notifications WHERE created_at BETWEEN :period_start_date AND :period_end_date",
+        "sqlTotalQuery": "SELECT COUNT(*) AS total_notifications FROM notifications"
+      }
+    ],
     "cards": [
       {
         "key": "card_hwk3a5",
@@ -14,14 +51,29 @@
         "dataSource": "mysql_db_wpck38",
         "values": [
           {
-            "alias": "id",
+            "alias": "user_count",
             "color": "#1851ff"
           }
         ],
-        "dataKeyAlias": "id",
+        "dataKeyAlias": "date",
         "title": "Number of Users",
-        "sqlQuery": "SELECT * FROM `users` ",
-        "span": "12"
+        "sqlQuery": "SELECT DATE(createdAt) as date, COUNT(*) as user_count FROM users WHERE createdAt BETWEEN :period_start_date AND :period_end_date GROUP BY DATE(createdAt) ORDER BY date",
+        "span": "6"
+      },
+      {
+        "key": "card_cv2mmo",
+        "fetchStrategy": "rawSqlQuery",
+        "type": "lineChart",
+        "dataSource": "mysql_db_wpck38",
+        "values": [
+          {
+            "alias": "total_duration",
+            "color": "#1851ff"
+          }
+        ],
+        "dataKeyAlias": "date",
+        "title": "Pomodoro Duration",
+        "sqlQuery": "SELECT DATE(createdAt) as date, SUM(duration) as total_duration FROM PomodoroSessions WHERE createdAt BETWEEN :period_start_date AND :period_end_date GROUP BY DATE(createdAt) ORDER BY date"
       }
     ]
   }
