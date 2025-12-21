@@ -1,4 +1,4 @@
-import { X, Sun, Moon, Monitor } from "lucide-react";
+import { X, Sun, Moon } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 
 export type ThemeOption = {
