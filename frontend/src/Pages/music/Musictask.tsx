@@ -12,6 +12,10 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import MusicCard from "../../Components/MusicCard";
+import lofi from "../../assets/music/lofi";
+import nature from "../../assets/music/nature";
+import ambient from "../../assets/music/ambient";
+import focus from "../../assets/music/focus";
 
 interface Track {
   id: string;
@@ -28,58 +32,20 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
   embedded = false,
 }) => {
   const [activeTab, setActiveTab] = useState<string>("lofi");
-  // separate current track id and play state so pause/resume works
   const [currentTrackId, setCurrentTrackId] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [time, setTime] = useState<number>(0);
   const [showCompact, setShowCompact] = useState<boolean>(false);
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const [iframeSrc, setIframeSrc] = useState<string | null>(null);
+  const prevTrackId = useRef<string | null>(null);
 
+  // ensure imported arrays are treated as Track[]
   const tracks: Track[] = [
-    {
-      id: "1",
-      title: "Lo-Fi Chill Beat",
-      category: "Lo-Fi Focus",
-      description: "Soft beats perfect for deep work 🎧",
-      duration: "3:50",
-      genre: "lofi",
-      youtubeId: "BrnDlRmW5hs",
-    },
-    {
-      id: "2",
-      title: "Late Night Groove",
-      category: "Lo-Fi Lounge",
-      description: "Smooth background music for creativity 🌙",
-      duration: "4:10",
-      genre: "lofi",
-      youtubeId: "Viu_ptw9MrU",
-    },
-    {
-      id: "3",
-      title: "Coffee Shop Vibes",
-      category: "Study Flow",
-      description: "Cozy atmosphere with gentle melodies ☕",
-      duration: "1:00",
-      genre: "nature",
-    },
-    {
-      id: "4",
-      title: "Midnight Study",
-      category: "Focus Collective",
-      description: "Late night concentration companion 🌙",
-      duration: "1:00",
-      isPremium: true,
-      genre: "ambient",
-    },
-    {
-      id: "5",
-      title: "Peaceful Flow",
-      category: "Calm Minds",
-      description: "Gentle melodies for sustained focus 🧘",
-      duration: "1:00",
-      genre: "focus",
-    },
+    ...(lofi as unknown as Track[]),
+    ...(nature as unknown as Track[]),
+    ...(ambient as unknown as Track[]),
+    ...(focus as unknown as Track[]),
   ];
 
   const tabs = [
@@ -110,10 +76,9 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
   ];
 
   const visibleTracks = tracks.filter((t) => t.genre === activeTab);
-
   const currentTrack = tracks.find((t) => t.id === currentTrackId);
 
-  // keep an internal timer while playing
+  // internal timer for UI
   useEffect(() => {
     let interval: ReturnType<typeof setInterval> | undefined;
     if (isPlaying) {
@@ -124,19 +89,43 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
     };
   }, [isPlaying]);
 
-  // control youtube iframe via postMessage (enablejsapi=1 in src)
+  // set iframeSrc when the currentTrack changes.
+  // autoplay only when a new track is loaded (not on simple pause/resume)
+  useEffect(() => {
+    if (!currentTrack?.youtubeId) {
+      // no youtube track — clear src
+      setIframeSrc(null);
+      prevTrackId.current = currentTrackId;
+      return;
+    }
+
+    const isNewTrack = prevTrackId.current !== currentTrackId;
+    const autoplay = isNewTrack && isPlaying ? 1 : 0;
+
+    setIframeSrc(
+      `https://www.youtube.com/embed/${
+        currentTrack.youtubeId
+      }?enablejsapi=1&autoplay=${autoplay}&origin=${encodeURIComponent(
+        window.location.origin
+      )}`
+    );
+
+    prevTrackId.current = currentTrackId;
+  }, [currentTrackId, currentTrack?.youtubeId, isPlaying]);
+
+  // control youtube via postMessage (play/pause)
   useEffect(() => {
     if (!currentTrack?.youtubeId || !iframeRef.current) return;
     const win = iframeRef.current.contentWindow;
     if (!win) return;
     const cmd = isPlaying ? "playVideo" : "pauseVideo";
-    // small delay to allow iframe to initialize after src change
+    // wait a bit for iframe to initialize before sending commands
     const t = setTimeout(() => {
       win.postMessage(
         JSON.stringify({ event: "command", func: cmd, args: [] }),
         "*"
       );
-    }, 300);
+    }, 350);
     return () => clearTimeout(t);
   }, [currentTrack?.youtubeId, isPlaying]);
 
@@ -150,22 +139,14 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
 
   const handleTogglePlay = () => {
     if (currentTrackId) {
-      // pause/resume without clearing the track id
       setIsPlaying((p) => !p);
     } else {
-      // start first visible track and ensure iframe uses autoplay
-      const startId = visibleTracks[0]?.id ?? tracks[0].id;
-      const yid = (visibleTracks[0] ?? tracks[0])?.youtubeId;
-      setCurrentTrackId(startId ?? null);
+      // start first visible track
+      const start = visibleTracks[0]?.id ?? tracks[0]?.id ?? null;
+      setCurrentTrackId(start);
       setTime(0);
       setIsPlaying(true);
-      if (yid) {
-        setIframeSrc(
-          `https://www.youtube.com/embed/${yid}?enablejsapi=1&autoplay=1&origin=${encodeURIComponent(
-            window.location.origin
-          )}`
-        );
-      }
+      // iframeSrc will be set by useEffect reacting to currentTrackId/isPlaying
     }
   };
 
@@ -176,15 +157,6 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
       setCurrentTrackId(id);
       setTime(0);
       setIsPlaying(true);
-      if (list[0]?.youtubeId) {
-        setIframeSrc(
-          `https://www.youtube.com/embed/${
-            list[0].youtubeId
-          }?enablejsapi=1&autoplay=1&origin=${encodeURIComponent(
-            window.location.origin
-          )}`
-        );
-      }
       return;
     }
     const idx = list.findIndex((t) => t.id === currentTrackId);
@@ -192,15 +164,6 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
     setCurrentTrackId(list[nextIdx]?.id ?? null);
     setTime(0);
     setIsPlaying(true);
-    if (list[nextIdx]?.youtubeId) {
-      setIframeSrc(
-        `https://www.youtube.com/embed/${
-          list[nextIdx].youtubeId
-        }?enablejsapi=1&autoplay=1&origin=${encodeURIComponent(
-          window.location.origin
-        )}`
-      );
-    }
   };
 
   const handlePrev = () => {
@@ -210,15 +173,6 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
       setCurrentTrackId(id);
       setTime(0);
       setIsPlaying(true);
-      if (list[list.length - 1]?.youtubeId) {
-        setIframeSrc(
-          `https://www.youtube.com/embed/${
-            list[list.length - 1].youtubeId
-          }?enablejsapi=1&autoplay=1&origin=${encodeURIComponent(
-            window.location.origin
-          )}`
-        );
-      }
       return;
     }
     const idx = list.findIndex((t) => t.id === currentTrackId);
@@ -227,17 +181,9 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
     setCurrentTrackId(list[prevIdx]?.id ?? null);
     setTime(0);
     setIsPlaying(true);
-    if (list[prevIdx]?.youtubeId) {
-      setIframeSrc(
-        `https://www.youtube.com/embed/${
-          list[prevIdx].youtubeId
-        }?enablejsapi=1&autoplay=1&origin=${encodeURIComponent(
-          window.location.origin
-        )}`
-      );
-    }
   };
 
+  // UI rendering: always use iframeSrc when rendering the hidden iframe
   if (showCompact) {
     if (embedded) {
       return (
@@ -255,15 +201,11 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
             onNext={handleNext}
             onPrev={handlePrev}
           />
-          {currentTrack?.youtubeId && (
+          {currentTrack?.youtubeId && iframeSrc && (
             <iframe
               ref={iframeRef}
               className="w-0 h-0 invisible"
-              src={`https://www.youtube.com/embed/${
-                currentTrack.youtubeId
-              }?enablejsapi=1&origin=${encodeURIComponent(
-                window.location.origin
-              )}`}
+              src={iframeSrc}
               title={currentTrack.title}
               allow="autoplay; encrypted-media"
             />
@@ -287,15 +229,12 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
             onPrev={handlePrev}
           />
         </motion.div>
-        {currentTrack?.youtubeId && (
+
+        {currentTrack?.youtubeId && iframeSrc && (
           <iframe
             ref={iframeRef}
             className="w-0 h-0 invisible"
-            src={`https://www.youtube.com/embed/${
-              currentTrack.youtubeId
-            }?enablejsapi=1&origin=${encodeURIComponent(
-              window.location.origin
-            )}`}
+            src={iframeSrc}
             title={currentTrack.title}
             allow="autoplay; encrypted-media"
           />
@@ -371,10 +310,7 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
                 key={tab.id}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => {
-                  setActiveTab(tab.id);
-                  // keep currentTrackId and isPlaying so switching tabs doesn't stop music
-                }}
+                onClick={() => setActiveTab(tab.id)}
                 className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-medium transition-all whitespace-nowrap ${
                   isActive
                     ? `bg-linear-to-r ${tab.color} text-white shadow-lg`
@@ -478,7 +414,6 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.95 }}
                           onClick={() => {
-                            // explicit play / pause per track without clearing the track id
                             if (isThisPlaying) {
                               setIsPlaying(false);
                             } else if (currentTrackId === track.id) {
@@ -511,18 +446,11 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
         </AnimatePresence>
       </div>
 
-      {currentTrack?.youtubeId && (
+      {currentTrack?.youtubeId && iframeSrc && (
         <iframe
           ref={iframeRef}
           className="w-0 h-0 invisible"
-          src={
-            iframeSrc ??
-            `https://www.youtube.com/embed/${
-              currentTrack.youtubeId
-            }?enablejsapi=1&origin=${encodeURIComponent(
-              window.location.origin
-            )}`
-          }
+          src={iframeSrc}
           title={currentTrack.title}
           allow="autoplay; encrypted-media"
         />
