@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Music,
   Cloud,
@@ -28,28 +28,13 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
   embedded = false,
 }) => {
   const [activeTab, setActiveTab] = useState<string>("lofi");
-  const [playingTrack, setPlayingTrack] = useState<string | null>(null);
+  // separate current track id and play state so pause/resume works
+  const [currentTrackId, setCurrentTrackId] = useState<string | null>(null);
+  const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [time, setTime] = useState<number>(0);
   const [showCompact, setShowCompact] = useState<boolean>(false);
-
-  useEffect(() => {
-    let interval: ReturnType<typeof setInterval> | undefined;
-    if (playingTrack) {
-      setTime(0);
-      interval = setInterval(() => {
-        setTime((prev) => prev + 1);
-      }, 1000);
-    } else {
-      if (interval) {
-        clearInterval(interval);
-      }
-    }
-    return () => {
-      if (interval) {
-        clearInterval(interval);
-      }
-    };
-  }, [playingTrack]);
+  const iframeRef = useRef<HTMLIFrameElement | null>(null);
+  const [iframeSrc, setIframeSrc] = useState<string | null>(null);
 
   const tracks: Track[] = [
     {
@@ -126,6 +111,35 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
 
   const visibleTracks = tracks.filter((t) => t.genre === activeTab);
 
+  const currentTrack = tracks.find((t) => t.id === currentTrackId);
+
+  // keep an internal timer while playing
+  useEffect(() => {
+    let interval: ReturnType<typeof setInterval> | undefined;
+    if (isPlaying) {
+      interval = setInterval(() => setTime((s) => s + 1), 1000);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isPlaying]);
+
+  // control youtube iframe via postMessage (enablejsapi=1 in src)
+  useEffect(() => {
+    if (!currentTrack?.youtubeId || !iframeRef.current) return;
+    const win = iframeRef.current.contentWindow;
+    if (!win) return;
+    const cmd = isPlaying ? "playVideo" : "pauseVideo";
+    // small delay to allow iframe to initialize after src change
+    const t = setTimeout(() => {
+      win.postMessage(
+        JSON.stringify({ event: "command", func: cmd, args: [] }),
+        "*"
+      );
+    }, 300);
+    return () => clearTimeout(t);
+  }, [currentTrack?.youtubeId, isPlaying]);
+
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60)
       .toString()
@@ -134,7 +148,95 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
     return `${m}:${s}`;
   };
 
-  const currentTrack = tracks.find((t) => t.id === playingTrack);
+  const handleTogglePlay = () => {
+    if (currentTrackId) {
+      // pause/resume without clearing the track id
+      setIsPlaying((p) => !p);
+    } else {
+      // start first visible track and ensure iframe uses autoplay
+      const startId = visibleTracks[0]?.id ?? tracks[0].id;
+      const yid = (visibleTracks[0] ?? tracks[0])?.youtubeId;
+      setCurrentTrackId(startId ?? null);
+      setTime(0);
+      setIsPlaying(true);
+      if (yid) {
+        setIframeSrc(
+          `https://www.youtube.com/embed/${yid}?enablejsapi=1&autoplay=1&origin=${encodeURIComponent(
+            window.location.origin
+          )}`
+        );
+      }
+    }
+  };
+
+  const handleNext = () => {
+    const list = visibleTracks.length ? visibleTracks : tracks;
+    if (!currentTrackId) {
+      const id = list[0]?.id ?? null;
+      setCurrentTrackId(id);
+      setTime(0);
+      setIsPlaying(true);
+      if (list[0]?.youtubeId) {
+        setIframeSrc(
+          `https://www.youtube.com/embed/${
+            list[0].youtubeId
+          }?enablejsapi=1&autoplay=1&origin=${encodeURIComponent(
+            window.location.origin
+          )}`
+        );
+      }
+      return;
+    }
+    const idx = list.findIndex((t) => t.id === currentTrackId);
+    const nextIdx = idx >= 0 ? (idx + 1) % list.length : 0;
+    setCurrentTrackId(list[nextIdx]?.id ?? null);
+    setTime(0);
+    setIsPlaying(true);
+    if (list[nextIdx]?.youtubeId) {
+      setIframeSrc(
+        `https://www.youtube.com/embed/${
+          list[nextIdx].youtubeId
+        }?enablejsapi=1&autoplay=1&origin=${encodeURIComponent(
+          window.location.origin
+        )}`
+      );
+    }
+  };
+
+  const handlePrev = () => {
+    const list = visibleTracks.length ? visibleTracks : tracks;
+    if (!currentTrackId) {
+      const id = list[list.length - 1]?.id ?? null;
+      setCurrentTrackId(id);
+      setTime(0);
+      setIsPlaying(true);
+      if (list[list.length - 1]?.youtubeId) {
+        setIframeSrc(
+          `https://www.youtube.com/embed/${
+            list[list.length - 1].youtubeId
+          }?enablejsapi=1&autoplay=1&origin=${encodeURIComponent(
+            window.location.origin
+          )}`
+        );
+      }
+      return;
+    }
+    const idx = list.findIndex((t) => t.id === currentTrackId);
+    const prevIdx =
+      idx >= 0 ? (idx - 1 + list.length) % list.length : list.length - 1;
+    setCurrentTrackId(list[prevIdx]?.id ?? null);
+    setTime(0);
+    setIsPlaying(true);
+    if (list[prevIdx]?.youtubeId) {
+      setIframeSrc(
+        `https://www.youtube.com/embed/${
+          list[prevIdx].youtubeId
+        }?enablejsapi=1&autoplay=1&origin=${encodeURIComponent(
+          window.location.origin
+        )}`
+      );
+    }
+  };
 
   if (showCompact) {
     if (embedded) {
@@ -148,18 +250,20 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
           <MusicCard
             onOpenMusic={() => setShowCompact(false)}
             trackTitle={currentTrack?.title}
-            isPlaying={!!playingTrack}
-            onTogglePlay={() => {
-              // only start playback if nothing is playing; don't stop current playback
-              if (!playingTrack) {
-                setPlayingTrack(visibleTracks[0]?.id ?? tracks[0].id);
-              }
-            }}
+            isPlaying={isPlaying}
+            onTogglePlay={handleTogglePlay}
+            onNext={handleNext}
+            onPrev={handlePrev}
           />
           {currentTrack?.youtubeId && (
             <iframe
+              ref={iframeRef}
               className="w-0 h-0 invisible"
-              src={`https://www.youtube.com/embed/${currentTrack.youtubeId}?autoplay=1`}
+              src={`https://www.youtube.com/embed/${
+                currentTrack.youtubeId
+              }?enablejsapi=1&origin=${encodeURIComponent(
+                window.location.origin
+              )}`}
               title={currentTrack.title}
               allow="autoplay; encrypted-media"
             />
@@ -177,19 +281,21 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
           <MusicCard
             onOpenMusic={() => setShowCompact(false)}
             trackTitle={currentTrack?.title}
-            isPlaying={!!playingTrack}
-            onTogglePlay={() => {
-              // only start playback if nothing is playing; don't stop current playback
-              if (!playingTrack) {
-                setPlayingTrack(visibleTracks[0]?.id ?? tracks[0].id);
-              }
-            }}
+            isPlaying={isPlaying}
+            onTogglePlay={handleTogglePlay}
+            onNext={handleNext}
+            onPrev={handlePrev}
           />
         </motion.div>
         {currentTrack?.youtubeId && (
           <iframe
+            ref={iframeRef}
             className="w-0 h-0 invisible"
-            src={`https://www.youtube.com/embed/${currentTrack.youtubeId}?autoplay=1`}
+            src={`https://www.youtube.com/embed/${
+              currentTrack.youtubeId
+            }?enablejsapi=1&origin=${encodeURIComponent(
+              window.location.origin
+            )}`}
             title={currentTrack.title}
             allow="autoplay; encrypted-media"
           />
@@ -225,9 +331,10 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
             <h3 className="text-3xl font-bold bg-linear-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
               Focus Music
             </h3>
-            {playingTrack ? (
+            {currentTrackId ? (
               <p className="text-sm text-yellow-600 font-medium">
-                ▶ Now Playing: {currentTrack?.title}
+                {isPlaying ? "▶ Now Playing:" : "⏸ Paused:"}{" "}
+                {currentTrack?.title}
               </p>
             ) : (
               <p className="text-sm text-gray-600">
@@ -266,7 +373,7 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
                 whileTap={{ scale: 0.95 }}
                 onClick={() => {
                   setActiveTab(tab.id);
-                  // keep playingTrack as-is so switching tabs doesn't stop music
+                  // keep currentTrackId and isPlaying so switching tabs doesn't stop music
                 }}
                 className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-medium transition-all whitespace-nowrap ${
                   isActive
@@ -300,7 +407,7 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
               </div>
             ) : (
               visibleTracks.map((track, index) => {
-                const isPlaying = playingTrack === track.id;
+                const isThisPlaying = isPlaying && currentTrackId === track.id;
                 return (
                   <motion.div
                     key={track.id}
@@ -308,10 +415,10 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05 }}
                     className={`bg-white/80 backdrop-blur-sm border border-gray-200 rounded-2xl px-4 py-3 shadow-sm hover:shadow-md transition-all duration-200 relative overflow-hidden ${
-                      isPlaying ? "ring-2 ring-yellow-400" : ""
+                      isThisPlaying ? "ring-2 ring-yellow-400" : ""
                     }`}
                   >
-                    {isPlaying && (
+                    {isThisPlaying && (
                       <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-yellow-400 to-orange-500">
                         <motion.div
                           className="h-full bg-white/30"
@@ -326,13 +433,13 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
                       <motion.div
                         whileHover={{ rotate: 360 }}
                         transition={{ duration: 0.6 }}
-                        animate={isPlaying ? { rotate: 360 } : {}}
+                        animate={isThisPlaying ? { rotate: 360 } : {}}
                         className={`w-14 h-14 bg-gradient-to-br ${
                           tabs.find((t) => t.id === track.genre)?.color ||
                           "from-gray-400 to-gray-500"
                         } rounded-2xl flex items-center justify-center flex-shrink-0 shadow-md`}
                       >
-                        {isPlaying ? (
+                        {isThisPlaying ? (
                           <Disc3 className="w-7 h-7 text-white animate-spin" />
                         ) : (
                           <Music className="w-7 h-7 text-white" />
@@ -354,7 +461,7 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
                       </div>
 
                       <div className="flex items-center gap-3 flex-shrink-0">
-                        {isPlaying && (
+                        {isThisPlaying && (
                           <motion.div
                             initial={{ opacity: 0, scale: 0 }}
                             animate={{ opacity: 1, scale: 1 }}
@@ -371,20 +478,24 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.95 }}
                           onClick={() => {
-                            // explicit start / stop — avoid implicit toggles that cause unexpected auto-play
-                            if (isPlaying) {
-                              setPlayingTrack(null);
+                            // explicit play / pause per track without clearing the track id
+                            if (isThisPlaying) {
+                              setIsPlaying(false);
+                            } else if (currentTrackId === track.id) {
+                              setIsPlaying(true);
                             } else {
-                              setPlayingTrack(track.id);
+                              setCurrentTrackId(track.id);
+                              setTime(0);
+                              setIsPlaying(true);
                             }
                           }}
                           className={`p-4 rounded-2xl transition-all shadow-md ${
-                            isPlaying
+                            isThisPlaying
                               ? "bg-yellow-500 text-white hover:bg-yellow-600"
                               : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                           }`}
                         >
-                          {isPlaying ? (
+                          {isThisPlaying ? (
                             <Pause className="w-5 h-5" />
                           ) : (
                             <Play className="w-5 h-5 ml-0.5" />
@@ -402,8 +513,16 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
 
       {currentTrack?.youtubeId && (
         <iframe
+          ref={iframeRef}
           className="w-0 h-0 invisible"
-          src={`https://www.youtube.com/embed/${currentTrack.youtubeId}?autoplay=1`}
+          src={
+            iframeSrc ??
+            `https://www.youtube.com/embed/${
+              currentTrack.youtubeId
+            }?enablejsapi=1&origin=${encodeURIComponent(
+              window.location.origin
+            )}`
+          }
           title={currentTrack.title}
           allow="autoplay; encrypted-media"
         />

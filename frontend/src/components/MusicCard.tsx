@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Play, Music, Disc3 } from "lucide-react";
+import { Play, Music, Disc3, SkipBack, SkipForward, Pause } from "lucide-react";
 import { motion } from "framer-motion";
 
 interface MusicCardProps {
@@ -7,6 +7,8 @@ interface MusicCardProps {
   trackTitle?: string;
   isPlaying?: boolean; // controlled play state from parent
   onTogglePlay?: () => void; // parent toggler
+  onNext?: () => void;
+  onPrev?: () => void;
 }
 
 const MusicCard: React.FC<MusicCardProps> = ({
@@ -14,6 +16,8 @@ const MusicCard: React.FC<MusicCardProps> = ({
   trackTitle,
   isPlaying,
   onTogglePlay,
+  onNext,
+  onPrev,
 }) => {
   const [currentTrack, setCurrentTrack] = useState<string | null>(null);
   const rootRef = useRef<HTMLDivElement | null>(null);
@@ -24,7 +28,8 @@ const MusicCard: React.FC<MusicCardProps> = ({
     if (playing) {
       setCurrentTrack(trackTitle ?? currentTrack);
     } else {
-      setCurrentTrack(null);
+      // keep currentTrack visible (paused) — do not clear it so resume works
+      if (trackTitle) setCurrentTrack(trackTitle);
     }
   }, [isPlaying, trackTitle]);
 
@@ -50,6 +55,22 @@ const MusicCard: React.FC<MusicCardProps> = ({
   const togglePlay = () => {
     onTogglePlay?.();
     onOpenMusic?.();
+  };
+
+  const handlePrev = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onPrev?.();
+  };
+
+  const handleNext = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onNext?.();
+  };
+
+  // Now: combined play/pause only — always toggle play state (no stop)
+  const handlePlayPause = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onTogglePlay?.();
   };
 
   const handleContainerClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -138,14 +159,55 @@ const MusicCard: React.FC<MusicCardProps> = ({
             <p className="text-foreground font-medium truncate">
               {controlledPlaying
                 ? trackTitle ?? currentTrack
-                : "No track selected"}
+                : trackTitle ?? currentTrack ?? "No track selected"}
             </p>
             <p className="text-sm text-muted-foreground">
               {controlledPlaying
                 ? "Relaxing beats to help you focus"
-                : "Click play to start"}
+                : "Click play to start / resume"}
             </p>
           </motion.div>
+        </div>
+
+        {/* Right-side controls: Prev | Play/Pause | Next */}
+        <div className="flex items-center gap-3 flex-shrink-0">
+          <motion.button
+            onClick={handlePrev}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            aria-label="Previous track"
+            className="p-2 rounded-lg bg-white border border-border shadow-sm text-gray-600 hover:bg-gray-50"
+          >
+            <SkipBack className="w-5 h-5" />
+          </motion.button>
+
+          <motion.button
+            onClick={handlePlayPause}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            aria-label={controlledPlaying ? "Pause" : "Play"}
+            className={`p-2 rounded-lg shadow-md transition-all text-white flex items-center justify-center ${
+              controlledPlaying
+                ? "bg-yellow-500 hover:bg-yellow-600 ring-1 ring-yellow-300"
+                : "bg-blue-500 hover:bg-blue-600 ring-1 ring-blue-300"
+            }`}
+          >
+            {controlledPlaying ? (
+              <Pause className="w-5 h-5" />
+            ) : (
+              <Play className="w-5 h-5" />
+            )}
+          </motion.button>
+
+          <motion.button
+            onClick={handleNext}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            aria-label="Next track"
+            className="p-2 rounded-lg bg-white border border-border shadow-sm text-gray-600 hover:bg-gray-50"
+          >
+            <SkipForward className="w-5 h-5" />
+          </motion.button>
         </div>
       </div>
     </motion.div>
