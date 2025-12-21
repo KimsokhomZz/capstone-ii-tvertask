@@ -2,6 +2,7 @@
   "menuPageOrder": [
     "users",
     "quests",
+    "pomoSession",
     "dashboard"
   ]
 }

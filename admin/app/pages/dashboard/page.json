@@ -63,21 +63,21 @@
       {
         "key": "card_cv2mmo",
         "fetchStrategy": "rawSqlQuery",
-        "type": "lineChart",
+        "type": "barChart",
         "dataSource": "mysql_db_wpck38",
         "values": [
           {
-            "alias": "complete",
+            "alias": "total_completed",
             "color": "#1851ff"
           },
           {
-            "alias": "uncomplete",
+            "alias": "total_uncompleted",
             "color": "#fa5252"
           }
         ],
         "dataKeyAlias": "date",
         "title": "Pomodoro Complete",
-        "sqlQuery": "SELECT DATE(createdAt) as date, SUM(completed) as completed_true, COUNT(*) - SUM(completed) as completed_false FROM PomodoroSessions WHERE createdAt BETWEEN :period_start_date AND :period_end_date GROUP BY DATE(createdAt) ORDER BY date"
+        "sqlQuery": "SELECT DATE(createdAt) as date, SUM(completed = 1) as total_completed, SUM(completed = 0) as total_uncompleted FROM PomodoroSessions WHERE createdAt BETWEEN :period_start_date AND :period_end_date GROUP BY DATE(createdAt) ORDER BY date"
       }
     ]
   }
