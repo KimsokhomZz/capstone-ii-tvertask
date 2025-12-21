@@ -160,7 +160,9 @@ export default function Focustask() {
 
   return (
     <div
-      className={`min-h-screen p-4 text-black transition-colors ${selectedBg}`}
+      className={`min-h-screen p-4 transition-colors ${
+        darkMode ? "bg-[#101828] text-white" : "bg-white text-black"
+      } ${selectedBg}`}
     >
       <div className="max-w-4xl mx-auto space-y-4">
         <div className="flex items-center justify-between">
