@@ -55,13 +55,15 @@ const MusicCard: React.FC<MusicCardProps> = ({
   const handleContainerClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const target = e.target as HTMLElement | null;
     if (target && target.closest("button, input, a, textarea, select")) return;
-    togglePlay();
+    // open music UI only — do not auto-start playback
+    onOpenMusic?.();
   };
 
   const handleContainerKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
-      togglePlay();
+      // open music UI only — do not auto-start playback
+      onOpenMusic?.();
     }
   };
 
@@ -107,7 +109,10 @@ const MusicCard: React.FC<MusicCardProps> = ({
 
       <div className="flex items-center gap-4">
         <motion.button
-          onClick={togglePlay}
+          onClick={(e) => {
+            e.stopPropagation();
+            togglePlay();
+          }}
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
           aria-pressed={!!currentTrack}

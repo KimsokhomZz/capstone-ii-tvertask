@@ -149,11 +149,12 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
             onOpenMusic={() => setShowCompact(false)}
             trackTitle={currentTrack?.title}
             isPlaying={!!playingTrack}
-            onTogglePlay={() =>
-              setPlayingTrack((p) =>
-                p ? null : visibleTracks[0]?.id ?? tracks[0].id
-              )
-            }
+            onTogglePlay={() => {
+              // only start playback if nothing is playing; don't stop current playback
+              if (!playingTrack) {
+                setPlayingTrack(visibleTracks[0]?.id ?? tracks[0].id);
+              }
+            }}
           />
           {currentTrack?.youtubeId && (
             <iframe
@@ -177,11 +178,12 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
             onOpenMusic={() => setShowCompact(false)}
             trackTitle={currentTrack?.title}
             isPlaying={!!playingTrack}
-            onTogglePlay={() =>
-              setPlayingTrack((p) =>
-                p ? null : visibleTracks[0]?.id ?? tracks[0].id
-              )
-            }
+            onTogglePlay={() => {
+              // only start playback if nothing is playing; don't stop current playback
+              if (!playingTrack) {
+                setPlayingTrack(visibleTracks[0]?.id ?? tracks[0].id);
+              }
+            }}
           />
         </motion.div>
         {currentTrack?.youtubeId && (
@@ -264,7 +266,7 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
                 whileTap={{ scale: 0.95 }}
                 onClick={() => {
                   setActiveTab(tab.id);
-                  setPlayingTrack(null);
+                  // keep playingTrack as-is so switching tabs doesn't stop music
                 }}
                 className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-medium transition-all whitespace-nowrap ${
                   isActive
@@ -368,9 +370,14 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
                         <motion.button
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.95 }}
-                          onClick={() =>
-                            setPlayingTrack(isPlaying ? null : track.id)
-                          }
+                          onClick={() => {
+                            // explicit start / stop — avoid implicit toggles that cause unexpected auto-play
+                            if (isPlaying) {
+                              setPlayingTrack(null);
+                            } else {
+                              setPlayingTrack(track.id);
+                            }
+                          }}
                           className={`p-4 rounded-2xl transition-all shadow-md ${
                             isPlaying
                               ? "bg-yellow-500 text-white hover:bg-yellow-600"
