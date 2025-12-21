@@ -97,6 +97,7 @@ const User = sequelize.define(
     },
   },
   {
+    tableName: "users",
     timestamps: true, // adds createdAt and updatedAt
     hooks: {
       // Hash password before saving
