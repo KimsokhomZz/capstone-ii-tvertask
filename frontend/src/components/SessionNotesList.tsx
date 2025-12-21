@@ -13,6 +13,7 @@ type SessionNotesListProps = {
   onDelete?: (id: number) => Promise<void>;
   loading?: boolean;
   error?: string | null;
+  themeBackground?: string;
 };
 
 export default function SessionNotesList({
@@ -22,6 +23,7 @@ export default function SessionNotesList({
   onDelete,
   loading = false,
   error = null,
+  themeBackground,
 }: SessionNotesListProps) {
   const { darkMode } = useTheme();
   const [deleteId, setDeleteId] = useState<number | null>(null);
@@ -53,6 +55,15 @@ export default function SessionNotesList({
           ? "bg-[#101828] border-[#2a3f5f] text-white"
           : "bg-card border-border"
       }`}
+      style={
+        themeBackground && themeBackground.includes("url")
+          ? {
+              backgroundColor: darkMode
+                ? "rgba(16, 24, 40, 0.3)"
+                : "rgba(255, 255, 255, 0.3)",
+            }
+          : {}
+      }
     >
       {error && (
         <div

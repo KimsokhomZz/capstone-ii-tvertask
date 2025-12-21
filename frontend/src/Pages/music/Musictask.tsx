@@ -29,9 +29,10 @@ interface Track {
   youtubeId?: string;
 }
 
-const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
-  embedded = false,
-}) => {
+const FocusMusicApp: React.FC<{
+  embedded?: boolean;
+  themeBackground?: string;
+}> = ({ embedded = false, themeBackground }) => {
   const { darkMode } = useTheme();
   const [activeTab, setActiveTab] = useState<string>("lofi");
   const [currentTrackId, setCurrentTrackId] = useState<string | null>(null);
@@ -469,6 +470,21 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
                 ? "bg-[#101828]"
                 : "bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50"
             }`
+      }
+      style={
+        embedded && themeBackground && themeBackground.includes("url")
+          ? {
+              backgroundColor: darkMode
+                ? "rgba(16, 24, 40, 0.3)"
+                : "rgba(255, 255, 255, 0.3)",
+            }
+          : !embedded && themeBackground && themeBackground.includes("url")
+          ? {
+              backgroundColor: darkMode
+                ? "rgba(16, 24, 40, 0.3)"
+                : "rgba(255, 255, 255, 0.3)",
+            }
+          : {}
       }
     >
       <div className="max-w-5xl mx-auto">

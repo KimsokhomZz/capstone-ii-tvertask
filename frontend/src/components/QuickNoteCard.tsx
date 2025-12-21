@@ -7,6 +7,7 @@ type QuickNoteCardProps = {
   tags: string[];
   setTags: (fn: (prev: string[]) => string[]) => void;
   onAdd: () => void;
+  themeBackground?: string;
 };
 
 export default function QuickNoteCard({
@@ -15,6 +16,7 @@ export default function QuickNoteCard({
   tags,
   setTags,
   onAdd,
+  themeBackground,
 }: QuickNoteCardProps) {
   const { darkMode } = useTheme();
   const [error, setError] = useState<string | null>(null);
@@ -36,6 +38,15 @@ export default function QuickNoteCard({
           ? "bg-[#101828] border-[#2a3f5f] text-white"
           : "bg-card border-border text-gray-900"
       }`}
+      style={
+        themeBackground && themeBackground.includes("url")
+          ? {
+              backgroundColor: darkMode
+                ? "rgba(16, 24, 40, 0.3)"
+                : "rgba(255, 255, 255, 0.3)",
+            }
+          : {}
+      }
     >
       <div className="flex items-start justify-between mb-4">
         <h3
@@ -108,6 +119,15 @@ export default function QuickNoteCard({
               ? "border-red-400 bg-red-50 text-foreground"
               : "border-input text-foreground"
           }`}
+          style={
+            themeBackground && themeBackground.includes("url")
+              ? {
+                  backgroundColor: darkMode
+                    ? "rgba(16, 24, 40, 0.3)"
+                    : "rgba(255, 255, 255, 0.3)",
+                }
+              : {}
+          }
         />
         {error && (
           <div

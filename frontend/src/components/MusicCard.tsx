@@ -10,6 +10,7 @@ interface MusicCardProps {
   onTogglePlay?: () => void;
   onNext?: () => void;
   onPrev?: () => void;
+  themeBackground?: string;
 }
 
 const MusicCard: React.FC<MusicCardProps> = ({
@@ -19,6 +20,7 @@ const MusicCard: React.FC<MusicCardProps> = ({
   onTogglePlay,
   onNext,
   onPrev,
+  themeBackground,
 }) => {
   const { darkMode } = useTheme();
   const [currentTrack, setCurrentTrack] = useState<string | null>(null);
@@ -29,8 +31,6 @@ const MusicCard: React.FC<MusicCardProps> = ({
     const playing = typeof isPlaying === "boolean" ? isPlaying : !!currentTrack;
     if (playing) {
       setCurrentTrack(trackTitle ?? currentTrack);
-    } else {
-      // keep currentTrack visible (paused) — do not clear it so resume works
       if (trackTitle) setCurrentTrack(trackTitle);
     }
   }, [isPlaying, trackTitle]);
@@ -113,6 +113,15 @@ const MusicCard: React.FC<MusicCardProps> = ({
               controlledPlaying ? "ring-2 ring-yellow-400 shadow-2xl" : ""
             }`
       }`}
+      style={
+        themeBackground && themeBackground.includes("url")
+          ? {
+              backgroundColor: darkMode
+                ? "rgba(16, 24, 40, 0.3)"
+                : "rgba(255, 255, 255, 0.3)",
+            }
+          : {}
+      }
     >
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">

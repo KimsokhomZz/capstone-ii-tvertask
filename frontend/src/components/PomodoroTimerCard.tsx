@@ -193,7 +193,9 @@ export default function PomodoroTimerCard({
               background:
                 themeBackground && themeBackground.includes("url")
                   ? "transparent"
-                  : "#101828",
+                  : darkMode
+                  ? "#101828"
+                  : "#ffffff",
             }
           : {}
       }
@@ -205,9 +207,18 @@ export default function PomodoroTimerCard({
           isFullscreen
             ? ""
             : `border ${darkMode ? "border-[#2a3f5f]" : "border-border"}`
-        } backdrop-blur-lg rounded-[28px] p-6 md:p-8 transition-all w-full ${
+        } rounded-[28px] p-6 md:p-8 transition-all w-full ${
           isFullscreen ? "max-w-4xl mx-4 my-8" : ""
         }`}
+        style={
+          themeBackground && themeBackground.includes("url")
+            ? {
+                backgroundColor: darkMode
+                  ? "rgba(16, 24, 40, 0.3)"
+                  : "rgba(255, 255, 255, 0.3)",
+              }
+            : {}
+        }
       >
         {isFullscreen && themeBackground && (
           <div
@@ -763,7 +774,9 @@ export default function PomodoroTimerCard({
                 y="95"
                 dominantBaseline="middle"
                 textAnchor="middle"
-                className="text-xl fill-current text-yellow-400 font-mono font-bold"
+                className={`text-xl font-mono font-bold ${
+                  darkMode ? "fill-yellow-400" : "fill-[#101828]"
+                }`}
               >
                 {formatTime(timeLeft)}
               </text>
@@ -772,7 +785,9 @@ export default function PomodoroTimerCard({
                 y="115"
                 dominantBaseline="middle"
                 textAnchor="middle"
-                className="text-[10px] fill-current text-gray-500 font-semibold"
+                className={`text-[10px] font-semibold ${
+                  darkMode ? "fill-green-400" : "fill-green-500"
+                }`}
               >
                 {displayPercentage}% Complete
               </text>

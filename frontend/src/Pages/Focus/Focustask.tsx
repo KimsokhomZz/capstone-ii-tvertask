@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import PomodoroTimerCard from "../../Components/PomodoroTimerCard";
 import MusicCard from "../../Components/MusicCard";
 import QuickNoteCard from "../../Components/QuickNoteCard";
@@ -23,7 +23,20 @@ export default function Focustask() {
   const [tags, setTags] = useState<string[]>([]);
   const [showMusic, setShowMusic] = useState(false);
   const [galleryOpen, setGalleryOpen] = useState(false);
-  const [bgId, setBgId] = useState<string>();
+  const [bgId, setBgId] = useState<string>(() => {
+    // Load saved background from localStorage on initial render
+    try {
+      const saved = localStorage.getItem("focuspage.bgId");
+      return saved ? saved : "none";
+    } catch {
+      return "none";
+    }
+  });
+
+  // Save background ID to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem("focuspage.bgId", bgId || "none");
+  }, [bgId]);
 
   const selectedBg =
     bgId && bgId !== "none"
@@ -189,6 +202,15 @@ export default function Focustask() {
               ? "bg-[#101828] border-[#2a3f5f] text-white"
               : "bg-card border-border"
           }`}
+          style={
+            selectedBg && selectedBg.includes("url")
+              ? {
+                  backgroundColor: darkMode
+                    ? "rgba(16, 24, 40, 0.3)"
+                    : "rgba(255, 255, 255, 0.3)",
+                }
+              : {}
+          }
         >
           <div className="space-y-1">
             <p
@@ -222,9 +244,12 @@ export default function Focustask() {
         {/* render MusicCard or full Musictask when opened */}
         {showMusic ? (
           // request embedded (inline) compact behavior to avoid huge vertical spacing
-          <Musictask embedded />
+          <Musictask embedded themeBackground={selectedBg} />
         ) : (
-          <MusicCard onOpenMusic={() => setShowMusic(true)} />
+          <MusicCard
+            onOpenMusic={() => setShowMusic(true)}
+            themeBackground={selectedBg}
+          />
         )}
 
         <QuickNoteCard
@@ -233,6 +258,7 @@ export default function Focustask() {
           tags={tags}
           setTags={setTags}
           onAdd={handleAddNote}
+          themeBackground={selectedBg}
         />
 
         <SessionNotesList
@@ -242,6 +268,7 @@ export default function Focustask() {
           onDelete={handleDeleteRemoteNote}
           loading={loading}
           error={error}
+          themeBackground={selectedBg}
         />
       </div>
 
