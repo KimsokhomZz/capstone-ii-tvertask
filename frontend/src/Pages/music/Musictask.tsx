@@ -11,6 +11,7 @@ import {
   Disc3,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTheme } from "@/context/ThemeContext";
 import MusicCard from "../../Components/MusicCard";
 import lofi from "../../assets/music/lofi";
 import nature from "../../assets/music/nature";
@@ -31,6 +32,7 @@ interface Track {
 const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
   embedded = false,
 }) => {
+  const { darkMode } = useTheme();
   const [activeTab, setActiveTab] = useState<string>("lofi");
   const [currentTrackId, setCurrentTrackId] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
@@ -457,8 +459,16 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
       transition={{ duration: 0.3, ease: "easeOut" }}
       className={
         embedded
-          ? "w-full h-full bg-card rounded-[28px] shadow-md border border-border overflow-hidden p-8"
-          : "min-h-screen p-8"
+          ? `w-full h-full rounded-[28px] shadow-md border overflow-hidden p-8 transition-colors ${
+              darkMode
+                ? "bg-[#101828] border-[#2a3f5f]"
+                : "bg-card border-border"
+            }`
+          : `min-h-screen p-8 transition-colors ${
+              darkMode
+                ? "bg-[#101828]"
+                : "bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50"
+            }`
       }
     >
       <div className="max-w-5xl mx-auto">
@@ -477,12 +487,20 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
               Focus Music
             </h3>
             {currentTrackId ? (
-              <p className="text-sm text-yellow-600 font-medium">
+              <p
+                className={`text-sm font-medium ${
+                  darkMode ? "text-gray-300" : "text-yellow-600"
+                }`}
+              >
                 {isPlaying ? "▶ Now Playing:" : "⏸ Paused:"}{" "}
                 {currentTrack?.title}
               </p>
             ) : (
-              <p className="text-sm text-gray-600">
+              <p
+                className={`text-sm ${
+                  darkMode ? "text-gray-400" : "text-gray-600"
+                }`}
+              >
                 Curated playlists to boost your productivity
               </p>
             )}
@@ -494,9 +512,13 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
               whileTap={{ scale: 0.95 }}
               aria-label="Show compact music card"
               onClick={() => setShowCompact(true)}
-              className="p-3 rounded-2xl bg-white/80 backdrop-blur-sm border border-gray-200 shadow-sm hover:shadow-lg transition-all duration-75"
+              className={`p-3 rounded-2xl border shadow-sm hover:shadow-lg transition-all duration-75 ${
+                darkMode
+                  ? "bg-[#1d2942] border-[#2a3f5f] text-yellow-400"
+                  : "bg-white/80 border-gray-200 text-yellow-500"
+              }`}
             >
-              <ChevronDown className="w-6 h-6 text-yellow-500" />
+              <ChevronDown className="w-6 h-6" />
             </motion.button>
           )}
         </motion.div>
@@ -520,6 +542,8 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
                 className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-medium transition-all whitespace-nowrap ${
                   isActive
                     ? `bg-linear-to-r ${tab.color} text-white shadow-lg`
+                    : darkMode
+                    ? "bg-[#1d2942] text-gray-300 hover:bg-[#253548] shadow-sm border border-[#2a3f5f]"
                     : "bg-white text-gray-600 hover:bg-gray-50 shadow-sm"
                 }`}
               >
@@ -542,8 +566,12 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
           >
             {visibleTracks.length === 0 ? (
               <div className="text-center py-16">
-                <Music className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <p className="text-gray-500">
+                <Music
+                  className={`w-16 h-16 mx-auto mb-4 ${
+                    darkMode ? "text-gray-600" : "text-gray-300"
+                  }`}
+                />
+                <p className={darkMode ? "text-gray-400" : "text-gray-500"}>
                   No tracks for this category yet.
                 </p>
               </div>
@@ -556,8 +584,14 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05 }}
-                    className={`bg-white/80 backdrop-blur-sm border border-gray-200 rounded-2xl px-4 py-3 shadow-sm hover:shadow-md transition-all duration-200 relative overflow-hidden ${
-                      isThisPlaying ? "ring-2 ring-yellow-400" : ""
+                    className={`border rounded-2xl px-4 py-3 shadow-sm hover:shadow-md transition-all duration-200 relative overflow-hidden ${
+                      darkMode
+                        ? `bg-[#0f1419] border-[#2a3f5f] ${
+                            isThisPlaying ? "ring-2 ring-yellow-400" : ""
+                          }`
+                        : `bg-white/80 border-gray-200 ${
+                            isThisPlaying ? "ring-2 ring-yellow-400" : ""
+                          }`
                     }`}
                   >
                     {isThisPlaying && (
@@ -589,15 +623,29 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
                       </motion.div>
 
                       <div className="flex-1 min-w-0">
-                        <h3 className="text-lg font-semibold text-gray-800 truncate">
+                        <h3
+                          className={`text-lg font-semibold truncate ${
+                            darkMode ? "text-white" : "text-gray-800"
+                          }`}
+                        >
                           {track.title}
                           {track.isPremium && (
-                            <span className="ml-2 text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full">
+                            <span
+                              className={`ml-2 text-xs px-2 py-1 rounded-full ${
+                                darkMode
+                                  ? "bg-yellow-500/20 text-yellow-300"
+                                  : "bg-yellow-100 text-yellow-700"
+                              }`}
+                            >
                               ⭐ Premium
                             </span>
                           )}
                         </h3>
-                        <p className="text-sm text-gray-600 truncate">
+                        <p
+                          className={`text-sm truncate ${
+                            darkMode ? "text-gray-400" : "text-gray-600"
+                          }`}
+                        >
                           {track.description}
                         </p>
                       </div>
@@ -607,7 +655,11 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
                           <motion.div
                             initial={{ opacity: 0, scale: 0 }}
                             animate={{ opacity: 1, scale: 1 }}
-                            className="flex items-center gap-2 text-sm text-gray-600 bg-gray-100 px-3 py-1.5 rounded-lg"
+                            className={`flex items-center gap-2 text-sm px-3 py-1.5 rounded-lg ${
+                              darkMode
+                                ? "bg-[#1d2942] text-gray-300"
+                                : "bg-gray-100 text-gray-600"
+                            }`}
                           >
                             <Clock className="w-4 h-4" />
                             <span className="font-mono">
@@ -633,6 +685,8 @@ const FocusMusicApp: React.FC<{ embedded?: boolean }> = ({
                           className={`p-4 rounded-2xl transition-all shadow-md ${
                             isThisPlaying
                               ? "bg-yellow-500 text-white hover:bg-yellow-600"
+                              : darkMode
+                              ? "bg-[#1d2942] text-gray-300 hover:bg-[#253548]"
                               : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                           }`}
                         >

@@ -2,6 +2,7 @@ import DeleteConfirmation from "@/components/DeleteConfirmation";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useState } from "react";
+import { useTheme } from "@/context/ThemeContext";
 
 type Note = { id: number; text: string; editing?: boolean };
 
@@ -22,24 +23,61 @@ export default function SessionNotesList({
   loading = false,
   error = null,
 }: SessionNotesListProps) {
+  const { darkMode } = useTheme();
   const [deleteId, setDeleteId] = useState<number | null>(null);
 
   if (loading && notes.length === 0) {
     return (
-      <div className="bg-card rounded-[28px] shadow-xl border border-border p-6 md:p-8">
-        <div className="text-sm text-muted-foreground">Loading notes…</div>
+      <div
+        className={`rounded-[28px] shadow-xl border p-6 md:p-8 transition-colors ${
+          darkMode
+            ? "bg-[#101828] border-[#2a3f5f] text-white"
+            : "bg-card border-border"
+        }`}
+      >
+        <div
+          className={`text-sm ${
+            darkMode ? "text-gray-400" : "text-muted-foreground"
+          }`}
+        >
+          Loading notes…
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-card rounded-[28px] shadow-md border border-border p-6 md:p-8">
-      {error && <div className="text-sm text-destructive mb-3">{error}</div>}
+    <div
+      className={`rounded-[28px] shadow-md border p-6 md:p-8 transition-colors ${
+        darkMode
+          ? "bg-[#101828] border-[#2a3f5f] text-white"
+          : "bg-card border-border"
+      }`}
+    >
+      {error && (
+        <div
+          className={`text-sm mb-3 ${
+            darkMode ? "text-red-400" : "text-destructive"
+          }`}
+        >
+          {error}
+        </div>
+      )}
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-xl font-semibold text-foreground">
+        <h3
+          className={`text-xl font-semibold ${
+            darkMode ? "text-white" : "text-foreground"
+          }`}
+        >
           💡 Session Notes
         </h3>
-        <span className="text-xs bg-yellow-100 text-yellow-700 border border-yellow-200 px-2.5 py-1 rounded-full">
+        <span
+          className={`text-xs border px-2.5 py-1 rounded-full ${
+            darkMode
+              ? "bg-yellow-500/20 text-yellow-300 border-yellow-400/30"
+              : "bg-yellow-100 text-yellow-700 border-yellow-200"
+          }`}
+        >
           {notes.length}
         </span>
       </div>
@@ -47,8 +85,18 @@ export default function SessionNotesList({
         {notes.length === 0 && (
           <div className="flex flex-col items-center justify-center py-8 text-center">
             <div className="text-4xl mb-3">📝</div>
-            <p className="text-sm text-muted-foreground">No notes yet</p>
-            <p className="text-xs text-muted-foreground/70 mt-1">
+            <p
+              className={`text-sm ${
+                darkMode ? "text-gray-400" : "text-muted-foreground"
+              }`}
+            >
+              No notes yet
+            </p>
+            <p
+              className={`text-xs mt-1 ${
+                darkMode ? "text-gray-500" : "text-muted-foreground/70"
+              }`}
+            >
               Add your first note to get started
             </p>
           </div>
@@ -56,7 +104,11 @@ export default function SessionNotesList({
         {notes.map((n) => (
           <div
             key={n.id}
-            className="group flex items-center gap-3 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-2xl px-4 py-3 shadow-sm hover:shadow-md transition-all duration-200"
+            className={`group flex items-center gap-3 border rounded-2xl px-4 py-3 shadow-sm hover:shadow-md transition-all duration-200 ${
+              darkMode
+                ? "bg-[#0f1419] border-[#2a3f5f] text-white"
+                : "bg-white/80 border-gray-200 text-foreground"
+            }`}
           >
             <div className="flex-1 min-w-0">
               {n.editing ? (
@@ -69,11 +121,19 @@ export default function SessionNotesList({
                       )
                     )
                   }
-                  className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                  className={`w-full rounded-lg border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all ${
+                    darkMode
+                      ? "border-[#2a3f5f] bg-[#1a2332] text-white"
+                      : "border-input text-foreground"
+                  }`}
                   autoFocus
                 />
               ) : (
-                <div className="text-foreground text-sm leading-relaxed break-words">
+                <div
+                  className={`text-sm leading-relaxed break-words ${
+                    darkMode ? "text-white" : "text-foreground"
+                  }`}
+                >
                   {n.text}
                 </div>
               )}
@@ -83,10 +143,10 @@ export default function SessionNotesList({
                 <>
                   <button
                     disabled={loading}
-                    className={`text-xs px-3 py-1.5 rounded-lg bg-green-500 text-white hover:bg-green-600 font-medium transition-all ${
+                    className={`text-xs px-3 py-1.5 rounded-lg text-white font-medium transition-all ${
                       loading
                         ? "opacity-50 cursor-not-allowed"
-                        : "hover:scale-105"
+                        : "hover:scale-105 bg-green-600 hover:bg-green-700"
                     }`}
                     onClick={async () => {
                       if (loading) return;
@@ -109,7 +169,11 @@ export default function SessionNotesList({
                   </button>
                   <button
                     disabled={loading}
-                    className={`text-xs px-3 py-1.5 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 font-medium transition-all ${
+                    className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-all ${
+                      darkMode
+                        ? "bg-[#1d2942] text-gray-300 hover:bg-[#253548]"
+                        : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                    } ${
                       loading
                         ? "opacity-50 cursor-not-allowed"
                         : "hover:scale-105"
@@ -126,10 +190,10 @@ export default function SessionNotesList({
                   </button>
                   <button
                     disabled={loading}
-                    className={`text-xs px-3 py-1.5 rounded-lg bg-red-500 text-white hover:bg-red-600 font-medium transition-all ${
+                    className={`text-xs px-3 py-1.5 rounded-lg text-white font-medium transition-all ${
                       loading
                         ? "opacity-50 cursor-not-allowed"
-                        : "hover:scale-105"
+                        : "hover:scale-105 bg-red-600 hover:bg-red-700"
                     }`}
                     onClick={() => setDeleteId(n.id)}
                   >
@@ -140,7 +204,11 @@ export default function SessionNotesList({
                 <>
                   <button
                     disabled={loading}
-                    className={`text-xs px-3 py-1.5 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 font-medium transition-all ${
+                    className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-all ${
+                      darkMode
+                        ? "bg-blue-600/20 text-blue-300 hover:bg-blue-600/30"
+                        : "bg-blue-50 text-blue-600 hover:bg-blue-100"
+                    } ${
                       loading
                         ? "opacity-50 cursor-not-allowed"
                         : "hover:scale-105"
@@ -157,7 +225,11 @@ export default function SessionNotesList({
                   </button>
                   <button
                     disabled={loading}
-                    className={`text-xs px-3 py-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 font-medium transition-all ${
+                    className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-all ${
+                      darkMode
+                        ? "bg-red-600/20 text-red-300 hover:bg-red-600/30"
+                        : "bg-red-50 text-red-600 hover:bg-red-100"
+                    } ${
                       loading
                         ? "opacity-50 cursor-not-allowed"
                         : "hover:scale-105"
@@ -168,7 +240,13 @@ export default function SessionNotesList({
                   </button>
                 </>
               )}
-              <span className="text-xs bg-yellow-50 text-yellow-700 border border-yellow-200 px-2.5 py-1 rounded-full font-medium whitespace-nowrap">
+              <span
+                className={`text-xs border px-2.5 py-1 rounded-full font-medium whitespace-nowrap ${
+                  darkMode
+                    ? "bg-yellow-500/20 text-yellow-300 border-yellow-400/30"
+                    : "bg-yellow-50 text-yellow-700 border-yellow-200"
+                }`}
+              >
                 {new Date().toLocaleTimeString([], {
                   hour: "2-digit",
                   minute: "2-digit",

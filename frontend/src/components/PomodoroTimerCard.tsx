@@ -182,7 +182,6 @@ export default function PomodoroTimerCard({
   return (
     <div
       ref={cardRef}
-      // when fullscreen make this the fullscreen container and center the inner card
       className={`transition-all ${
         isFullscreen
           ? "fixed inset-0 z-50 flex items-center justify-center overflow-auto p-6"
@@ -190,23 +189,26 @@ export default function PomodoroTimerCard({
       }`}
       style={
         isFullscreen
-          ? themeBackground
-            ? { background: "transparent" }
-            : darkMode
-            ? { background: "transparent" }
-            : { background: "#ffffff" }
+          ? {
+              background:
+                themeBackground && themeBackground.includes("url")
+                  ? "transparent"
+                  : "#101828",
+            }
           : {}
       }
     >
       <div
-        // remove border when fullscreen
-        className={`bg-white ${
-          isFullscreen ? "" : "border border-border"
-        } backdrop-blur-lg text-foreground rounded-[28px] p-6 md:p-8 transition-all w-full ${
+        className={`${
+          darkMode ? "bg-[#101828] text-white" : "bg-white text-black"
+        } ${
+          isFullscreen
+            ? ""
+            : `border ${darkMode ? "border-[#2a3f5f]" : "border-border"}`
+        } backdrop-blur-lg rounded-[28px] p-6 md:p-8 transition-all w-full ${
           isFullscreen ? "max-w-4xl mx-4 my-8" : ""
         }`}
       >
-        {" "}
         {isFullscreen && themeBackground && (
           <div
             className="fixed inset-0 -z-10"
@@ -225,7 +227,7 @@ export default function PomodoroTimerCard({
         )}
         {/* Header */}
         <div
-          className={`flex items-center justify-between w-full max-w-3xl mb-5 mx-auto `}
+          className={`flex items-center justify-between w-full max-w-3xl mb-5 mx-auto`}
         >
           {!isFullscreen && (
             <Header
@@ -239,22 +241,40 @@ export default function PomodoroTimerCard({
               <div>
                 <button
                   onClick={() => setShowPicker((s) => !s)}
-                  className="px-3 py-1 rounded-full bg-secondary border border-border hover:bg-accent hover:shadow-md text-md transition-colors cursor-pointer"
+                  className={`px-3 py-1 rounded-full transition-colors cursor-pointer ${
+                    darkMode
+                      ? "bg-[#1d2942] border border-[#2a3f5f] text-white hover:bg-[#253548]"
+                      : "bg-secondary border border-border hover:bg-accent"
+                  }`}
                 >
                   🛠️
                 </button>
 
-                {/* Change time / presets popup (restored from modified) */}
+                {/* Change time / presets popup */}
                 {showPicker && (
-                  <div className="absolute right-0 mt-2 z-10 bg-white border border-gray-200 rounded-2xl shadow-2xl p-5 w-72 max-h-[80vh] overflow-y-auto">
+                  <div
+                    className={`absolute right-0 mt-2 z-10 rounded-2xl shadow-2xl p-5 w-72 max-h-[80vh] overflow-y-auto ${
+                      darkMode
+                        ? "bg-[#1a2332] border border-[#2a3f5f]"
+                        : "bg-white border border-gray-200"
+                    }`}
+                  >
                     {/* Header */}
                     <div className="flex items-center justify-between mb-2">
-                      <h3 className="text-base font-semibold   text-gray-800 flex items-center gap-2">
+                      <h3
+                        className={`text-base font-semibold flex items-center gap-2 ${
+                          darkMode ? "text-white" : "text-gray-800"
+                        }`}
+                      >
                         ⚙️ Timer Settings
                       </h3>
                       <button
                         onClick={() => setShowPicker(false)}
-                        className="p-1 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors"
+                        className={`p-1 rounded-lg transition-colors ${
+                          darkMode
+                            ? "hover:bg-[#253548] text-gray-400 hover:text-gray-200"
+                            : "hover:bg-gray-100 text-gray-500 hover:text-gray-700"
+                        }`}
                         aria-label="Close"
                       >
                         ✕
@@ -263,7 +283,11 @@ export default function PomodoroTimerCard({
 
                     {/* Presets Section */}
                     <div className="mb-5">
-                      <div className="text-sm font-semibold text-gray-600 mb-2">
+                      <div
+                        className={`text-sm font-semibold mb-2 ${
+                          darkMode ? "text-gray-300" : "text-gray-600"
+                        }`}
+                      >
                         📋 Quick Presets
                       </div>
                       <div className="space-y-1">
@@ -290,7 +314,11 @@ export default function PomodoroTimerCard({
                               }}
                               className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-left border-2 transition-all duration-200 ${
                                 active
-                                  ? "bg-linear-to-r from-blue-50 to-indigo-50 border-blue-400 shadow-md"
+                                  ? darkMode
+                                    ? "bg-[#253548] border-blue-400 shadow-md"
+                                    : "bg-linear-to-r from-blue-50 to-indigo-50 border-blue-400 shadow-md"
+                                  : darkMode
+                                  ? "border-[#2a3f5f] hover:border-[#3a4f7f] hover:bg-[#1a2f42] hover:shadow-sm"
                                   : "border-gray-200 hover:border-gray-300 hover:bg-gray-50 hover:shadow-sm"
                               }`}
                             >
@@ -299,6 +327,8 @@ export default function PomodoroTimerCard({
                                   className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all ${
                                     active
                                       ? "border-blue-500 bg-blue-500"
+                                      : darkMode
+                                      ? "border-gray-500"
                                       : "border-gray-300"
                                   }`}
                                 >
@@ -308,13 +338,21 @@ export default function PomodoroTimerCard({
                                 </div>
                                 <span
                                   className={`text-sm font-medium ${
-                                    active ? "text-blue-700" : "text-gray-700"
+                                    active
+                                      ? "text-blue-400"
+                                      : darkMode
+                                      ? "text-gray-300"
+                                      : "text-gray-700"
                                   }`}
                                 >
                                   {p.label}
                                 </span>
                               </div>
-                              <span className="text-xs font-semibold text-gray-500">
+                              <span
+                                className={`text-xs font-semibold ${
+                                  darkMode ? "text-gray-400" : "text-gray-500"
+                                }`}
+                              >
                                 {p.focus} • {p.short} • {p.long}
                               </span>
                             </button>
@@ -324,21 +362,45 @@ export default function PomodoroTimerCard({
                     </div>
 
                     {/* Divider */}
-                    <div className="border-t border-gray-200 my-2" />
+                    <div
+                      className={`border-t my-2 ${
+                        darkMode ? "border-[#2a3f5f]" : "border-gray-200"
+                      }`}
+                    />
 
                     {/* Custom Settings */}
                     <div>
-                      <div className="text-sm font-semibold text-gray-600 mb-2 flex items-center gap-2">
+                      <div
+                        className={`text-sm font-semibold mb-2 flex items-center gap-2 ${
+                          darkMode ? "text-gray-300" : "text-gray-600"
+                        }`}
+                      >
                         🎨 Custom Duration
                       </div>
                       <div className="space-y-2">
                         {/* Pomodoro Slider */}
-                        <div className="bg-linear-to-br from-red-50 to-orange-50 rounded-xl p-3 border border-red-100">
+                        <div
+                          className={`rounded-xl p-3 border ${
+                            darkMode
+                              ? "bg-red-950/30 border-red-900/50"
+                              : "bg-linear-to-br from-red-50 to-orange-50 border-red-100"
+                          }`}
+                        >
                           <div className="flex items-center justify-between mb-2">
-                            <span className="text-sm font-medium text-gray-700 flex items-center gap-1.5">
+                            <span
+                              className={`text-sm font-medium flex items-center gap-1.5 ${
+                                darkMode ? "text-red-300" : "text-gray-700"
+                              }`}
+                            >
                               🎯 Focus
                             </span>
-                            <span className="text-sm font-bold text-red-600 bg-white px-2 py-0.5 rounded-full">
+                            <span
+                              className={`text-sm font-bold px-2 py-0.5 rounded-full ${
+                                darkMode
+                                  ? "text-red-300 bg-[#253548]"
+                                  : "text-red-600 bg-white"
+                              }`}
+                            >
                               {sliderMinutes} min
                             </span>
                           </div>
@@ -361,12 +423,28 @@ export default function PomodoroTimerCard({
                         </div>
 
                         {/* Short Break Slider */}
-                        <div className="bg-linear-to-br from-yellow-50 to-amber-50 rounded-xl p-3 border border-yellow-100">
+                        <div
+                          className={`rounded-xl p-3 border ${
+                            darkMode
+                              ? "bg-yellow-950/30 border-yellow-900/50"
+                              : "bg-linear-to-br from-yellow-50 to-amber-50 border-yellow-100"
+                          }`}
+                        >
                           <div className="flex items-center justify-between mb-2">
-                            <span className="text-sm font-medium text-gray-700 flex items-center gap-1.5">
+                            <span
+                              className={`text-sm font-medium flex items-center gap-1.5 ${
+                                darkMode ? "text-yellow-300" : "text-gray-700"
+                              }`}
+                            >
                               ☕ Short Rest
                             </span>
-                            <span className="text-sm font-bold text-yellow-600 bg-white px-2 py-0.5 rounded-full">
+                            <span
+                              className={`text-sm font-bold px-2 py-0.5 rounded-full ${
+                                darkMode
+                                  ? "text-yellow-300 bg-[#253548]"
+                                  : "text-yellow-600 bg-white"
+                              }`}
+                            >
                               {sliderShort} min
                             </span>
                           </div>
@@ -389,12 +467,28 @@ export default function PomodoroTimerCard({
                         </div>
 
                         {/* Long Break Slider */}
-                        <div className="bg-linear-to-br from-green-50 to-emerald-50 rounded-xl p-3 border border-green-100">
+                        <div
+                          className={`rounded-xl p-3 border ${
+                            darkMode
+                              ? "bg-green-950/30 border-green-900/50"
+                              : "bg-linear-to-br from-green-50 to-emerald-50 border-green-100"
+                          }`}
+                        >
                           <div className="flex items-center justify-between mb-2">
-                            <span className="text-sm font-medium text-gray-700 flex items-center gap-1.5">
+                            <span
+                              className={`text-sm font-medium flex items-center gap-1.5 ${
+                                darkMode ? "text-green-300" : "text-gray-700"
+                              }`}
+                            >
                               🌴 Long Rest
                             </span>
-                            <span className="text-sm font-bold text-green-600 bg-white px-2 py-0.5 rounded-full">
+                            <span
+                              className={`text-sm font-bold px-2 py-0.5 rounded-full ${
+                                darkMode
+                                  ? "text-green-300 bg-[#253548]"
+                                  : "text-green-600 bg-white"
+                              }`}
+                            >
                               {sliderLong} min
                             </span>
                           </div>
@@ -440,7 +534,11 @@ export default function PomodoroTimerCard({
                             setShowPicker(false);
                             setSelectedPreset("custom");
                           }}
-                          className="w-full px-4 py-3 rounded-xl bg-linear-to-r from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700 text-white font-semibold text-sm shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 active:scale-95"
+                          className={`w-full px-4 py-3 rounded-xl text-white font-semibold text-sm shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 active:scale-95 ${
+                            darkMode
+                              ? "bg-yellow-600 hover:bg-yellow-700"
+                              : "bg-linear-to-r from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700"
+                          }`}
                         >
                           ✓ Apply Settings
                         </button>
@@ -451,9 +549,11 @@ export default function PomodoroTimerCard({
               </div>
             )}
             <span
-              className={`text-xs bg-yellow-100 text-yellow-700 border border-yellow-200 px-3 py-2 rounded-full ${
-                isFullscreen ? "text-base font-medium" : "text-sm"
-              }`}
+              className={`text-xs px-3 py-2 rounded-full ${
+                darkMode
+                  ? "bg-yellow-500/20 text-yellow-300 border border-yellow-400/30"
+                  : "bg-yellow-100 text-yellow-700 border border-yellow-200"
+              } ${isFullscreen ? "text-base font-medium" : "text-sm"}`}
             >
               {isBreak
                 ? shortsSinceLong === 4
@@ -463,6 +563,7 @@ export default function PomodoroTimerCard({
             </span>
           </div>
         </div>
+
         {/* TIMER SVG + Ben10 character (modified UI) */}
         <div className="flex justify-center items-center">
           <div
@@ -561,8 +662,17 @@ export default function PomodoroTimerCard({
                   x2="100%"
                   y2="100%"
                 >
-                  <stop offset="0%" stopColor="#F9FAFB" />
-                  <stop offset="100%" stopColor="#F3F4F6" />
+                  {darkMode ? (
+                    <>
+                      <stop offset="0%" stopColor="#f6bb00" />
+                      <stop offset="100%" stopColor="#f6bb00" />
+                    </>
+                  ) : (
+                    <>
+                      <stop offset="0%" stopColor="#F9FAFB" />
+                      <stop offset="100%" stopColor="#F3F4F6" />
+                    </>
+                  )}
                 </linearGradient>
 
                 {/* Shimmer effect (optional animation) */}
@@ -673,13 +783,23 @@ export default function PomodoroTimerCard({
         <div className="flex flex-col items-center">
           <div className="flex flex-col items-center space-y-3 mb-6">
             {/* Task Title */}
-            <h2 className="text-2xl font-bold text-gray-800 tracking-tight text-center">
+            <h2
+              className={`text-2xl font-bold tracking-tight text-center ${
+                darkMode ? "text-white" : "text-gray-800"
+              }`}
+            >
               {taskTitle}
             </h2>
 
-            {/* Status Badge with Icon and Animation */}
-            <div className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full bg-linear-to-r from-yellow-50 to-green-50 border border-yellow-200/50 shadow-sm">
-              <span className="flex items-center gap-1.5 text-sm font-semibold text-gray-700">
+            {/* Status Badge */}
+            <div
+              className={`inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full border shadow-sm ${
+                darkMode
+                  ? "bg-[#1d2942] border-[#2a3f5f] text-white"
+                  : "bg-linear-to-r from-yellow-50 to-green-50 border-yellow-200/50 text-gray-700"
+              }`}
+            >
+              <span className="flex items-center gap-1.5 text-sm font-semibold">
                 {isBreak ? (
                   <>
                     <span className="text-base">☕</span>
@@ -700,17 +820,24 @@ export default function PomodoroTimerCard({
           <div className="flex flex-wrap items-center gap-2">
             <button
               onClick={toggleTimer}
-              className="px-4 py-2 rounded-xl bg-secondary border border-border hover:bg-accent hover:shadow-md text-black cursor-pointer transition-colors"
+              className={`px-4 py-2 rounded-xl border cursor-pointer transition-colors ${
+                darkMode
+                  ? "bg-[#1d2942] border-[#2a3f5f] text-white hover:bg-[#253548]"
+                  : "bg-secondary border-border text-black hover:bg-accent"
+              }`}
             >
               {isRunning ? "Pause" : "Start"}
             </button>
             {isFullscreen && (
               <button
                 onClick={() => {
-                  // just open the music modal — do not pause the global player
                   setIsMusicOpen(true);
                 }}
-                className="px-4 py-2 rounded-xl bg-gray-100 border border-gray-200 hover:bg-yellow-50 hover:shadow-md text-gray-800 cursor-pointer transition-colors"
+                className={`px-4 py-2 rounded-xl border cursor-pointer transition-colors ${
+                  darkMode
+                    ? "bg-[#1d2942] border-[#2a3f5f] text-white hover:bg-[#253548]"
+                    : "bg-gray-100 border-gray-200 text-gray-800 hover:bg-yellow-50"
+                }`}
               >
                 Music
               </button>
@@ -745,13 +872,21 @@ export default function PomodoroTimerCard({
                   setTimeLeft(selectedFocus * 60);
                 }
               }}
-              className="px-4 py-2 rounded-xl bg-secondary border border-border hover:bg-accent hover:shadow-md text-black cursor-pointer transition-colors"
+              className={`px-4 py-2 rounded-xl border cursor-pointer transition-colors ${
+                darkMode
+                  ? "bg-[#1d2942] border-[#2a3f5f] text-white hover:bg-[#253548]"
+                  : "bg-secondary border-border text-black hover:bg-accent"
+              }`}
             >
               Complete
             </button>
             <button
               onClick={resetTimer}
-              className="px-4 py-2 rounded-xl bg-secondary border border-border hover:bg-accent hover:shadow-md text-black cursor-pointer transition-colors"
+              className={`px-4 py-2 rounded-xl border cursor-pointer transition-colors ${
+                darkMode
+                  ? "bg-[#1d2942] border-[#2a3f5f] text-white hover:bg-[#253548]"
+                  : "bg-secondary border-border text-black hover:bg-accent"
+              }`}
             >
               Reset
             </button>
@@ -763,27 +898,29 @@ export default function PomodoroTimerCard({
                   cardRef.current?.requestFullscreen?.();
                 }
               }}
-              className="px-4 py-2 rounded-xl bg-secondary border border-border hover:bg-accent hover:shadow-md text-black cursor-pointer transition-colors"
+              className={`px-4 py-2 rounded-xl border cursor-pointer transition-colors ${
+                darkMode
+                  ? "bg-[#1d2942] border-[#2a3f5f] text-white hover:bg-[#253548]"
+                  : "bg-secondary border-border text-black hover:bg-accent"
+              }`}
             >
               {isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
             </button>
           </div>
         </div>
-        {/* Music modal (kept mounted so player doesn't unmount on close) */}
+
+        {/* Music modal */}
         <div
-          // keep mounted to preserve iframe/player state; toggle visibility via opacity & pointer-events
           className={`fixed inset-0 z-50 flex items-center justify-center bg-black/50 transition-opacity duration-200 ${
             isMusicOpen
               ? "opacity-100 pointer-events-auto"
               : "opacity-0 pointer-events-none"
           }`}
-          // click outside content closes modal
           onClick={(e) => {
             if (e.target === e.currentTarget) setIsMusicOpen(false);
           }}
         >
           <div className="bg-white rounded-2xl p-4 md:p-6 relative shadow-xl w-[944px] h-auto max-h-[90vh] overflow-auto">
-            {/* removed internal Close button — click outside overlay to close */}
             <FocusMusicApp embedded={true} />
           </div>
         </div>

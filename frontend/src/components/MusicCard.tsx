@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Play, Music, Disc3, SkipBack, SkipForward, Pause } from "lucide-react";
 import { motion } from "framer-motion";
+import { useTheme } from "@/context/ThemeContext";
 
 interface MusicCardProps {
   onOpenMusic?: () => void;
   trackTitle?: string;
-  isPlaying?: boolean; // controlled play state from parent
-  onTogglePlay?: () => void; // parent toggler
+  isPlaying?: boolean;
+  onTogglePlay?: () => void;
   onNext?: () => void;
   onPrev?: () => void;
 }
@@ -19,6 +20,7 @@ const MusicCard: React.FC<MusicCardProps> = ({
   onNext,
   onPrev,
 }) => {
+  const { darkMode } = useTheme();
   const [currentTrack, setCurrentTrack] = useState<string | null>(null);
   const rootRef = useRef<HTMLDivElement | null>(null);
 
@@ -102,14 +104,26 @@ const MusicCard: React.FC<MusicCardProps> = ({
       initial={{ opacity: 0, y: 5 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className={`bg-card rounded-[28px] shadow-md border border-border p-6 md:p-8 w-full max-w-[944px] cursor-pointer transition-all duration-300 ${
-        controlledPlaying ? "ring-2 ring-yellow-400 shadow-2xl" : ""
+      className={`rounded-[28px] shadow-md border p-6 md:p-8 w-full max-w-[944px] cursor-pointer transition-all duration-300 ${
+        darkMode
+          ? `bg-[#101828] border-[#2a3f5f] text-white ${
+              controlledPlaying ? "ring-2 ring-yellow-400 shadow-2xl" : ""
+            }`
+          : `bg-card border-border ${
+              controlledPlaying ? "ring-2 ring-yellow-400 shadow-2xl" : ""
+            }`
       }`}
     >
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
           <Music className="w-6 h-6 text-yellow-500" />
-          <h3 className="text-xl font-semibold text-gray-900">Focus Music</h3>
+          <h3
+            className={`text-xl font-semibold ${
+              darkMode ? "text-white" : "text-gray-900"
+            }`}
+          >
+            Focus Music
+          </h3>
         </div>
         {controlledPlaying && (
           <motion.div
@@ -156,12 +170,20 @@ const MusicCard: React.FC<MusicCardProps> = ({
             animate={{ opacity: controlledPlaying ? 1 : 0.6 }}
             className="space-y-1"
           >
-            <p className="text-foreground font-medium truncate">
+            <p
+              className={`font-medium truncate ${
+                darkMode ? "text-white" : "text-foreground"
+              }`}
+            >
               {controlledPlaying
                 ? trackTitle ?? currentTrack
                 : trackTitle ?? currentTrack ?? "No track selected"}
             </p>
-            <p className="text-sm text-muted-foreground">
+            <p
+              className={`text-sm ${
+                darkMode ? "text-gray-400" : "text-muted-foreground"
+              }`}
+            >
               {controlledPlaying
                 ? "Relaxing beats to help you focus"
                 : "Click play to start / resume"}
@@ -176,7 +198,11 @@ const MusicCard: React.FC<MusicCardProps> = ({
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             aria-label="Previous track"
-            className="p-2 rounded-lg bg-white border border-border shadow-sm text-gray-600 hover:bg-gray-50"
+            className={`p-2 rounded-lg shadow-sm transition-all ${
+              darkMode
+                ? "bg-[#1d2942] border-[#2a3f5f] text-gray-300 hover:bg-[#253548]"
+                : "bg-white border border-border text-gray-600 hover:bg-gray-50"
+            }`}
           >
             <SkipBack className="w-5 h-5" />
           </motion.button>
@@ -204,7 +230,11 @@ const MusicCard: React.FC<MusicCardProps> = ({
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             aria-label="Next track"
-            className="p-2 rounded-lg bg-white border border-border shadow-sm text-gray-600 hover:bg-gray-50"
+            className={`p-2 rounded-lg shadow-sm transition-all ${
+              darkMode
+                ? "bg-[#1d2942] border-[#2a3f5f] text-gray-300 hover:bg-[#253548]"
+                : "bg-white border border-border text-gray-600 hover:bg-gray-50"
+            }`}
           >
             <SkipForward className="w-5 h-5" />
           </motion.button>

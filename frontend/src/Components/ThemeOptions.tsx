@@ -1,5 +1,5 @@
 // ThemeOptions.ts
-import type { ThemeOption } from "./ThemeGallery";
+import type { ThemeOption } from "../Components/ThemeGallery";
 
 export const themeOptions: ThemeOption[] = [
   // Default theme (no background)
@@ -7,7 +7,7 @@ export const themeOptions: ThemeOption[] = [
     id: "none",
     name: "None",
     light: { className: "bg-white", preview: "" },
-    dark: { className: "bg-gray-900", preview: "" },
+    dark: { className: "bg-[#101828]", preview: "" },
   },
 
   /* ===== LIGHT THEMES ===== */
@@ -19,7 +19,7 @@ export const themeOptions: ThemeOption[] = [
         "bg-[url('/image_background/light2.png')] bg-cover bg-center bg-scroll",
       preview: "/image_background/light2.png",
     },
-    dark: null, // This theme is not available in dark mode
+    dark: null,
   },
   {
     id: "galaxy",
@@ -29,7 +29,7 @@ export const themeOptions: ThemeOption[] = [
         "bg-[url('/image_background/star.gif')] bg-cover bg-center bg-fixed",
       preview: "/image_background/star.gif",
     },
-    dark: null, // This theme is not available in dark mode
+    dark: null,
   },
   {
     id: "fish",
@@ -39,7 +39,7 @@ export const themeOptions: ThemeOption[] = [
         " bg-[url('/image_background/fish.gif')] bg-fixed bg-cover bg-center",
       preview: "/image_background/fish.gif",
     },
-    dark: null, // This theme is not available in dark mode
+    dark: null,
   },
   {
     id: "cat",
@@ -59,22 +59,8 @@ export const themeOptions: ThemeOption[] = [
         " bg-[url('/image_background/waterflow.gif')] bg-cover bg-center",
       preview: "/image_background/waterflow.gif",
     },
-    dark: null, // This theme is not available in dark mode
+    dark: null,
   },
-
-  // Add more light themes here with the same structure
-  // {
-  //   id: "another_light_theme",
-  //   name: "Another Light Theme",
-  //   light: {
-  //     className: "bg-[url('/path/to/light-image.png')] bg-cover bg-center",
-  //     preview: "/path/to/light-image.png",
-  //   },
-  //   dark: {
-  //     className: "bg-gray-900",
-  //     preview: "/path/to/light-image.png"
-  //   },
-  // },
 
   /* ===== DARK THEMES ===== */
   {
@@ -84,7 +70,7 @@ export const themeOptions: ThemeOption[] = [
       className: "bg-[url('/image_background/light4.png')] bg-cover bg-center ",
       preview: "/image_background/light4.png",
     },
-    light: null, // This theme is not available in light mode
+    light: null,
   },
   {
     id: "starry_night",
@@ -96,17 +82,4 @@ export const themeOptions: ThemeOption[] = [
     },
     light: null,
   },
-  // Add more dark themes here with the same structure
-  // {
-  //   id: "another_dark_theme",
-  //   name: "Another Dark Theme",
-  //   dark: {
-  //     className: "bg-[url('/path/to/dark-image.png')] bg-cover bg-center",
-  //     preview: "/path/to/dark-image.png",
-  //   },
-  //   light: {
-  //     className: "bg-white",
-  //     preview: "/path/to/dark-image.png"
-  //   },
-  // },
 ];

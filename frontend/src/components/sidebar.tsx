@@ -20,11 +20,15 @@ interface SidebarProps {
   onLogout?: () => void;
 }
 
+interface AuthContextType {
+  user: { id: string } | null;
+}
+
 const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { logout } = useAuth();
-  const { user } = useContext(AuthContext) as any;
+  const { user } = useContext(AuthContext) as AuthContextType;
   const { unreadCount, fetchUnreadCount } = useContext(NotificationContext)!;
 
   const [selectedMood, setSelectedMood] = useState<number | null>(() => {
@@ -34,9 +38,9 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
 
   useEffect(() => {
     if (user?.id) {
-      fetchUnreadCount(user.id);
+      fetchUnreadCount(Number(user.id));
       const interval = setInterval(() => {
-        fetchUnreadCount(user.id);
+        fetchUnreadCount(Number(user.id));
       }, 30000);
       return () => clearInterval(interval);
     }
@@ -73,7 +77,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
         onLogout();
       }
       navigate("/login");
-    } catch (error) {
+    } catch {
       // Silent error handling
     }
   };
