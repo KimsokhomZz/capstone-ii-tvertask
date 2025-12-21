@@ -67,13 +67,17 @@
         "dataSource": "mysql_db_wpck38",
         "values": [
           {
-            "alias": "total_duration",
+            "alias": "complete",
             "color": "#1851ff"
+          },
+          {
+            "alias": "uncomplete",
+            "color": "#fa5252"
           }
         ],
         "dataKeyAlias": "date",
-        "title": "Pomodoro Duration",
-        "sqlQuery": "SELECT DATE(createdAt) as date, SUM(duration) as total_duration FROM PomodoroSessions WHERE createdAt BETWEEN :period_start_date AND :period_end_date GROUP BY DATE(createdAt) ORDER BY date"
+        "title": "Pomodoro Complete",
+        "sqlQuery": "SELECT DATE(createdAt) as date, SUM(completed) as completed_true, COUNT(*) - SUM(completed) as completed_false FROM PomodoroSessions WHERE createdAt BETWEEN :period_start_date AND :period_end_date GROUP BY DATE(createdAt) ORDER BY date"
       }
     ]
   }
