@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
 import EditProfile from "../../components/Profile/EditProfile.js";
 import ChangePassword from "../../components/Profile/ChangePassword.js";
-import ProgressStats from "../../components/Profile/ProgressStats.js";
+// import ProgressStats from "../../components/Profile/ProgressStats.js"; // commented per request
 import AvatarUploadModal from "../../components/Profile/AvatarUploadModal.js";
 import { User, Edit, Lock, BarChart3, Camera } from "lucide-react";
 
@@ -128,12 +128,12 @@ const Profile = () => {
       icon: Edit,
       description: "Update personal info",
     },
-    {
-      id: "stats",
-      label: "Progress & Stats",
-      icon: BarChart3,
-      description: "Track your improvement",
-    },
+    // {
+    //   id: "stats",
+    //   label: "Progress & Stats",
+    //   icon: BarChart3,
+    //   description: "Track your improvement",
+    // },
     {
       id: "password",
       label: "Security",
@@ -163,8 +163,8 @@ const Profile = () => {
         return <EditProfile user={user} onUpdate={handleProfileUpdate} />;
       case "password":
         return <ChangePassword />;
-      case "stats":
-        return <ProgressStats stats={userStats} />;
+      // case "stats":
+      //   return <ProgressStats stats={userStats} />; // commented per request
       default:
         return <ProfileView user={user} stats={userStats} />;
     }
@@ -363,6 +363,8 @@ const ProfileView = ({ user, stats }: { user: any; stats: any }) => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Quick Stats Cards */}
         <div className="lg:col-span-2 grid grid-cols-2 sm:grid-cols-4 gap-6">
+          {/* Level (commented out) */}
+          {/*
           <div className="bg-blue-50 p-6 rounded-2xl border border-blue-100 transition-transform hover:scale-105 dark:bg-[#1d2942] dark:border-[#2a3f5f]">
             <div className="text-3xl font-bold text-blue-700 dark:text-white mb-2">
               {stats.level}
@@ -371,6 +373,10 @@ const ProfileView = ({ user, stats }: { user: any; stats: any }) => {
               Level
             </div>
           </div>
+          */}
+
+          {/* Day Streak (commented out) */}
+          {/*
           <div className="bg-green-50 p-6 rounded-2xl border border-green-100 transition-transform hover:scale-105 dark:bg-[#1d2942] dark:border-[#2a3f5f]">
             <div className="text-3xl font-bold text-green-700 dark:text-white mb-2">
               {stats.streak}
@@ -379,6 +385,10 @@ const ProfileView = ({ user, stats }: { user: any; stats: any }) => {
               Day Streak
             </div>
           </div>
+          */}
+
+          {/* Tasks Done (commented out) */}
+          {/*
           <div className="bg-purple-50 p-6 rounded-2xl border border-purple-100 transition-transform hover:scale-105 dark:bg-[#1d2942] dark:border-[#2a3f5f]">
             <div className="text-3xl font-bold text-purple-700 dark:text-white mb-2">
               {stats.completedTasks}
@@ -387,14 +397,17 @@ const ProfileView = ({ user, stats }: { user: any; stats: any }) => {
               Tasks Done
             </div>
           </div>
-          <div className="bg-orange-50 p-6 rounded-2xl border border-orange-100 transition-transform hover:scale-105 dark:bg-[#1d2942] dark:border-[#2a3f5f]">
+          */}
+
+          {/* Hours Focused (kept visible) */}
+          {/* <div className="bg-orange-50 p-6 rounded-2xl border border-orange-100 transition-transform hover:scale-105 dark:bg-[#1d2942] dark:border-[#2a3f5f]">
             <div className="text-3xl font-bold text-orange-700 dark:text-white mb-2">
               {Math.round(stats.totalFocusTime / 60)}
             </div>
             <div className="text-sm font-medium text-orange-600 dark:text-white">
               Hours Focused
             </div>
-          </div>
+          </div> */}
         </div>
 
         {/* Personal Information */}
