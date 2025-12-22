@@ -38,8 +38,10 @@ const Support: React.FC = () => {
       <div className="max-w-4xl mx-auto">
         {/* Page Header */}
         <div className="text-center mb-16">
-          <h1 className="text-5xl font-bold text-gray-900 mb-4">Support</h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <h1 className="text-5xl font-bold text-gray-900 dark:text-white mb-4">
+            Support
+          </h1>
+          <p className="text-lg text-gray-600 dark:text-white max-w-2xl mx-auto">
             If you need help, feel free to contact us through the following
             channels.
           </p>
@@ -53,7 +55,7 @@ const Support: React.FC = () => {
               <a
                 key={index}
                 href={card.href}
-                className="group relative bg-white rounded-2xl p-8 shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-2 border border-gray-100"
+                className="group relative bg-white rounded-2xl p-8 shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-2 border border-gray-100 dark:bg-[#1d2942] dark:border-[#2a3f5f] dark:text-white"
               >
                 {/* Gradient Background on Hover */}
                 <div
@@ -69,10 +71,10 @@ const Support: React.FC = () => {
 
                 {/* Content */}
                 <div className="relative">
-                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                  <h3 className="text-sm font-semibold text-gray-500 dark:text-white uppercase tracking-wide mb-2">
                     {card.title}
                   </h3>
-                  <p className="text-lg font-medium text-gray-900 group-hover:text-blue-600 transition-colors duration-300 break-all">
+                  <p className="text-lg font-medium text-gray-900 dark:text-white group-hover:text-blue-600 transition-colors duration-300 break-all">
                     {card.value}
                   </p>
                 </div>
@@ -99,11 +101,11 @@ const Support: React.FC = () => {
         </div>
 
         {/* Additional Help Section */}
-        <div className="mt-16 text-center bg-white rounded-2xl p-8 shadow-md border border-gray-100">
-          <h2 className="text-2xl font-bold text-gray-900 mb-3">
+        <div className="mt-16 text-center bg-white rounded-2xl p-8 shadow-md border border-gray-100 dark:bg-[#1d2942] dark:border-[#2a3f5f] dark:text-white">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
             Need Immediate Assistance?
           </h2>
-          <p className="text-gray-600 mb-6">
+          <p className="text-gray-600 dark:text-white mb-6">
             Our support team typically responds within 24 hours on all channels.
           </p>
           <div className="flex justify-center gap-4 flex-wrap">

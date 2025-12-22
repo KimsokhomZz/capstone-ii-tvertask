@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Eye, EyeOff, Lock, Check, X, Shield } from "lucide-react";
+import { useTheme } from "../../context/ThemeContext";
 
 const ChangePassword = () => {
   const [formData, setFormData] = useState({
@@ -17,6 +18,8 @@ const ChangePassword = () => {
   const [isNewPasswordFocused, setIsNewPasswordFocused] = useState(false);
   const [isConfirmPasswordFocused, setIsConfirmPasswordFocused] =
     useState(false);
+
+  const { darkMode } = useTheme();
 
   const passwordRequirements = [
     { label: "At least 8 characters", test: (pwd: string) => pwd.length >= 8 },
@@ -118,7 +121,13 @@ const ChangePassword = () => {
 
   return (
     <div className="p-8 sm:p-10">
-      <h2 className="text-3xl font-bold text-gray-900 mb-8">Change Password</h2>
+      <h2
+        className={`text-3xl font-bold mb-8 ${
+          darkMode ? "text-white" : "text-gray-900"
+        }`}
+      >
+        Change Password
+      </h2>
 
       {message && (
         <div
@@ -137,7 +146,9 @@ const ChangePassword = () => {
         <div>
           <label
             htmlFor="currentPassword"
-            className="block text-base font-semibold text-gray-700 mb-3"
+            className={`block text-base font-semibold mb-3 ${
+              darkMode ? "text-white" : "text-gray-700"
+            }`}
           >
             Current Password
           </label>
@@ -148,7 +159,11 @@ const ChangePassword = () => {
               name="currentPassword"
               value={formData.currentPassword}
               onChange={handleInputChange}
-              className="w-full px-5 py-3.5 pr-12 text-base border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+              className={`w-full px-5 py-3.5 pr-12 text-base rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all ${
+                darkMode
+                  ? "bg-[#1d2942] border-[#2a3f5f] text-white"
+                  : "bg-white border-gray-300 text-gray-900"
+              }`}
               required
             />
             <button
@@ -169,7 +184,9 @@ const ChangePassword = () => {
         <div className="relative">
           <label
             htmlFor="newPassword"
-            className="block text-sm font-medium text-gray-700 mb-2"
+            className={`block text-sm font-medium mb-2 ${
+              darkMode ? "text-white" : "text-gray-700"
+            }`}
           >
             New Password
           </label>
@@ -182,7 +199,11 @@ const ChangePassword = () => {
               onChange={handleInputChange}
               onFocus={() => setIsNewPasswordFocused(true)}
               onBlur={() => setIsNewPasswordFocused(false)}
-              className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className={`w-full px-3 py-2 pr-10 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                darkMode
+                  ? "bg-[#1d2942] border-[#2a3f5f] text-white"
+                  : "bg-white border-gray-300 text-gray-900"
+              }`}
               required
             />
             <button
@@ -200,8 +221,18 @@ const ChangePassword = () => {
 
           {/* Password Requirements - Floating */}
           {formData.newPassword && isNewPasswordFocused && (
-            <div className="absolute top-full left-0 right-0 mt-2 p-4 bg-white rounded-lg border border-gray-200 shadow-lg z-50 animate-fadeIn">
-              <h4 className="text-sm font-bold text-gray-900 mb-3">
+            <div
+              className={`absolute top-full left-0 right-0 mt-2 p-4 rounded-lg shadow-lg z-50 animate-fadeIn ${
+                darkMode
+                  ? "bg-[#1d2942] border-[#2a3f5f] text-white"
+                  : "bg-white border-gray-200 text-gray-900"
+              }`}
+            >
+              <h4
+                className={`text-sm font-bold mb-3 ${
+                  darkMode ? "text-white" : "text-gray-900"
+                }`}
+              >
                 Password Requirements:
               </h4>
               <div className="space-y-2">
@@ -222,7 +253,13 @@ const ChangePassword = () => {
                       </div>
                       <span
                         className={`text-xs font-medium ${
-                          isValid ? "text-green-700" : "text-gray-600"
+                          isValid
+                            ? darkMode
+                              ? "text-green-300"
+                              : "text-green-700"
+                            : darkMode
+                            ? "text-gray-300"
+                            : "text-gray-600"
                         }`}
                       >
                         {req.label}
@@ -239,7 +276,9 @@ const ChangePassword = () => {
         <div className="relative">
           <label
             htmlFor="confirmPassword"
-            className="block text-sm font-medium text-gray-700 mb-2"
+            className={`block text-sm font-medium mb-2 ${
+              darkMode ? "text-white" : "text-gray-700"
+            }`}
           >
             Confirm New Password
           </label>
@@ -252,10 +291,14 @@ const ChangePassword = () => {
               onChange={handleInputChange}
               onFocus={() => setIsConfirmPasswordFocused(true)}
               onBlur={() => setIsConfirmPasswordFocused(false)}
-              className={`w-full px-3 py-2 pr-10 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+              className={`w-full px-3 py-2 pr-10 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
                 formData.confirmPassword && !doPasswordsMatch()
                   ? "border-red-300"
                   : "border-gray-300"
+              } ${
+                darkMode
+                  ? "bg-[#1d2942] text-white border-[#2a3f5f]"
+                  : "bg-white text-gray-900"
               }`}
               required
             />
@@ -274,8 +317,18 @@ const ChangePassword = () => {
 
           {/* Confirm Password Requirements - Floating */}
           {formData.confirmPassword && isConfirmPasswordFocused && (
-            <div className="absolute top-full left-0 right-0 mt-2 p-4 bg-white rounded-lg border border-gray-200 shadow-lg z-50 animate-fadeIn">
-              <h4 className="text-sm font-bold text-gray-900 mb-3">
+            <div
+              className={`absolute top-full left-0 right-0 mt-2 p-4 rounded-lg shadow-lg z-50 animate-fadeIn ${
+                darkMode
+                  ? "bg-[#1d2942] border-[#2a3f5f] text-white"
+                  : "bg-white border-gray-200 text-gray-900"
+              }`}
+            >
+              <h4
+                className={`text-sm font-bold mb-3 ${
+                  darkMode ? "text-white" : "text-gray-900"
+                }`}
+              >
                 Password Requirements:
               </h4>
               <div className="space-y-2">
@@ -296,7 +349,13 @@ const ChangePassword = () => {
                       </div>
                       <span
                         className={`text-xs font-medium ${
-                          isValid ? "text-green-700" : "text-gray-600"
+                          isValid
+                            ? darkMode
+                              ? "text-green-300"
+                              : "text-green-700"
+                            : darkMode
+                            ? "text-gray-300"
+                            : "text-gray-600"
                         }`}
                       >
                         {req.label}
@@ -322,7 +381,13 @@ const ChangePassword = () => {
                   </div>
                   <span
                     className={`text-xs font-medium ${
-                      doPasswordsMatch() ? "text-green-700" : "text-gray-600"
+                      doPasswordsMatch()
+                        ? darkMode
+                          ? "text-green-300"
+                          : "text-green-700"
+                        : darkMode
+                        ? "text-gray-300"
+                        : "text-gray-600"
                     }`}
                   >
                     Passwords match

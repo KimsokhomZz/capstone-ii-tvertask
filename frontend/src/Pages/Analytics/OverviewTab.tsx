@@ -26,10 +26,10 @@ interface StatCardProps {
 
 function StatCard({ label, value, subLabel, icon }: StatCardProps) {
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 px-5 py-4 flex flex-col gap-2">
+    <div className="bg-white dark:bg-[#1d2942] rounded-2xl shadow-sm border border-gray-100 dark:border-transparent px-5 py-4 flex flex-col gap-2">
       <div className="flex items-center gap-2">
         {icon && (
-          <div className="h-7 w-7 rounded-full bg-gray-50 flex items-center justify-center text-[15px]">
+          <div className="h-7 w-7 rounded-full bg-gray-50 dark:bg-[#253548] flex items-center justify-center text-[15px]">
             {icon}
           </div>
         )}
@@ -37,8 +37,12 @@ function StatCard({ label, value, subLabel, icon }: StatCardProps) {
           {label}
         </p>
       </div>
-      <p className="text-2xl font-semibold text-gray-900">{value}</p>
-      {subLabel && <p className="text-xs text-gray-400">{subLabel}</p>}
+      <p className="text-2xl font-semibold text-gray-900 dark:text-white">
+        {value}
+      </p>
+      {subLabel && (
+        <p className="text-xs text-gray-400 dark:text-gray-400">{subLabel}</p>
+      )}
     </div>
   );
 }
@@ -345,8 +349,8 @@ export default function AnalyticsOverviewTab() {
 
       {/* Recent Achievements and This Week sections */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-5 space-y-3">
-          <h3 className="text-sm font-semibold text-gray-900">
+        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-5 space-y-3 dark:bg-[#1d2942] dark:border-transparent dark:text-white">
+          <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
             Recent Achievements
           </h3>
           <div className="space-y-3">
@@ -387,30 +391,36 @@ export default function AnalyticsOverviewTab() {
         </div>
 
         {/* This Week */}
-        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-5 space-y-3">
-          <h3 className="text-sm font-semibold text-gray-900">This Week</h3>
-          <dl className="space-y-2 text-sm text-gray-600">
+        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-5 space-y-3 dark:bg-[#1d2942] dark:border-transparent">
+          <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
+            This Week
+          </h3>
+          <dl className="space-y-2 text-sm text-gray-600 dark:text-gray-300">
             <div className="flex justify-between">
-              <dt>Tasks Completed</dt>
-              <dd className="font-semibold text-gray-900">
+              <dt className="text-gray-600 dark:text-gray-300">
+                Tasks Completed
+              </dt>
+              <dd className="font-semibold text-gray-900 dark:text-white">
                 {weeklyLoading ? "--" : weeklyStats?.tasksCompleted || 0}
               </dd>
             </div>
             <div className="flex justify-between">
-              <dt>Focus Session</dt>
-              <dd className="font-semibold text-gray-900">
+              <dt className="text-gray-600 dark:text-gray-300">
+                Focus Session
+              </dt>
+              <dd className="font-semibold text-gray-900 dark:text-white">
                 {weeklyLoading ? "--" : weeklyStats?.focusSessions || 0}
               </dd>
             </div>
             <div className="flex justify-between">
-              <dt>Avatar Grow</dt>
-              <dd className="font-semibold text-gray-900">
+              <dt className="text-gray-600 dark:text-gray-300">Avatar Grow</dt>
+              <dd className="font-semibold text-gray-900 dark:text-white">
                 {weeklyLoading ? "--" : weeklyStats?.avatarGrow || 0}
               </dd>
             </div>
             <div className="flex justify-between">
-              <dt>Focus Time</dt>
-              <dd className="font-semibold text-gray-900">
+              <dt className="text-gray-600 dark:text-gray-300">Focus Time</dt>
+              <dd className="font-semibold text-gray-900 dark:text-white">
                 {weeklyLoading
                   ? "--"
                   : formatFocusTime(weeklyStats?.focusTime || 0)}

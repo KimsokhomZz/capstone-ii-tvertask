@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import AnalyticsOverviewTab from "./OverviewTab";
 import LevelSystemTab from "./LevelSystemTab";
 import AnalyticTab from "./AnalyticTab";
+import { useTheme } from "../../context/ThemeContext";
 
 type AnalyticsTab = "overview" | "level" | "analytic";
 
@@ -53,6 +54,7 @@ function AnalyticsTabs({
 
 export default function AnalyticsPage() {
   const [activeTab, setActiveTab] = useState<AnalyticsTab>("overview");
+  const { darkMode } = useTheme();
 
   // Animation variants
   const containerVariants = {
@@ -107,6 +109,7 @@ export default function AnalyticsPage() {
   return (
     <motion.div
       className="space-y-6"
+      style={darkMode ? { backgroundColor: "#101828" } : undefined}
       initial="hidden"
       animate="visible"
       variants={containerVariants}
@@ -122,7 +125,9 @@ export default function AnalyticsPage() {
           transition={{ duration: 0.5, delay: 0.1 }}
         >
           <motion.h1
-            className="text-2xl md:text-3xl font-bold text-gray-900 mb-2"
+            className={`text-2xl md:text-3xl font-bold mb-2 ${
+              darkMode ? "text-white" : "text-gray-900"
+            }`}
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
@@ -156,7 +161,11 @@ export default function AnalyticsPage() {
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="bg-white rounded-3xl shadow-md border border-gray-100 p-6 md:p-8 overflow-hidden"
+            className={`rounded-3xl shadow-md border p-6 md:p-8 overflow-hidden ${
+              darkMode
+                ? "bg-[#101828] border-[#2a3f5f] text-white"
+                : "bg-white border-gray-100"
+            }`}
           >
             <AnalyticsOverviewTab />
           </motion.div>
@@ -168,7 +177,11 @@ export default function AnalyticsPage() {
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="bg-gradient-to-br from-purple-50 via-white to-indigo-50 rounded-3xl shadow-md border border-purple-100 p-6 md:p-8 overflow-hidden"
+            className={`rounded-3xl shadow-md border p-6 md:p-8 overflow-hidden ${
+              darkMode
+                ? "bg-[#101828] border-[#2a3f5f] text-white"
+                : "bg-gradient-to-br from-purple-50 via-white to-indigo-50 border-purple-100"
+            }`}
           >
             <LevelSystemTab />
           </motion.div>
@@ -180,7 +193,11 @@ export default function AnalyticsPage() {
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="bg-gradient-to-br from-blue-50 via-white to-cyan-50 rounded-3xl shadow-md border border-blue-100 p-6 md:p-8 overflow-hidden"
+            className={`rounded-3xl shadow-md border p-6 md:p-8 overflow-hidden ${
+              darkMode
+                ? "bg-[#101828] border-[#2a3f5f] text-white"
+                : "bg-gradient-to-br from-blue-50 via-white to-cyan-50 border-blue-100"
+            }`}
           >
             <AnalyticTab />
           </motion.div>

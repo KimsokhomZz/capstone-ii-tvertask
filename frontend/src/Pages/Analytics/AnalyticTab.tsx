@@ -19,19 +19,23 @@ interface StatCardProps {
 
 function StatCard({ label, value, subLabel, icon }: StatCardProps) {
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 px-5 py-4 flex flex-col gap-2">
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 px-5 py-4 flex flex-col gap-2 dark:bg-[#1d2942] dark:border-transparent dark:text-white">
       <div className="flex items-center gap-2">
         {icon && (
-          <div className="h-7 w-7 rounded-full bg-gray-50 flex items-center justify-center text-[15px]">
+          <div className="h-7 w-7 rounded-full bg-gray-50 dark:bg-[#253548] flex items-center justify-center text-[15px]">
             {icon}
           </div>
         )}
-        <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+        <p className="text-xs font-medium text-gray-500 uppercase tracking-wide dark:text-gray-300">
           {label}
         </p>
       </div>
-      <p className="text-2xl font-semibold text-gray-900">{value}</p>
-      {subLabel && <p className="text-xs text-gray-400">{subLabel}</p>}
+      <p className="text-2xl font-semibold text-gray-900 dark:text-white">
+        {value}
+      </p>
+      {subLabel && (
+        <p className="text-xs text-gray-400 dark:text-gray-400">{subLabel}</p>
+      )}
     </div>
   );
 }
@@ -113,17 +117,17 @@ export default function AnalyticTab() {
           <div className="h-8 w-8 rounded-lg bg-emerald-50 flex items-center justify-center">
             <BarChart3 className="w-4 h-4 text-emerald-500" />
           </div>
-          <h2 className="text-lg font-semibold text-gray-900">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
             Analytics Dashboard
           </h2>
+          <p className="text-sm text-gray-600 dark:text-white max-w-xl">
+            Track your mood, productivity, and growth patterns.
+          </p>
         </div>
-        <p className="text-sm text-gray-600 max-w-xl">
-          Track your mood, productivity, and growth patterns.
-        </p>
       </div>
 
       <div className="flex justify-end">
-        <div className="inline-flex items-center gap-1 bg-gray-100 rounded-full px-1 py-1 text-[11px] font-medium">
+        <div className="inline-flex items-center gap-1 bg-gray-100 rounded-full px-1 py-1 text-[11px] font-medium dark:bg-[#1d2942]/50 dark:backdrop-blur-sm">
           {/* <button
             className={`px-3 py-1 rounded-full ${
               range === "overview"

@@ -1,15 +1,21 @@
 import { Outlet, useLocation } from "react-router-dom";
 import Sidebar from "./sidebar";
+import { useTheme } from "../context/ThemeContext";
 
 export default function MainLayout() {
   const handleLogout = () => alert("Logged out!");
   const location = useLocation();
+  const { darkMode } = useTheme();
   const isFocusPage = location.pathname.includes("/focus");
   const isTaskListPage =
     location.pathname === "/focus" || location.pathname === "/";
 
   return (
-    <div className={`min-h-screen flex bg-[#FFFBF6]`}>
+    <div
+      className={`min-h-screen flex ${
+        darkMode ? "bg-[#101828]" : "bg-[#FFFBF6]"
+      }`}
+    >
       {/* Fixed Sidebar */}
       <aside className="fixed left-0 top-0 h-screen w-64 bg-white border-r shadow-sm z-10">
         <Sidebar onLogout={handleLogout} />
