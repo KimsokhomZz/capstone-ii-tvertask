@@ -14,6 +14,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import AuthContext, { useAuth } from "@/context/AuthContext";
 import { NotificationContext } from "@/context/NotificationContext";
+import { useTheme } from "@/context/ThemeContext";
 import { moods } from "@/utils/moods";
 
 interface SidebarProps {
@@ -28,6 +29,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { logout } = useAuth();
+  const { darkMode } = useTheme();
   const { user } = useContext(AuthContext) as AuthContextType;
   const { unreadCount, fetchUnreadCount } = useContext(NotificationContext)!;
 
@@ -91,7 +93,11 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
   ];
 
   return (
-    <aside className="flex flex-col justify-between h-screen w-64 shadow-xl">
+    <aside
+      className={`flex flex-col justify-between h-screen w-64 shadow-xl transition-colors ${
+        darkMode ? "bg-[#101828]" : "bg-white"
+      }`}
+    >
       <div>
         {/* Logo Section */}
         <motion.div
@@ -99,9 +105,13 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
           animate={{ opacity: 1, y: 0 }}
           className="w-full mb-4"
         >
-          <div className="relative w-full border-b-2 border-yellow-200 pb-4 flex justify-center items-center">
+          <div
+            className={`relative w-full border-b-2 ${
+              darkMode ? "border-yellow-600" : "border-yellow-200"
+            } pb-4 flex justify-center items-center`}
+          >
             <img
-              src="../src/assets/logo1.svg"
+              src="../src/assets/Tver.svg"
               alt="TverTask Logo"
               className="w-48 object-contain rounded-2xl"
             />
@@ -129,6 +139,8 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
                 className={`flex items-center gap-3 w-full px-4 py-3 rounded-xl transition-all duration-200 ${
                   isActive
                     ? "bg-linear-to-r from-yellow-400 to-yellow-500 text-white font-semibold shadow-lg"
+                    : darkMode
+                    ? "text-gray-300 hover:bg-[#1a2f42] hover:text-yellow-400"
                     : "text-gray-600 hover:bg-yellow-50 hover:text-yellow-600"
                 }`}
               >
@@ -165,7 +177,11 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
                 aria-current={isActive ? "page" : undefined}
                 className={`flex items-center gap-3 w-full px-4 py-2 rounded-lg transition-all text-sm ${
                   isActive
-                    ? "bg-yellow-100 text-yellow-700 font-semibold shadow-sm"
+                    ? darkMode
+                      ? "bg-[#1a2f42] text-yellow-400 font-semibold shadow-sm"
+                      : "bg-yellow-100 text-yellow-700 font-semibold shadow-sm"
+                    : darkMode
+                    ? "text-gray-400 hover:text-yellow-400 hover:bg-[#1a2f42]"
                     : "text-gray-500 hover:text-gray-700 hover:bg-gray-100"
                 }`}
               >
@@ -185,7 +201,11 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
             }
             className={`flex items-center justify-between w-full px-4 py-2 rounded-lg transition-all text-sm ${
               location.pathname === "/notifications"
-                ? "bg-yellow-100 text-yellow-700 font-semibold shadow-sm"
+                ? darkMode
+                  ? "bg-[#1a2f42] text-yellow-400 font-semibold shadow-sm"
+                  : "bg-yellow-100 text-yellow-700 font-semibold shadow-sm"
+                : darkMode
+                ? "text-gray-400 hover:text-yellow-400 hover:bg-[#1a2f42]"
                 : "text-gray-500 hover:text-gray-700 hover:bg-gray-100"
             }`}
           >
@@ -210,17 +230,29 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-linear-to-r from-purple-50 to-pink-50 border-2 border-purple-300 rounded-2xl p-3 shadow-md hover:shadow-lg transition-all"
+            className={`rounded-2xl p-3 shadow-md hover:shadow-lg transition-all ${
+              darkMode
+                ? "bg-[#1a2f42] border-2 border-yellow-600"
+                : "bg-linear-to-r from-purple-50 to-pink-50 border-2 border-purple-300"
+            }`}
           >
             <div className="flex items-center gap-2">
               <span className="text-2xl animate-bounce">
                 {moods[selectedMood].emoji}
               </span>
               <div className="flex flex-col flex-1 min-w-0">
-                <span className="text-xs text-purple-500 font-semibold uppercase tracking-wide">
+                <span
+                  className={`text-xs font-semibold uppercase tracking-wide ${
+                    darkMode ? "text-yellow-400" : "text-purple-500"
+                  }`}
+                >
                   Current Mood
                 </span>
-                <span className="text-sm font-bold text-purple-700 truncate">
+                <span
+                  className={`text-sm font-bold truncate ${
+                    darkMode ? "text-yellow-300" : "text-purple-700"
+                  }`}
+                >
                   {moods[selectedMood].label}
                 </span>
               </div>
@@ -234,14 +266,30 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           onClick={handleLogout}
-          className="flex items-center gap-3 w-full bg-linear-to-r from-yellow-50 to-orange-50 hover:from-yellow-100 hover:to-orange-100 py-3 px-3 rounded-2xl transition-all border border-yellow-200 shadow-sm hover:shadow-md"
+          className={`flex items-center gap-3 w-full py-3 px-3 rounded-2xl transition-all border shadow-sm hover:shadow-md ${
+            darkMode
+              ? "bg-[#1a2f42] hover:bg-[#253548] border-yellow-600 hover:border-yellow-500"
+              : "bg-linear-to-r from-yellow-50 to-orange-50 hover:from-yellow-100 hover:to-orange-100 border-yellow-200"
+          }`}
         >
           <div className="bg-linear-to-br from-yellow-400 to-orange-500 rounded-full p-2 shrink-0 shadow-md">
             <LogOut size={18} className="text-white" />
           </div>
           <div className="text-left flex-1">
-            <div className="text-sm font-semibold text-gray-800">Logout</div>
-            <div className="text-xs text-gray-500">See you later! 👋</div>
+            <div
+              className={`text-sm font-semibold ${
+                darkMode ? "text-yellow-300" : "text-gray-800"
+              }`}
+            >
+              Logout
+            </div>
+            <div
+              className={`text-xs ${
+                darkMode ? "text-gray-400" : "text-gray-500"
+              }`}
+            >
+              See you later! 👋
+            </div>
           </div>
         </motion.button>
       </div>

@@ -18,8 +18,10 @@ import DashboardTasksSection from "./DashboardTasksSection";
 import { fetchUserStreak } from "../../api/streakApi";
 import { getStatus } from "../../api/userXpApi";
 import { exportToPDF } from "./exportPDF";
+import { useTheme } from "../../context/ThemeContext";
 
 const Dashboard: React.FC = () => {
+  const { darkMode } = useTheme();
   const [activeTab, setActiveTab] = useState<"All-time">("All-time");
   const [showCompleted, setShowCompleted] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -345,7 +347,9 @@ const Dashboard: React.FC = () => {
 
   return (
     <motion.div
-      className="min-h-screen p-4 sm:p-6 md:p-8"
+      className={`min-h-screen p-4 sm:p-6 md:p-8 transition-colors ${
+        darkMode ? "bg-[#101828]" : "bg-white"
+      }`}
       initial="hidden"
       animate="visible"
       variants={containerVariants}
@@ -356,7 +360,11 @@ const Dashboard: React.FC = () => {
           className="flex items-center justify-between mb-6"
           variants={itemVariants}
         >
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">
+          <h2
+            className={`text-3xl sm:text-4xl font-bold ${
+              darkMode ? "text-white" : "text-gray-900"
+            }`}
+          >
             🚀 Dashboard
           </h2>
 
@@ -376,7 +384,9 @@ const Dashboard: React.FC = () => {
 
         {/* Tabs */}
         <motion.div
-          className="flex flex-wrap gap-x-4 gap-y-2 mb-8 border-b border-gray-200"
+          className={`flex flex-wrap gap-x-4 gap-y-2 mb-8 border-b ${
+            darkMode ? "border-gray-700" : "border-gray-200"
+          }`}
           variants={itemVariants}
         >
           {tabs.map((tab) => (
@@ -386,6 +396,8 @@ const Dashboard: React.FC = () => {
               className={`px-4 py-2 font-medium transition-colors relative ${
                 activeTab === tab
                   ? "text-yellow-500"
+                  : darkMode
+                  ? "text-gray-400 hover:text-gray-300"
                   : "text-gray-500 hover:text-gray-700"
               }`}
               whileHover={{ scale: 1.05 }}
@@ -405,7 +417,9 @@ const Dashboard: React.FC = () => {
 
         {/* KPI Section */}
         <motion.h2
-          className="text-xl sm:text-2xl font-bold text-gray-900 mb-6"
+          className={`text-xl sm:text-2xl font-bold mb-6 ${
+            darkMode ? "text-white" : "text-gray-900"
+          }`}
           variants={itemVariants}
         >
           Key Performance Indicator ({activeTab})
@@ -417,18 +431,30 @@ const Dashboard: React.FC = () => {
         >
           {/* Daily Progress Card */}
           <motion.div
-            className="bg-white rounded-2xl p-6 shadow-sm border hover:border-yellow-300 hover:shadow-md"
+            className={`rounded-2xl p-6 shadow-sm border transition-colors ${
+              darkMode
+                ? "bg-[#1d2942] border-[#2a3f5f] hover:border-yellow-400/50 hover:shadow-md"
+                : "bg-white border-gray-200 hover:border-yellow-300 hover:shadow-md"
+            }`}
             variants={cardVariants}
             whileHover="hover"
           >
             <div className="flex items-center gap-2 mb-4">
               <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
-              <span className="text-sm text-gray-600">
+              <span
+                className={`text-sm ${
+                  darkMode ? "text-gray-400" : "text-gray-600"
+                }`}
+              >
                 {activeTab} Progress
               </span>
             </div>
             <div className="mb-4">
-              <div className="text-sm text-gray-500 mb-2">
+              <div
+                className={`text-sm mb-2 ${
+                  darkMode ? "text-gray-400" : "text-gray-500"
+                }`}
+              >
                 Task Completion Rate
               </div>
               <motion.div
@@ -440,7 +466,11 @@ const Dashboard: React.FC = () => {
                 {dailyProgressPercentage}%
               </motion.div>
             </div>
-            <div className="w-full bg-yellow-100 rounded-full h-2">
+            <div
+              className={`w-full rounded-full h-2 ${
+                darkMode ? "bg-yellow-500/20" : "bg-yellow-100"
+              }`}
+            >
               <motion.div
                 className="bg-yellow-400 h-2 rounded-full"
                 initial={{ width: 0 }}
@@ -448,7 +478,11 @@ const Dashboard: React.FC = () => {
                 transition={{ delay: 0.6, duration: 0.8, ease: "easeOut" }}
               ></motion.div>
             </div>
-            <p className="text-xs text-gray-400 mt-3">
+            <p
+              className={`text-xs mt-3 ${
+                darkMode ? "text-gray-500" : "text-gray-400"
+              }`}
+            >
               {dailyProgressPercentage === 100
                 ? "Great job, all tasks completed!"
                 : "Keep going, add more tasks or complete existing ones."}
@@ -457,38 +491,76 @@ const Dashboard: React.FC = () => {
 
           {/* Active Time Card */}
           <motion.div
-            className="bg-white rounded-2xl p-6 shadow-sm border hover:border-yellow-300 hover:shadow-md"
+            className={`rounded-2xl p-6 shadow-sm border transition-colors ${
+              darkMode
+                ? "bg-[#1d2942] border-[#2a3f5f] hover:border-yellow-400/50 hover:shadow-md"
+                : "bg-white border-gray-200 hover:border-yellow-300 hover:shadow-md"
+            }`}
             variants={cardVariants}
             whileHover="hover"
           >
             <div className="flex items-center gap-2 mb-4">
-              <Target className="w-4 h-4 text-blue-500" />
-              <span className="text-sm text-gray-600">Active Time</span>
+              <Target
+                className={`w-4 h-4 ${
+                  darkMode ? "text-blue-400" : "text-blue-500"
+                }`}
+              />
+              <span
+                className={`text-sm ${
+                  darkMode ? "text-gray-400" : "text-gray-600"
+                }`}
+              >
+                Active Time
+              </span>
             </div>
             <motion.div
-              className="text-3xl sm:text-4xl font-bold text-gray-900 mb-1"
+              className={`text-3xl sm:text-4xl font-bold mb-1 ${
+                darkMode ? "text-white" : "text-gray-900"
+              }`}
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.5, type: "spring", stiffness: 200 }}
             >
               {formatMinutesToHourMinute(activeMinutes)}
             </motion.div>
-            <p className="text-xs text-gray-400">
+            <p
+              className={`text-xs ${
+                darkMode ? "text-gray-500" : "text-gray-400"
+              }`}
+            >
               Total time you have been active on the system.
             </p>
           </motion.div>
 
           {/* Streak Card */}
           <motion.div
-            className="bg-white rounded-2xl p-6 shadow-sm border hover:border-yellow-300 hover:shadow-md"
+            className={`rounded-2xl p-6 shadow-sm border transition-colors ${
+              darkMode
+                ? "bg-[#1d2942] border-[#2a3f5f] hover:border-yellow-400/50 hover:shadow-md"
+                : "bg-white border-gray-200 hover:border-yellow-300 hover:shadow-md"
+            }`}
             variants={cardVariants}
             whileHover="hover"
           >
             <div className="flex items-center gap-2 mb-4">
-              <Flame className="w-4 h-4 text-orange-500" />
-              <span className="text-sm text-gray-600">Streak</span>
+              <Flame
+                className={`w-4 h-4 ${
+                  darkMode ? "text-orange-400" : "text-orange-500"
+                }`}
+              />
+              <span
+                className={`text-sm ${
+                  darkMode ? "text-gray-400" : "text-gray-600"
+                }`}
+              >
+                Streak
+              </span>
             </div>
-            <div className="text-3xl sm:text-4xl font-bold text-gray-900 mb-1">
+            <div
+              className={`text-3xl sm:text-4xl font-bold mb-1 ${
+                darkMode ? "text-white" : "text-gray-900"
+              }`}
+            >
               {streak !== null ? (
                 <motion.div
                   className="flex items-center gap-2"
@@ -515,17 +587,27 @@ const Dashboard: React.FC = () => {
                   </motion.span>
                 </motion.div>
               ) : (
-                <span className="text-gray-400">--</span>
+                <span className={darkMode ? "text-gray-500" : "text-gray-400"}>
+                  --
+                </span>
               )}
             </div>
-            <p className="text-xs text-gray-400">
+            <p
+              className={`text-xs ${
+                darkMode ? "text-gray-500" : "text-gray-400"
+              }`}
+            >
               Consecutive days of activity.
             </p>
           </motion.div>
 
           {/* XP Gain Card */}
           <motion.div
-            className="bg-linear-to-br from-purple-400 to-purple-600 rounded-2xl p-6 shadow-sm text-white border hover:border-purple-600 hover:shadow-md"
+            className={`rounded-2xl p-6 shadow-sm border transition-colors ${
+              darkMode
+                ? "bg-gradient-to-br from-purple-600 to-purple-700 border-purple-500/50 hover:border-purple-400 hover:shadow-md"
+                : "bg-linear-to-br from-purple-400 to-purple-600 border-purple-300 hover:border-purple-600 hover:shadow-md"
+            } text-white`}
             variants={cardVariants}
             whileHover="hover"
           >
@@ -549,7 +631,11 @@ const Dashboard: React.FC = () => {
               <div className="text-sm mb-2">
                 Level {xpStatus ? xpStatus.level : "--"}
               </div>
-              <div className="w-full bg-purple-300/30 rounded-full h-2">
+              <div
+                className={`w-full rounded-full h-2 ${
+                  darkMode ? "bg-purple-500/30" : "bg-purple-300/30"
+                }`}
+              >
                 <motion.div
                   className="bg-white h-2 rounded-full"
                   initial={{ width: 0 }}

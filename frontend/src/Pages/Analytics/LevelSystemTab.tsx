@@ -98,14 +98,16 @@ export default function LevelSystemTab() {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-lg font-semibold text-gray-900">Level System</h2>
-      <p className="text-sm text-gray-600 max-w-xl">
+      <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+        Level System
+      </h2>
+      <p className="text-sm text-gray-600 dark:text-white max-w-xl">
         See your current growth stage, benefits, and upcoming levels in your
         productivity journey.
       </p>
 
       {/* Current Level Card */}
-      <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4 dark:bg-[#101828] dark:border-[#2a3f5f] dark:text-white">
         {loading ? (
           <div className="flex items-center justify-center w-full py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
@@ -120,14 +122,14 @@ export default function LevelSystemTab() {
                 <p className="text-sm font-semibold text-gray-900">
                   {currentLevelInfo.title}
                 </p>
-                <p className="text-xs text-gray-600">
+                <p className="text-xs text-gray-600 dark:text-gray-300">
                   {currentLevelInfo.subtitle}
                 </p>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-gray-500 dark:text-gray-400">
                   {currentLevelInfo.description}
                 </p>
                 <div className="mt-2 space-y-1">
-                  <p className="text-xs font-medium text-gray-700">
+                  <p className="text-xs font-medium text-gray-700 dark:text-gray-300">
                     Progress to Level {nextLevel}
                   </p>
                   <div className="w-full max-w-md h-2.5 bg-gray-100 rounded-full overflow-hidden">
@@ -136,7 +138,7 @@ export default function LevelSystemTab() {
                       style={{ width: `${getProgressPercent()}%` }}
                     />
                   </div>
-                  <p className="text-[11px] text-gray-500">
+                  <p className="text-[11px] text-gray-500 dark:text-gray-400">
                     {stats?.xp - stats?.prevLevelXp || 0} /{" "}
                     {stats?.nextLevelTotal - stats?.prevLevelXp || 0} XP
                     {getProgressPercent() < 100
@@ -147,10 +149,10 @@ export default function LevelSystemTab() {
               </div>
             </div>
             <div className="text-right self-stretch flex flex-col items-end justify-between">
-              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+              <p className="text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wide">
                 level {currentLevel}
               </p>
-              <p className="text-sm font-semibold text-gray-900">
+              <p className="text-sm font-semibold text-gray-900 dark:text-white">
                 {stats?.xp || 0} XP
               </p>
             </div>
@@ -159,16 +161,16 @@ export default function LevelSystemTab() {
       </div>
 
       {/* Your Current Benefits */}
-      <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-5 space-y-4">
-        <h3 className="text-sm font-semibold text-gray-900">
+      <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-5 space-y-4 dark:bg-[#101828] dark:border-[#2a3f5f] dark:text-white">
+        <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
           Your Current Benefits
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-gray-700">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-gray-700 dark:text-gray-300">
           <div className="space-y-2">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+            <p className="text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase tracking-wide">
               Level Perks
             </p>
-            <ul className="space-y-1 text-sm text-gray-700">
+            <ul className="space-y-1 text-sm text-gray-700 dark:text-gray-300">
               <li>✅ Streak tracking</li>
               <li>✅ Basic mood tracking</li>
               <li>✅ Avatar growth unlock</li>
@@ -177,10 +179,10 @@ export default function LevelSystemTab() {
             </ul>
           </div>
           <div className="space-y-2">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+            <p className="text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase tracking-wide">
               Active Bonuses
             </p>
-            <ul className="space-y-1 text-sm text-gray-700">
+            <ul className="space-y-1 text-sm text-gray-700 dark:text-gray-300">
               <li>
                 +{Math.min(currentLevel * 5, 25)}% extra XP on completed tasks
               </li>
@@ -193,7 +195,7 @@ export default function LevelSystemTab() {
 
       {/* Level Progression Path */}
       <div className="space-y-3">
-        <h3 className="text-sm font-semibold text-gray-900">
+        <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
           Level Progression Path
         </h3>
         <div className="space-y-3">
@@ -206,7 +208,7 @@ export default function LevelSystemTab() {
             return (
               <div
                 key={level}
-                className={`bg-white rounded-3xl shadow-sm border p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3 ${
+                className={`bg-white dark:bg-[#101828] rounded-3xl shadow-sm border p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3 dark:border-[#2a3f5f] ${
                   isCurrentLevel
                     ? "border-[#4ADE80] ring-2 ring-[#4ADE80]/20"
                     : isCompleted
@@ -219,7 +221,7 @@ export default function LevelSystemTab() {
                     {info.emoji}
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                       Level {lvl}: {info.title}
                       {isCurrentLevel && (
                         <span className="text-xs bg-[#4ADE80] text-white px-2 py-0.5 rounded-full">
@@ -232,8 +234,10 @@ export default function LevelSystemTab() {
                         </span>
                       )}
                     </p>
-                    <p className="text-xs text-gray-600">{info.subtitle}</p>
-                    <p className="mt-1 text-xs text-gray-500 max-w-md">
+                    <p className="text-xs text-gray-600 dark:text-gray-300">
+                      {info.subtitle}
+                    </p>
+                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400 max-w-md">
                       {info.description}
                     </p>
                   </div>

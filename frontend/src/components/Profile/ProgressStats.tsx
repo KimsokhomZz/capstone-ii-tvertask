@@ -11,6 +11,7 @@ import {
   Award,
   Zap,
 } from "lucide-react";
+import { useTheme } from "../../context/ThemeContext";
 
 interface StatsData {
   level: number;
@@ -41,6 +42,8 @@ interface ProgressStatsProps {
 const ProgressStats = ({ stats }: ProgressStatsProps) => {
   const [selectedPeriod, setSelectedPeriod] = useState("week");
   const [detailedStats, setDetailedStats] = useState<any>(null);
+
+  const { darkMode } = useTheme();
 
   useEffect(() => {
     fetchDetailedStats();
@@ -96,14 +99,22 @@ const ProgressStats = ({ stats }: ProgressStatsProps) => {
   };
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-8">
+    <div
+      className={`p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-8 ${
+        darkMode ? "text-white" : "text-gray-900"
+      }`}
+    >
       {/* Header Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h2 className="text-3xl font-bold text-gray-900">
+          <h2
+            className={`text-3xl font-bold ${
+              darkMode ? "text-white" : "text-gray-900"
+            }`}
+          >
             Progress & Statistics
           </h2>
-          <p className="text-gray-500 mt-1">
+          <p className={`${darkMode ? "text-white" : "text-gray-500"} mt-1`}>
             Track your productivity journey and celebrate your achievements
           </p>
         </div>
@@ -115,6 +126,8 @@ const ProgressStats = ({ stats }: ProgressStatsProps) => {
               className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
                 selectedPeriod === period
                   ? "bg-white text-gray-900 shadow-sm"
+                  : darkMode
+                  ? "text-white hover:text-white/80"
                   : "text-gray-500 hover:text-gray-900"
               }`}
             >
@@ -129,11 +142,19 @@ const ProgressStats = ({ stats }: ProgressStatsProps) => {
         <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-4 sm:p-6 text-white shadow-lg hover:shadow-xl transition-shadow">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-blue-100 font-medium text-sm sm:text-base">
+              <p
+                className={`text-blue-100 font-medium text-sm sm:text-base ${
+                  darkMode ? "text-white" : ""
+                }`}
+              >
                 Current Level
               </p>
               <p className="text-2xl sm:text-3xl font-bold">{stats.level}</p>
-              <div className="mt-2 flex items-center text-blue-100 text-xs sm:text-sm">
+              <div
+                className={`mt-2 flex items-center text-blue-100 text-xs sm:text-sm ${
+                  darkMode ? "text-white" : ""
+                }`}
+              >
                 <Zap className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
                 {stats.xp.toLocaleString()} XP
               </div>
@@ -196,8 +217,12 @@ const ProgressStats = ({ stats }: ProgressStatsProps) => {
       </div>
 
       {/* Level Progress Section */}
-      <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-100">
-        <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+      <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-100 dark:bg-[#1d2942] dark:border-transparent">
+        <h3
+          className={`text-xl font-bold mb-6 flex items-center gap-2 ${
+            darkMode ? "text-white" : "text-gray-900"
+          }`}
+        >
           <Trophy className="w-6 h-6 text-yellow-500" />
           Level Progress
         </h3>
@@ -244,13 +269,19 @@ const ProgressStats = ({ stats }: ProgressStatsProps) => {
       </div>
 
       {/* Enhanced Activity Chart */}
-      <div className="bg-white p-6 sm:p-8 rounded-2xl border border-gray-100 shadow-sm">
+      <div className="bg-white p-6 sm:p-8 rounded-2xl border border-gray-100 shadow-sm dark:bg-[#1d2942] dark:border-transparent">
         <div className="flex items-center justify-between mb-8">
-          <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+          <h3
+            className={`text-lg font-bold flex items-center gap-2 ${
+              darkMode ? "text-white" : "text-gray-900"
+            }`}
+          >
             <TrendingUp className="w-5 h-5 text-blue-500" />
             Activity Trends
           </h3>
-          <div className="text-sm text-gray-500">
+          <div
+            className={`${darkMode ? "text-white" : "text-sm text-gray-500"}`}
+          >
             Track your progress over time
           </div>
         </div>
@@ -338,7 +369,11 @@ const ProgressStats = ({ stats }: ProgressStatsProps) => {
             </div>
           </div>
         ) : (
-          <div className="h-64 flex items-center justify-center text-gray-400">
+          <div
+            className={`h-64 flex items-center justify-center ${
+              darkMode ? "text-white" : "text-gray-400"
+            }`}
+          >
             <div className="text-center">
               <TrendingUp className="w-12 h-12 mx-auto mb-4 text-gray-300" />
               <p>Loading activity data...</p>
@@ -348,8 +383,12 @@ const ProgressStats = ({ stats }: ProgressStatsProps) => {
       </div>
 
       {/* Recent Achievements */}
-      <div className="bg-white p-6 sm:p-8 rounded-2xl border border-gray-100 shadow-sm">
-        <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2 mb-6">
+      <div className="bg-white p-6 sm:p-8 rounded-2xl border border-gray-100 shadow-sm dark:bg-[#1d2942] dark:border-transparent">
+        <h3
+          className={`text-lg font-bold flex items-center gap-2 mb-6 ${
+            darkMode ? "text-white" : "text-gray-900"
+          }`}
+        >
           <Award className="w-5 h-5 text-yellow-500" />
           Achievements
         </h3>
@@ -410,8 +449,12 @@ const ProgressStats = ({ stats }: ProgressStatsProps) => {
       </div>
 
       {/* Progress Insights */}
-      <div className="bg-white p-6 sm:p-8 rounded-2xl border border-gray-100 shadow-sm">
-        <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2 mb-6">
+      <div className="bg-white p-6 sm:p-8 rounded-2xl border border-gray-100 shadow-sm dark:bg-[#1d2942] dark:border-transparent">
+        <h3
+          className={`text-lg font-bold flex items-center gap-2 mb-6 ${
+            darkMode ? "text-white" : "text-gray-900"
+          }`}
+        >
           <Star className="w-5 h-5 text-purple-500" />
           Progress Insights
         </h3>
@@ -500,8 +543,12 @@ const ProgressStats = ({ stats }: ProgressStatsProps) => {
       </div>
 
       {/* Quick Stats Summary */}
-      <div className="bg-linear-to-r from-gray-50 to-blue-50 rounded-2xl p-6 sm:p-8 border border-gray-100">
-        <h3 className="text-xl font-bold text-gray-900 mb-6 text-center">
+      <div className="bg-linear-to-r  rounded-2xl p-6 sm:p-8 border border-gray-100 dark:bg-[#1d2942] dark:border-transparent">
+        <h3
+          className={`text-xl font-bold mb-6 text-center ${
+            darkMode ? "text-white" : "text-gray-900"
+          }`}
+        >
           Your Journey So Far
         </h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">

@@ -16,6 +16,7 @@ import CreateTaskModal from "./components/CreateTaskModal";
 import EditTaskModal from "./components/EditTaskModal";
 import ConfirmCompleteModal from "./components/ConfirmCompleteModal";
 import { toast as showToastify } from "react-toastify";
+import { useTheme } from "@/context/ThemeContext";
 import "react-toastify/dist/ReactToastify.css";
 
 // Use the Task type from your API if possible, otherwise define here:
@@ -42,6 +43,7 @@ type NewTask = {
 
 export default function TodoList() {
   const navigate = useNavigate();
+  const { darkMode } = useTheme();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [checkedMap, setCheckedMap] = useState<Record<number, boolean>>({});
   const [selectedId, setSelectedId] = useState<number | null>(null);
@@ -125,26 +127,12 @@ export default function TodoList() {
     }
   };
 
-  // Force light theme for the entire TaskList page
-  useEffect(() => {
-    document.documentElement.classList.remove('dark');
-    document.documentElement.style.colorScheme = 'light';
-    
-    return () => {
-      // Cleanup function to restore dark mode if needed when leaving the page
-      const darkMode = localStorage.getItem('app.theme') ? 
-        JSON.parse(localStorage.getItem('app.theme') || '{}').darkMode : 
-        window.matchMedia('(prefers-color-scheme: dark)').matches;
-      
-      if (darkMode) {
-        document.documentElement.classList.add('dark');
-        document.documentElement.style.colorScheme = 'dark';
-      }
-    };
-  }, []);
-
   return (
-    <div className="bg-white p-8 md:p-10 rounded-[28px] shadow-md w-full max-w-4xl border border-gray-100">
+    <div
+      className={`p-8 md:p-10 rounded-[28px] shadow-md w-full max-w-4xl border ${
+        darkMode ? "bg-[#101828] border-[#2a3f5f]" : "bg-white border-gray-100"
+      }`}
+    >
       {/* Header */}
       <motion.div
         initial={{ y: -20, opacity: 0 }}
@@ -159,7 +147,13 @@ export default function TodoList() {
             <h2 className="text-2xl font-bold bg-linear-to-r from-yellow-500 to-orange-500 bg-clip-text text-transparent">
               Focus Session
             </h2>
-            <p className="text-sm text-gray-500">Choose your focus task</p>
+            <p
+              className={`text-sm ${
+                darkMode ? "text-gray-400" : "text-gray-500"
+              }`}
+            >
+              Choose your focus task
+            </p>
           </div>
         </div>
 
@@ -167,7 +161,11 @@ export default function TodoList() {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => setShowCreate(true)}
-          className="flex items-center gap-2 rounded-xl bg-yellow-400 hover:bg-yellow-500 text-white px-4 py-2.5 text-sm font-semibold shadow-md hover:shadow-lg transition-all cursor-pointer"
+          className={`flex items-center gap-2 rounded-xl text-white px-4 py-2.5 text-sm font-semibold shadow-md hover:shadow-lg transition-all cursor-pointer ${
+            darkMode
+              ? "bg-[#1d2942] hover:bg-[#253548] border border-[#2a3f5f]"
+              : "bg-yellow-400 hover:bg-yellow-500"
+          }`}
         >
           <Plus className="w-4 h-4" />
           Add Task
@@ -181,7 +179,13 @@ export default function TodoList() {
         transition={{ delay: 0.1 }}
         className="mb-4"
       >
-        <div className="inline-flex items-center gap-2 bg-gray-100 px-3 py-1.5 rounded-full text-sm text-gray-700">
+        <div
+          className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm ${
+            darkMode
+              ? "bg-gray-700/50 text-gray-300"
+              : "bg-gray-100 text-gray-700"
+          }`}
+        >
           <span className="font-semibold">{tasks.length}</span>
           <span>{tasks.length === 1 ? "task" : "tasks"}</span>
         </div>
@@ -196,20 +200,40 @@ export default function TodoList() {
             exit={{ opacity: 0, y: -20 }}
             className="text-center py-16"
           >
-            <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Target className="w-10 h-10 text-gray-400" />
+            <div
+              className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 ${
+                darkMode ? "bg-gray-700/50" : "bg-gray-100"
+              }`}
+            >
+              <Target
+                className={`w-10 h-10 ${
+                  darkMode ? "text-gray-600" : "text-gray-400"
+                }`}
+              />
             </div>
-            <h3 className="text-lg font-semibold text-gray-700 mb-2">
+            <h3
+              className={`text-lg font-semibold mb-2 ${
+                darkMode ? "text-gray-200" : "text-gray-700"
+              }`}
+            >
               No tasks yet
             </h3>
-            <p className="text-sm text-gray-500 mb-6">
+            <p
+              className={`text-sm mb-6 ${
+                darkMode ? "text-gray-400" : "text-gray-500"
+              }`}
+            >
               Create your first focus task to get started
             </p>
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setShowCreate(true)}
-              className="inline-flex items-center gap-2 rounded-xl bg-yellow-400 hover:bg-yellow-500 text-white px-5 py-2.5 text-sm font-semibold shadow-md hover:shadow-lg transition-all"
+              className={`inline-flex items-center gap-2 rounded-xl text-white px-5 py-2.5 text-sm font-semibold shadow-md hover:shadow-lg transition-all ${
+                darkMode
+                  ? "bg-[#1d2942] hover:bg-[#253548] border border-[#2a3f5f]"
+                  : "bg-yellow-400 hover:bg-yellow-500"
+              }`}
             >
               <Plus className="w-4 h-4" />
               Create Task
@@ -251,7 +275,7 @@ export default function TodoList() {
                         duration:
                           task.focus_time ?? Number(task.duration) ?? 25,
                         taskId: task.id,
-                        short_break: task.short_break ?? 5, 
+                        short_break: task.short_break ?? 5,
                         long_break: task.long_break ?? 15,
                       },
                     })

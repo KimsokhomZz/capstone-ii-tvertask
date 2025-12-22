@@ -154,17 +154,17 @@ export default function NotificationsPage() {
       {/* Header */}
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div>
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 flex items-center gap-2 sm:gap-3">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-2 sm:gap-3">
             📣 Notifications
           </h2>
-          <p className="text-xs sm:text-sm text-gray-500 mt-1">
+          <p className="text-xs sm:text-sm text-gray-500 dark:text-white mt-1">
             Stay updated with your achievements, quests, and progress
           </p>
         </div>
       </div>
 
       {/* Search Bar */}
-      <div className="bg-white p-3 sm:p-4 rounded-2xl sm:rounded-[28px] shadow-md border border-gray-100">
+      <div className="bg-white p-3 sm:p-4 rounded-2xl sm:rounded-[28px] shadow-md border border-gray-100 dark:bg-[#1d2942] dark:border-[#2a3f5f] dark:text-white">
         <div className="relative">
           <Search
             className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-gray-400"
@@ -176,7 +176,7 @@ export default function NotificationsPage() {
             placeholder="Search notifications..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 sm:pl-12 pr-10 sm:pr-12 py-2.5 sm:py-3 rounded-full border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#FFC94A] focus:border-transparent text-sm transition-all text-gray-900 placeholder:text-gray-400"
+            className="w-full pl-10 sm:pl-12 pr-10 sm:pr-12 py-2.5 sm:py-3 rounded-full border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#FFC94A] focus:border-transparent text-sm transition-all text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-300"
           />
           {searchQuery && (
             <button
@@ -192,7 +192,7 @@ export default function NotificationsPage() {
       </div>
 
       {/* Filter and Actions Bar */}
-      <div className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-[28px] shadow-md border border-gray-100">
+      <div className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-[28px] shadow-md border border-gray-100 dark:bg-[#1d2942] dark:border-[#2a3f5f] dark:text-white">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
           <div className="flex gap-1.5 sm:gap-2 bg-[#F5F2FF] p-1 rounded-full w-full sm:w-auto">
             <button
@@ -265,14 +265,14 @@ export default function NotificationsPage() {
                 <Bell size={40} className="text-[#FFC94A] sm:w-12 sm:h-12" />
               )}
             </div>
-            <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-2">
+            <h3 className="text-lg sm:text-xl font-bold text-gray-800 dark:text-white mb-2">
               {searchQuery
                 ? "No matching notifications"
                 : filter === "unread"
                 ? "All caught up! 🎉"
                 : "No notifications yet"}
             </h3>
-            <p className="text-sm sm:text-base text-gray-500 max-w-sm mx-auto mb-4">
+            <p className="text-sm sm:text-base text-gray-500 dark:text-white max-w-sm mx-auto mb-4">
               {searchQuery
                 ? `No notifications found matching "${searchQuery}". Try different keywords.`
                 : filter === "unread"
@@ -329,7 +329,7 @@ export default function NotificationsPage() {
 
             {/* Showing count */}
             <div className="text-center pt-3 sm:pt-4">
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-500 dark:text-white">
                 Showing {displayedNotifications.length} of{" "}
                 {filteredNotifications.length} notifications
               </p>

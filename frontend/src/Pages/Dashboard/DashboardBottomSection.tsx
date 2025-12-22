@@ -5,6 +5,7 @@ import QuestCelebration from "../../components/QuestCelebration";
 import { awardXp } from "../../api/userXpApi";
 import { toast } from "react-toastify";
 import { moods } from "@/utils/moods";
+import { useTheme } from "@/context/ThemeContext";
 
 interface DashboardBottomSectionProps {
   // Remove these props since we're managing mood internally
@@ -24,6 +25,7 @@ interface Quest {
 }
 
 const DashboardBottomSection: React.FC<DashboardBottomSectionProps> = () => {
+  const { darkMode } = useTheme();
   const [selectedMood, setSelectedMood] = useState<number | null>(() => {
     const stored = localStorage.getItem("selectedMood");
     return stored !== null ? Number(stored) : null;
@@ -147,12 +149,26 @@ const DashboardBottomSection: React.FC<DashboardBottomSectionProps> = () => {
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* How do you feel */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm">
+        <div
+          className={`rounded-2xl p-6 shadow-sm ${
+            darkMode ? "bg-[#1d2942]" : "bg-white"
+          }`}
+        >
           <div className="flex items-center gap-2 mb-4">
             <span className="text-xl">💗</span>
-            <h3 className="text-xl font-bold text-black">How do you feel?</h3>
+            <h3
+              className={`text-xl font-bold ${
+                darkMode ? "text-white" : "text-black"
+              }`}
+            >
+              How do you feel?
+            </h3>
           </div>
-          <p className="text-sm text-gray-500 mb-6">
+          <p
+            className={`text-sm mb-6 ${
+              darkMode ? "text-gray-400" : "text-gray-500"
+            }`}
+          >
             Take a moment to check in with yourself
           </p>
 
@@ -163,24 +179,44 @@ const DashboardBottomSection: React.FC<DashboardBottomSectionProps> = () => {
                 onClick={() => handleMoodSelect(index)}
                 className={`p-3 sm:p-4 rounded-2xl border-2 transition-all ${
                   selectedMood === index
-                    ? "border-purple-400 bg-purple-50 scale-105 shadow-md"
-                    : "border-gray-200 hover:border-gray-300 hover:scale-105"
+                    ? `border-purple-400 ${
+                        darkMode ? "bg-purple-500/30" : "bg-purple-50"
+                      } scale-105 shadow-md`
+                    : `${
+                        darkMode
+                          ? "border-gray-600 hover:border-gray-500"
+                          : "border-gray-200 hover:border-gray-300"
+                      } hover:scale-105`
                 }`}
               >
                 <div className="text-2xl sm:text-3xl mb-1 sm:mb-2">
                   {mood.emoji}
                 </div>
-                <div className="text-xs text-gray-600">{mood.label}</div>
+                <div
+                  className={`text-xs ${
+                    darkMode ? "text-gray-400" : "text-gray-600"
+                  }`}
+                >
+                  {mood.label}
+                </div>
               </button>
             ))}
           </div>
         </div>
 
         {/* Collection Milestones */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm">
+        <div
+          className={`rounded-2xl p-6 shadow-sm ${
+            darkMode ? "bg-[#1d2942]" : "bg-white"
+          }`}
+        >
           <div className="flex items-center gap-2 mb-6">
             <Trophy className="w-5 h-5 text-orange-500" />
-            <h3 className="text-xl font-bold text-black">
+            <h3
+              className={`text-xl font-bold ${
+                darkMode ? "text-white" : "text-black"
+              }`}
+            >
               Collection Milestones
             </h3>
           </div>
@@ -189,15 +225,27 @@ const DashboardBottomSection: React.FC<DashboardBottomSectionProps> = () => {
             {quests.map((quest) => (
               <div
                 key={quest.id}
-                className="flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 transition-colors"
+                className={`flex items-center justify-between p-3 rounded-xl transition-colors ${
+                  darkMode ? "hover:bg-gray-700/30" : "hover:bg-gray-50"
+                }`}
               >
                 <div className="flex items-center gap-3">
                   <div className="text-2xl">{quest.icon}</div>
                   <div>
-                    <div className="font-semibold text-gray-900">
+                    <div
+                      className={`font-semibold ${
+                        darkMode ? "text-gray-200" : "text-gray-900"
+                      }`}
+                    >
                       {quest.name}
                     </div>
-                    <div className="text-xs text-gray-500">{quest.detail}</div>
+                    <div
+                      className={`text-xs ${
+                        darkMode ? "text-gray-500" : "text-gray-500"
+                      }`}
+                    >
+                      {quest.detail}
+                    </div>
                   </div>
                 </div>
                 {quest.status && !quest.claimed && (
@@ -209,12 +257,20 @@ const DashboardBottomSection: React.FC<DashboardBottomSectionProps> = () => {
                   </button>
                 )}
                 {quest.claimed && (
-                  <span className="text-sm text-gray-400 font-medium">
+                  <span
+                    className={`text-sm font-medium ${
+                      darkMode ? "text-gray-500" : "text-gray-400"
+                    }`}
+                  >
                     Claimed ✓
                   </span>
                 )}
                 {quest.progress && (
-                  <span className="text-sm text-gray-400 font-medium">
+                  <span
+                    className={`text-sm font-medium ${
+                      darkMode ? "text-gray-500" : "text-gray-400"
+                    }`}
+                  >
                     {quest.progress}
                   </span>
                 )}

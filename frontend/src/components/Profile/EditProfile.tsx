@@ -284,7 +284,9 @@ const EditProfile = ({ user, onUpdate }: EditProfileProps) => {
 
   return (
     <div className="p-10">
-      <h2 className="text-2xl font-bold text-gray-900 mb-8">Edit Profile</h2>
+      <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-8">
+        Edit Profile
+      </h2>
 
       {message && (
         <div
@@ -303,7 +305,7 @@ const EditProfile = ({ user, onUpdate }: EditProfileProps) => {
           <div>
             <label
               htmlFor="name"
-              className="block text-sm font-bold text-gray-700 mb-2"
+              className="block text-sm font-bold text-gray-700 dark:text-white mb-2"
             >
               Full Name
             </label>
@@ -313,7 +315,7 @@ const EditProfile = ({ user, onUpdate }: EditProfileProps) => {
               name="name"
               value={formData.name}
               onChange={handleInputChange}
-              className="w-full px-4 py-3 text-base border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+              className="w-full px-4 py-3 text-base border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all dark:bg-[#1d2942] dark:text-white dark:border-[#2a3f5f] dark:placeholder:text-gray-300"
               required
             />
           </div>
@@ -321,7 +323,7 @@ const EditProfile = ({ user, onUpdate }: EditProfileProps) => {
           <div>
             <label
               htmlFor="email"
-              className="block text-sm font-bold text-gray-700 mb-2"
+              className="block text-sm font-bold text-gray-700 dark:text-white mb-2"
             >
               Email Address
             </label>
@@ -334,11 +336,11 @@ const EditProfile = ({ user, onUpdate }: EditProfileProps) => {
                 onChange={handleEmailChange}
                 className={`w-full px-4 py-3 text-base border-2 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all ${
                   emailError || emailCheckStatus === "taken"
-                    ? "border-red-300 bg-red-50"
+                    ? "border-red-300 bg-red-50 dark:bg-[#1d2942]"
                     : emailCheckStatus === "available"
-                    ? "border-green-300 bg-green-50"
-                    : "border-gray-300"
-                }`}
+                    ? "border-green-300 bg-green-50 dark:bg-[#1d2942]"
+                    : "border-gray-300 dark:bg-[#1d2942]"
+                } dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-300`}
                 required
               />
               <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
@@ -395,7 +397,7 @@ const EditProfile = ({ user, onUpdate }: EditProfileProps) => {
           <div>
             <label
               htmlFor="location"
-              className="block text-sm font-bold text-gray-700 mb-2"
+              className="block text-sm font-bold text-gray-700 dark:text-white mb-2"
             >
               Location
             </label>
@@ -409,7 +411,7 @@ const EditProfile = ({ user, onUpdate }: EditProfileProps) => {
                   location: value,
                 }))
               }
-              className="w-full px-4 py-3 text-base border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+              className="w-full px-4 py-3 text-base border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all dark:bg-[#1d2942] dark:text-white dark:border-[#2a3f5f] dark:placeholder:text-gray-300"
               placeholder="City, Country"
             />
           </div>
@@ -420,7 +422,7 @@ const EditProfile = ({ user, onUpdate }: EditProfileProps) => {
         <div>
           <label
             htmlFor="bio"
-            className="block text-sm font-bold text-gray-700 mb-2"
+            className="block text-sm font-bold text-gray-700 dark:text-white mb-2"
           >
             Bio
           </label>
@@ -430,11 +432,11 @@ const EditProfile = ({ user, onUpdate }: EditProfileProps) => {
             value={formData.bio}
             onChange={handleInputChange}
             rows={5}
-            className="w-full px-4 py-3 text-base border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all resize-none"
+            className="w-full px-4 py-3 text-base border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all resize-none dark:bg-[#1d2942] dark:text-white dark:border-[#2a3f5f] dark:placeholder:text-gray-300"
             placeholder="Tell us about yourself..."
             maxLength={500}
           />
-          <p className="mt-2 text-sm text-gray-500 font-medium text-right">
+          <p className="mt-2 text-sm text-gray-500 font-medium text-right dark:text-gray-300">
             {formData.bio.length}/500 characters
           </p>
         </div>

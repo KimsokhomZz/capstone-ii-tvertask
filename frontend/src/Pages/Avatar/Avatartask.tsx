@@ -7,6 +7,7 @@ import FaceComponent from "./FaceComponent";
 import { getStatus, getXp } from "../../api/userXpApi";
 import { fetchUserStreak } from "../../api/streakApi";
 import AuthContext from "@/context/AuthContext";
+import { useTheme } from "@/context/ThemeContext"; // Make sure this import exists
 
 // --- Types & Data Structures (Ready for Backend) ---
 const Mood = {
@@ -75,6 +76,7 @@ const MOODS = {
     grad: "from-yellow-100 via-orange-50 to-yellow-50",
     emoji: "✨",
     msgs: ["I'm feeling great!", "Best day ever!"],
+    textCls: "text-black",
   },
   [Mood.ANGRY]: {
     cls: "bg-red-500",
@@ -84,6 +86,7 @@ const MOODS = {
     grad: "from-red-100 via-red-50 to-orange-50",
     emoji: "💢",
     msgs: ["Grrr!", "Don't touch me!"],
+    textCls: "text-black",
   },
   [Mood.SAD]: {
     cls: "bg-blue-400",
@@ -93,6 +96,7 @@ const MOODS = {
     grad: "from-blue-100 via-indigo-50 to-slate-50",
     emoji: "💧",
     msgs: ["I feel blue...", "*Sniff*"],
+    textCls: "text-black",
   },
   [Mood.EATING]: {
     cls: "bg-yellow-400",
@@ -102,6 +106,7 @@ const MOODS = {
     grad: "from-green-100 via-emerald-50 to-teal-50",
     emoji: "🍔",
     msgs: ["Yum yum!", "Delicious!"],
+    textCls: "text-black",
   },
   [Mood.LOVE]: {
     cls: "bg-pink-400",
@@ -111,6 +116,7 @@ const MOODS = {
     grad: "from-pink-100 via-rose-50 to-red-50",
     emoji: "💖",
     msgs: ["I love you!", "You're amazing!"],
+    textCls: "text-black",
   },
 };
 
@@ -149,6 +155,8 @@ const Avatar: React.FC = () => {
   const { user } = useContext(
     AuthContext
   ) as import("@/context/AuthContext").AuthContextType;
+
+  const { darkMode } = useTheme();
 
   const [isLoading, setIsLoading] = useState(true);
 
@@ -337,6 +345,7 @@ const Avatar: React.FC = () => {
     const cfg = MOODS[mood];
     return (
       <motion.div
+        key={`mode-play-${mood}`} // force remount when entering/exiting play
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -370,10 +379,18 @@ const Avatar: React.FC = () => {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => {
+            // ensure dashboard UI state is restored immediately
             setMode("dashboard");
             setMood(Mood.HAPPY);
+            setTab("gear"); // reset sidebar tab (optional)
+            setSelId(1); // reset selection (optional)
+            window.scrollTo(0, 0); // restore scroll if overlay changed it
           }}
-          className="absolute top-4 left-4 sm:top-6 sm:left-6 md:top-8 md:left-8 bg-white/60 hover:bg-white/90 px-3 py-2 sm:px-4 sm:py-2.5 md:px-5 md:py-2.5 rounded-xl md:rounded-2xl font-bold shadow-sm z-50 flex justify-center items-center gap-2 text-sm md:text-base"
+          className={`absolute top-4 left-4 sm:top-6 sm:left-6 md:top-8 md:left-8 px-3 py-2 sm:px-4 sm:py-2.5 md:px-5 md:py-2.5 rounded-xl md:rounded-2xl font-bold shadow-sm z-50 flex justify-center items-center gap-2 text-sm md:text-base ${
+            darkMode
+              ? "bg-white/60 hover:bg-white/90 text-black"
+              : "bg-white/60 hover:bg-white/90 text-black"
+          }`}
         >
           <i className="fa-solid fa-arrow-left"></i>
           <span className="hidden sm:inline">Dashboard</span>
@@ -396,7 +413,7 @@ const Avatar: React.FC = () => {
                 transition={{ duration: 0.3 }}
                 className="relative z-20 mb-2 sm:mb-4"
               >
-                <div className="bg-white/95 px-4 py-3 sm:px-6 sm:py-3.5 md:px-8 md:py-4 rounded-[1.5rem] md:rounded-[2rem] shadow-xl text-lg sm:text-xl md:text-2xl font-bold max-w-xs sm:max-w-sm text-center">
+                <div className="bg-white/95 px-4 py-3 sm:px-6 sm:py-3.5 md:px-8 md:py-4 rounded-[1.5rem] md:rounded-[2rem] shadow-xl text-lg sm:text-xl md:text-2xl font-bold max-w-xs sm:max-w-sm text-center text-black">
                   {msg}
                   <div className="absolute -bottom-2 sm:-bottom-3 left-1/2 -translate-x-1/2 w-5 h-5 sm:w-6 sm:h-6 bg-white/95 border-b-2 border-r-2 rotate-45"></div>
                 </div>
@@ -456,10 +473,12 @@ const Avatar: React.FC = () => {
             initial={{ opacity: 0, x: 100 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.3, duration: 0.5 }}
-            className="absolute right-4 top-20 bottom-4 w-72 sm:w-80 md:w-80 lg:w-96 bg-white/60 backdrop-blur-2xl border border-white/50 rounded-[1.5rem] md:rounded-[2rem] shadow-2xl overflow-hidden flex flex-col z-50 hidden md:flex"
+            className={`absolute right-4 top-20 bottom-4 w-72 sm:w-80 md:w-80 lg:w-96 bg-white/60 backdrop-blur-2xl border border-white/50 rounded-[1.5rem] md:rounded-[2rem] shadow-2xl overflow-hidden flex flex-col z-50 hidden md:flex ${
+              darkMode ? "text-black" : "text-gray-900"
+            }`}
           >
             <div className="p-4 md:p-6 border-b border-white/30">
-              <h2 className="text-xl md:text-2xl font-black flex gap-2 md:gap-3 items-center">
+              <h2 className="text-xl md:text-2xl font-black flex gap-2 md:gap-3 items-center text-black">
                 <span className="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-indigo-500 text-white flex items-center justify-center text-xs md:text-sm">
                   <i className="fa-solid fa-shirt"></i>
                 </span>
@@ -558,10 +577,18 @@ const Avatar: React.FC = () => {
       <div className="max-w-7xl mx-auto">
         {/* Header Section */}
         <motion.div variants={itemVariants} className="mb-6 sm:mb-8">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-gray-900 mb-2">
+          <h1
+            className={`text-3xl sm:text-4xl md:text-5xl font-black mb-2 ${
+              darkMode ? "text-white" : "text-gray-900"
+            }`}
+          >
             Avatar Hub
           </h1>
-          <p className="text-sm sm:text-base text-gray-600">
+          <p
+            className={`text-sm sm:text-base ${
+              darkMode ? "text-gray-400" : "text-gray-600"
+            }`}
+          >
             Customize and interact with your avatars
           </p>
         </motion.div>
@@ -575,9 +602,13 @@ const Avatar: React.FC = () => {
           <motion.div
             variants={cardVariants}
             whileHover={{ scale: 1.02 }}
-            className="lg:col-span-2 bg-white rounded-2xl sm:rounded-3xl shadow-lg overflow-hidden border border-gray-100 transition-all duration-300 hover:shadow-2xl"
+            className={`lg:col-span-2 rounded-2xl sm:rounded-3xl shadow-lg overflow-hidden border transition-all duration-300 hover:shadow-2xl ${
+              darkMode
+                ? "bg-[#1d2942] border-[#2a3f5f]"
+                : "bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50"
+            }`}
           >
-            <div className="relative aspect-video sm:aspect-[16/9] bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 flex items-center justify-center group">
+            <div className="relative aspect-video sm:aspect-[16/9] flex items-center justify-center group">
               {/* Avatar Display */}
               <div className="transform scale-75 sm:scale-85 md:scale-90 transition-transform duration-500 group-hover:scale-95">
                 <RenderContent scale={0.9} />
@@ -621,7 +652,9 @@ const Avatar: React.FC = () => {
                 {sel.type === "face" && (
                   <div className="flex items-center gap-2 mt-2">
                     <span className="text-2xl">{MOODS[mood].emoji}</span>
-                    <p className="text-xs sm:text-sm font-medium bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full">
+                    <p
+                      className={`text-xs sm:text-sm font-medium bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full ${MOODS[mood].textCls}`}
+                    >
                       {MOODS[mood].label}
                     </p>
                   </div>
@@ -644,10 +677,18 @@ const Avatar: React.FC = () => {
           {/* Avatar Stats */}
           <motion.div
             variants={cardVariants}
-            className="lg:col-span-1 bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-md border border-gray-100"
+            className={`lg:col-span-1 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-md border transition-all duration-300 ${
+              darkMode
+                ? "bg-[#1d2942] border-[#2a3f5f]"
+                : "bg-white border-gray-100"
+            }`}
           >
             <div className="flex items-center justify-between mb-4 sm:mb-6">
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
+              <h2
+                className={`text-xl sm:text-2xl font-bold ${
+                  darkMode ? "text-white" : "text-gray-900"
+                }`}
+              >
                 Stats
               </h2>
               <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
@@ -774,7 +815,11 @@ const Avatar: React.FC = () => {
             key={sec}
             variants={itemVariants}
             custom={secIdx}
-            className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 shadow-md mb-6 sm:mb-8 border border-gray-100"
+            className={`rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 shadow-md mb-6 sm:mb-8 border transition-all duration-300 ${
+              darkMode
+                ? "bg-[#1d2942] border-[#2a3f5f]"
+                : "bg-white border-gray-100"
+            }`}
           >
             <div className="flex items-center justify-between mb-4 sm:mb-6">
               <div className="flex items-center gap-3">
@@ -791,11 +836,19 @@ const Avatar: React.FC = () => {
                     }`}
                   ></i>
                 </div>
-                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">
+                <h2
+                  className={`text-xl sm:text-2xl md:text-3xl font-bold ${
+                    darkMode ? "text-white" : "text-gray-900"
+                  }`}
+                >
                   {sec}
                 </h2>
               </div>
-              <span className="text-xs sm:text-sm text-gray-500 font-medium">
+              <span
+                className={`text-xs sm:text-sm font-medium ${
+                  darkMode ? "text-gray-400" : "text-gray-500"
+                }`}
+              >
                 {
                   avatars.filter((a) =>
                     sec === "Avatar"

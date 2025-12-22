@@ -174,8 +174,9 @@ const Profile = () => {
     <div className="min-h-screen">
       <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* User Profile Header */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 mb-8 overflow-hidden">
-          <div className="p-6 sm:p-8 bg-linear-to-br from-blue-50 to-indigo-50">
+        <div className=" rounded-2xl  mb-8 overflow-hidden">
+          <div className="p-6 sm:p-8 bg-linear-to-br from-blue-50 to-indigo-50 dark:bg-[#1d2942] dark:from-transparent dark:to-transparent dark:text-white">
+            {" "}
             <div className="flex items-center space-x-6">
               <div
                 className="relative group cursor-pointer"
@@ -195,12 +196,14 @@ const Profile = () => {
                 </div>
               </div>
               <div className="min-w-0 flex-1">
-                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
                   {user.name}
                 </h1>
-                <p className="text-gray-500 mt-1 text-lg">{user.email}</p>
-                <div className="mt-3 flex flex-wrap gap-4 text-sm text-gray-600">
-                  <span className="flex items-center gap-1.5 text-gray-500 text-sm">
+                <p className="text-gray-500 mt-1 text-lg dark:text-white">
+                  {user.email}
+                </p>
+                <div className="mt-3 flex flex-wrap gap-4 text-sm text-gray-600 dark:text-white">
+                  <span className="flex items-center gap-1.5 text-gray-500 text-sm dark:text-white">
                     <span className="w-2 h-2 bg-green-500 rounded-full"></span>
                     Member since {new Date(user.createdAt).getFullYear()}
                   </span>
@@ -210,7 +213,7 @@ const Profile = () => {
           </div>
 
           {/* Navigation Tabs */}
-          <nav className="border-t border-gray-100">
+          <nav className="border-t dark:bg-[#1d2942] dark:text-white">
             <div className="flex overflow-x-auto">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
@@ -222,7 +225,7 @@ const Profile = () => {
                     className={`shrink-0 flex items-center gap-3 px-6 py-4 text-left transition-all duration-300 border-b-2 min-w-max ${
                       isActive
                         ? "border-blue-500 text-blue-700 bg-linear-to-r from-blue-50 to-indigo-50"
-                        : "border-transparent text-gray-500 hover:text-blue-600 hover:bg-blue-50/30"
+                        : "border-transparent text-gray-500 hover:text-blue-600 hover:bg-blue-50/30 dark:text-gray-300"
                     }`}
                   >
                     <div
@@ -237,14 +240,18 @@ const Profile = () => {
                     <div>
                       <span
                         className={`block font-semibold text-base transition-colors duration-300 ${
-                          isActive ? "text-blue-800" : "text-gray-600"
+                          isActive
+                            ? "text-blue-800 dark:text-[#101828]"
+                            : "text-gray-600 dark:text-white"
                         }`}
                       >
                         {tab.label}
                       </span>
                       <span
                         className={`block text-xs mt-0.5 transition-colors duration-300 ${
-                          isActive ? "text-blue-600" : "text-gray-400"
+                          isActive
+                            ? "text-blue-600 dark:text-blue-300"
+                            : "text-gray-400 dark:text-gray-300"
                         }`}
                       >
                         {tab.description}
@@ -317,7 +324,7 @@ const Profile = () => {
         </div>
 
         {/* Main Content Area */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 min-h-[600px]">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 min-h-[600px] dark:bg-[#101828] dark:text-white">
           {renderTabContent()}
         </div>
       </div>
@@ -345,8 +352,10 @@ const ProfileView = ({ user, stats }: { user: any; stats: any }) => {
   return (
     <div className="p-10">
       <div className="mb-8">
-        <h2 className="text-2xl font-bold text-gray-900">Overview</h2>
-        <p className="text-gray-500 mt-1 text-base">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+          Overview
+        </h2>
+        <p className="text-gray-500 mt-1 text-base dark:text-white">
           Your profile summary and activity statistics
         </p>
       </div>
@@ -354,31 +363,35 @@ const ProfileView = ({ user, stats }: { user: any; stats: any }) => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Quick Stats Cards */}
         <div className="lg:col-span-2 grid grid-cols-2 sm:grid-cols-4 gap-6">
-          <div className="bg-blue-50 p-6 rounded-2xl border border-blue-100 transition-transform hover:scale-105">
-            <div className="text-3xl font-bold text-blue-700 mb-2">
+          <div className="bg-blue-50 p-6 rounded-2xl border border-blue-100 transition-transform hover:scale-105 dark:bg-[#1d2942] dark:border-[#2a3f5f]">
+            <div className="text-3xl font-bold text-blue-700 dark:text-white mb-2">
               {stats.level}
             </div>
-            <div className="text-sm font-medium text-blue-600">Level</div>
+            <div className="text-sm font-medium text-blue-600 dark:text-white">
+              Level
+            </div>
           </div>
-          <div className="bg-green-50 p-6 rounded-2xl border border-green-100 transition-transform hover:scale-105">
-            <div className="text-3xl font-bold text-green-700 mb-2">
+          <div className="bg-green-50 p-6 rounded-2xl border border-green-100 transition-transform hover:scale-105 dark:bg-[#1d2942] dark:border-[#2a3f5f]">
+            <div className="text-3xl font-bold text-green-700 dark:text-white mb-2">
               {stats.streak}
             </div>
-            <div className="text-sm font-medium text-green-600">Day Streak</div>
+            <div className="text-sm font-medium text-green-600 dark:text-white">
+              Day Streak
+            </div>
           </div>
-          <div className="bg-purple-50 p-6 rounded-2xl border border-purple-100 transition-transform hover:scale-105">
-            <div className="text-3xl font-bold text-purple-700 mb-2">
+          <div className="bg-purple-50 p-6 rounded-2xl border border-purple-100 transition-transform hover:scale-105 dark:bg-[#1d2942] dark:border-[#2a3f5f]">
+            <div className="text-3xl font-bold text-purple-700 dark:text-white mb-2">
               {stats.completedTasks}
             </div>
-            <div className="text-sm font-medium text-purple-600">
+            <div className="text-sm font-medium text-purple-600 dark:text-white">
               Tasks Done
             </div>
           </div>
-          <div className="bg-orange-50 p-6 rounded-2xl border border-orange-100 transition-transform hover:scale-105">
-            <div className="text-3xl font-bold text-orange-700 mb-2">
+          <div className="bg-orange-50 p-6 rounded-2xl border border-orange-100 transition-transform hover:scale-105 dark:bg-[#1d2942] dark:border-[#2a3f5f]">
+            <div className="text-3xl font-bold text-orange-700 dark:text-white mb-2">
               {Math.round(stats.totalFocusTime / 60)}
             </div>
-            <div className="text-sm font-medium text-orange-600">
+            <div className="text-sm font-medium text-orange-600 dark:text-white">
               Hours Focused
             </div>
           </div>
@@ -386,51 +399,51 @@ const ProfileView = ({ user, stats }: { user: any; stats: any }) => {
 
         {/* Personal Information */}
         <div className="lg:col-span-2">
-          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm dark:bg-[#1d2942] dark:border-[#2a3f5f] dark:text-white">
             <div className="px-8 py-5 border-b border-gray-100 bg-gray-50/50">
-              <h3 className="font-bold text-lg text-gray-900">
+              <h3 className="font-bold text-lg text-gray-900 dark:text-white">
                 Personal Information
               </h3>
             </div>
             <div className="p-8 space-y-8">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 dark:text-gray-300">
                     Full Name
                   </label>
-                  <p className="text-gray-900 font-medium text-lg">
+                  <p className="text-gray-900 font-medium text-lg dark:text-white">
                     {user.name || "Not set"}
                   </p>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 dark:text-gray-300">
                     Email Address
                   </label>
-                  <p className="text-gray-900 font-medium text-lg break-all">
+                  <p className="text-gray-900 font-medium text-lg break-all dark:text-white">
                     {user.email}
                   </p>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 dark:text-gray-300">
                     Location
                   </label>
-                  <p className="text-gray-900 font-medium text-lg">
+                  <p className="text-gray-900 font-medium text-lg dark:text-white">
                     {user.location || "Not set"}
                   </p>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 dark:text-gray-300">
                     Member Since
                   </label>
-                  <p className="text-gray-900 font-medium text-lg">
+                  <p className="text-gray-900 font-medium text-lg dark:text-white">
                     {new Date(user.createdAt).toLocaleDateString()}
                   </p>
                 </div>
                 <div className="sm:col-span-2">
-                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 dark:text-gray-300">
                     Bio
                   </label>
-                  <p className="text-gray-900 font-medium text-lg leading-relaxed">
+                  <p className="text-gray-900 font-medium text-lg leading-relaxed dark:text-white">
                     {user.bio || "No bio added yet."}
                   </p>
                 </div>
