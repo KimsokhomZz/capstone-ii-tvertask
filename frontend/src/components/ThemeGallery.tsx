@@ -1,4 +1,5 @@
-import { X, Sun, Moon, Monitor } from "lucide-react";
+import React, { useRef } from "react";
+import { X, Sun, Moon } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 
 export type ThemeOption = {
@@ -42,7 +43,9 @@ function ThemeTabs() {
 
   return (
     <div className="p-4 border-b border-border">
-      <h3 className="text-sm font-medium text-gray-500 mb-3">THEME</h3>
+      <h3 className="text-sm font-medium text-gray-500 dark:text-gray-300 mb-3">
+        THEME
+      </h3>
       <div className="grid grid-cols-3 gap-2">
         {themes.map((theme) => (
           <button
@@ -50,8 +53,8 @@ function ThemeTabs() {
             onClick={() => theme.id !== "system" && toggleDarkMode()}
             className={`flex flex-col items-center justify-center p-3 rounded-lg transition-colors ${
               theme.active
-                ? "bg-primary/10 text-dark"
-                : "hover:bg-accent/50 text-black hover:text-black"
+                ? "bg-primary/10 dark:bg-primary/20 text-dark dark:text-white"
+                : "hover:bg-accent/50 dark:hover:bg-gray-800 text-black dark:text-gray-300 hover:text-black dark:hover:text-white"
             }`}
           >
             <div className="mb-1 ">{theme.icon}</div>
@@ -71,26 +74,25 @@ export default function ThemeGallery({
   onSelect,
 }: ThemeGalleryProps) {
   const { darkMode } = useTheme();
+  const itemRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   if (!open) return null;
 
   // Filter options based on current theme mode
   const filteredOptions = options
-    .filter(opt => {
+    .filter((opt) => {
       // Always include the 'none' option
-      if (opt.id === 'none') return true;
+      if (opt.id === "none") return true;
       // For dark mode, only include options that have a dark theme
       if (darkMode) return opt.dark != null;
       // For light mode, only include options that have a light theme
       return opt.light != null;
     })
-    .map(opt => ({
+    .map((opt) => ({
       ...opt,
-      className: darkMode 
-        ? opt.dark?.className || '' 
-        : opt.light?.className || '',
-      preview: darkMode 
-        ? opt.dark?.preview || '' 
-        : opt.light?.preview || ''
+      className: darkMode
+        ? opt.dark?.className || ""
+        : opt.light?.className || "",
+      preview: darkMode ? opt.dark?.preview || "" : opt.light?.preview || "",
     }));
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
@@ -108,7 +110,7 @@ export default function ThemeGallery({
             </div>
             <button
               onClick={onClose}
-              className="rounded-full p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-dark"
+              className="rounded-full p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-600 dark:text-gray-300"
               aria-label="Close theme settings"
             >
               <X className="w-5 h-5" />
@@ -125,12 +127,30 @@ export default function ThemeGallery({
               {filteredOptions.map((opt) => (
                 <div key={opt.id} className="space-y-2">
                   <button
+                    ref={(el) => {
+                      itemRefs.current[opt.id] = el;
+                    }}
                     type="button"
-                    onClick={() => onSelect(opt.id)}
+                    onClick={() => {
+                      onSelect(opt.id);
+                      const el = itemRefs.current[opt.id];
+                      if (el) {
+                        try {
+                          el.scrollIntoView({
+                            behavior: "smooth",
+                            block: "center",
+                            inline: "center",
+                          });
+                          el.focus();
+                        } catch {
+                          /* ignore */
+                        }
+                      }
+                    }}
                     className={`relative w-full aspect-video rounded-xl overflow-hidden border-2 transition-all ${
                       selectedId === opt.id
-                        ? "ring-2 ring-primary ring-offset-2"
-                        : "border-gray-200 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-500"
+                        ? "ring-2 ring-primary ring-offset-2 dark:ring-offset-gray-900"
+                        : "border-gray-200 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-600"
                     }`}
                     aria-pressed={selectedId === opt.id}
                     title={opt.name}
@@ -142,7 +162,7 @@ export default function ThemeGallery({
                       {opt.name}
                     </span>
                     {selectedId === opt.id && (
-                      <span className="text-xs bg-primary text-white px-2 py-0.5 rounded-full">
+                      <span className="text-xs bg-primary dark:bg-primary/80 text-white px-2 py-0.5 rounded-full">
                         Selected
                       </span>
                     )}
@@ -154,7 +174,7 @@ export default function ThemeGallery({
           <div className="p-4 border-t border-border flex justify-end">
             <button
               onClick={onClose}
-              className="px-4 py-2 rounded-lg bg-secondary text-black border border-border hover:bg-accent"
+              className="px-4 py-2 rounded-lg bg-secondary dark:bg-gray-800 text-black dark:text-white border border-border dark:border-gray-700 hover:bg-accent dark:hover:bg-gray-700"
             >
               Done
             </button>

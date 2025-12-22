@@ -1,24 +1,39 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Play, Pause, Volume2, Music } from "lucide-react";
+import { Play, Music, Disc3, SkipBack, SkipForward, Pause } from "lucide-react";
 import { motion } from "framer-motion";
+import { useTheme } from "@/context/ThemeContext";
 
 interface MusicCardProps {
   onOpenMusic?: () => void;
-  volume?: number;
-  onVolumeChange?: (v: number) => void;
+  trackTitle?: string;
+  isPlaying?: boolean;
+  onTogglePlay?: () => void;
+  onNext?: () => void;
+  onPrev?: () => void;
+  themeBackground?: string;
 }
 
 const MusicCard: React.FC<MusicCardProps> = ({
   onOpenMusic,
-  volume = 50,
-  onVolumeChange,
+  trackTitle,
+  isPlaying,
+  onTogglePlay,
+  onNext,
+  onPrev,
+  themeBackground,
 }) => {
+  const { darkMode } = useTheme();
   const [currentTrack, setCurrentTrack] = useState<string | null>(null);
   const rootRef = useRef<HTMLDivElement | null>(null);
 
-  const audioCtxRef = useRef<AudioContext | null>(null);
-  const gainRef = useRef<GainNode | null>(null);
-  const oscRef = useRef<OscillatorNode | null>(null);
+  // Sync local display state with parent-controlled play state / title
+  useEffect(() => {
+    const playing = typeof isPlaying === "boolean" ? isPlaying : !!currentTrack;
+    if (playing) {
+      setCurrentTrack(trackTitle ?? currentTrack);
+      if (trackTitle) setCurrentTrack(trackTitle);
+    }
+  }, [isPlaying, trackTitle]);
 
   useEffect(() => {
     const handler = () => {
@@ -39,111 +54,44 @@ const MusicCard: React.FC<MusicCardProps> = ({
     return () => window.removeEventListener("showMusicCard", handler);
   }, []);
 
-  const ensureAudioNodes = () => {
-    if (!audioCtxRef.current) {
-      audioCtxRef.current = new (window.AudioContext ||
-        (window as any).webkitAudioContext)();
-    }
-    const ctx = audioCtxRef.current!;
-    if (!gainRef.current) {
-      const g = ctx.createGain();
-      g.gain.value = (volume ?? 50) / 100;
-      g.connect(ctx.destination);
-      gainRef.current = g;
-    }
-  };
-
-  const startSound = async () => {
-    ensureAudioNodes();
-    const ctx = audioCtxRef.current!;
-    if (ctx.state === "suspended") {
-      try {
-        await ctx.resume();
-      } catch {
-        /* ignore */
-      }
-    }
-    if (oscRef.current) return;
-
-    const osc = ctx.createOscillator();
-    const gain = gainRef.current!;
-    osc.type = "sine";
-    osc.frequency.value = 220;
-    osc.connect(gain);
-    osc.start();
-    oscRef.current = osc;
-  };
-
-  const stopSound = () => {
-    if (oscRef.current) {
-      try {
-        oscRef.current.stop();
-      } catch {
-        /* ignore */
-      }
-      try {
-        oscRef.current.disconnect();
-      } catch {
-        /* ignore */
-      }
-      oscRef.current = null;
-    }
-  };
-
-  useEffect(() => {
-    if (gainRef.current && audioCtxRef.current) {
-      try {
-        gainRef.current.gain.setValueAtTime(
-          (volume ?? 50) / 100,
-          audioCtxRef.current.currentTime || 0
-        );
-      } catch {}
-    }
-  }, [volume]);
-
-  useEffect(() => {
-    return () => {
-      stopSound();
-      if (gainRef.current) {
-        try {
-          gainRef.current.disconnect();
-        } catch {}
-        gainRef.current = null;
-      }
-      if (audioCtxRef.current) {
-        try {
-          audioCtxRef.current.close();
-        } catch {}
-        audioCtxRef.current = null;
-      }
-    };
-  }, []);
-
   const togglePlay = () => {
-    if (currentTrack) {
-      stopSound();
-      setCurrentTrack(null);
-    } else {
-      startSound();
-      setCurrentTrack("Lo-Fi Focus Beats");
-      onOpenMusic?.();
-    }
+    onTogglePlay?.();
+    onOpenMusic?.();
+  };
+
+  const handlePrev = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onPrev?.();
+  };
+
+  const handleNext = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onNext?.();
+  };
+
+  // Now: combined play/pause only — always toggle play state (no stop)
+  const handlePlayPause = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onTogglePlay?.();
   };
 
   const handleContainerClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const target = e.target as HTMLElement | null;
     if (target && target.closest("button, input, a, textarea, select")) return;
-    togglePlay();
+    // open music UI only — do not auto-start playback
+    onOpenMusic?.();
   };
 
   const handleContainerKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
-      togglePlay();
+      // open music UI only — do not auto-start playback
+      onOpenMusic?.();
     }
   };
 
-  const isPlaying = !!currentTrack;
+  const controlledPlaying =
+    typeof isPlaying === "boolean" ? isPlaying : !!currentTrack;
 
   return (
     <motion.div
@@ -156,16 +104,37 @@ const MusicCard: React.FC<MusicCardProps> = ({
       initial={{ opacity: 0, y: 5 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className={`bg-card rounded-[28px] shadow-md border border-border p-6 md:p-8 w-full max-w-[944px] cursor-pointer transition-all duration-300 ${
-        isPlaying ? "ring-2 ring-yellow-400 shadow-2xl" : ""
+      className={`rounded-[28px] shadow-md border p-6 md:p-8 w-full max-w-[944px] cursor-pointer transition-all duration-300 ${
+        darkMode
+          ? `bg-[#101828] border-[#2a3f5f] text-white ${
+              controlledPlaying ? "ring-2 ring-yellow-400 shadow-2xl" : ""
+            }`
+          : `bg-card border-border ${
+              controlledPlaying ? "ring-2 ring-yellow-400 shadow-2xl" : ""
+            }`
       }`}
+      style={
+        themeBackground && themeBackground.includes("url")
+          ? {
+              backgroundColor: darkMode
+                ? "rgba(16, 24, 40, 0.3)"
+                : "rgba(255, 255, 255, 0.3)",
+            }
+          : {}
+      }
     >
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
           <Music className="w-6 h-6 text-yellow-500" />
-          <h3 className="text-xl font-semibold text-gray-900">Focus Music</h3>
+          <h3
+            className={`text-xl font-semibold ${
+              darkMode ? "text-white" : "text-gray-900"
+            }`}
+          >
+            Focus Music
+          </h3>
         </div>
-        {isPlaying && (
+        {controlledPlaying && (
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
@@ -184,18 +153,21 @@ const MusicCard: React.FC<MusicCardProps> = ({
 
       <div className="flex items-center gap-4">
         <motion.button
-          onClick={togglePlay}
+          onClick={(e) => {
+            e.stopPropagation();
+            togglePlay();
+          }}
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
           aria-pressed={!!currentTrack}
           className={`flex items-center justify-center w-14 h-14 rounded-full text-white shadow-lg transition-all ${
-            isPlaying
+            controlledPlaying
               ? "bg-yellow-500 hover:bg-yellow-600"
               : "bg-gray-400 hover:bg-gray-500"
           }`}
         >
-          {currentTrack ? (
-            <Pause className="w-6 h-6 text-white" />
+          {controlledPlaying ? (
+            <Disc3 className="w-6 h-6 text-white animate-spin" />
           ) : (
             <Play className="w-6 h-6 text-white ml-1" />
           )}
@@ -204,43 +176,77 @@ const MusicCard: React.FC<MusicCardProps> = ({
         <div className="flex-1 min-w-0">
           <motion.div
             initial={false}
-            animate={{ opacity: isPlaying ? 1 : 0.6 }}
+            animate={{ opacity: controlledPlaying ? 1 : 0.6 }}
             className="space-y-1"
           >
-            <p className="text-foreground font-medium truncate">
-              {currentTrack || "No track selected"}
+            <p
+              className={`font-medium truncate ${
+                darkMode ? "text-white" : "text-foreground"
+              }`}
+            >
+              {controlledPlaying
+                ? trackTitle ?? currentTrack
+                : trackTitle ?? currentTrack ?? "No track selected"}
             </p>
-            <p className="text-sm text-muted-foreground">
-              {currentTrack
+            <p
+              className={`text-sm ${
+                darkMode ? "text-gray-400" : "text-muted-foreground"
+              }`}
+            >
+              {controlledPlaying
                 ? "Relaxing beats to help you focus"
-                : "Click play to start"}
+                : "Click play to start / resume"}
             </p>
           </motion.div>
         </div>
 
-        <div className="flex items-center gap-3 ml-4">
-          <Volume2
-            className={`w-5 h-5 flex-shrink-0 transition-colors ${
-              volume === 0 ? "text-gray-400" : "text-yellow-500"
+        {/* Right-side controls: Prev | Play/Pause | Next */}
+        <div className="flex items-center gap-3 flex-shrink-0">
+          <motion.button
+            onClick={handlePrev}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            aria-label="Previous track"
+            className={`p-2 rounded-lg shadow-sm transition-all ${
+              darkMode
+                ? "bg-[#1d2942] border-[#2a3f5f] text-gray-300 hover:bg-[#253548]"
+                : "bg-white border border-border text-gray-600 hover:bg-gray-50"
             }`}
-          />
-          <input
-            aria-label="Volume"
-            type="range"
-            min={0}
-            max={100}
-            step={1}
-            value={volume}
-            onChange={(e) => onVolumeChange?.(Number(e.target.value))}
-            onClick={(e) => e.stopPropagation()}
-            className="w-24 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-yellow-500 hover:accent-yellow-600"
-            style={{
-              background: `linear-gradient(to right, #eab308 0%, #eab308 ${volume}%, #e5e7eb ${volume}%, #e5e7eb 100%)`,
-            }}
-          />
-          <span className="text-xs text-muted-foreground w-8 text-right">
-            {volume}%
-          </span>
+          >
+            <SkipBack className="w-5 h-5" />
+          </motion.button>
+
+          <motion.button
+            onClick={handlePlayPause}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            aria-label={controlledPlaying ? "Pause" : "Play"}
+            className={`p-2 rounded-lg shadow-md transition-all text-white flex items-center justify-center ${
+              controlledPlaying
+                ? "bg-yellow-500 hover:bg-yellow-600 ring-1 ring-yellow-300"
+                : "bg-blue-500 hover:bg-blue-600 ring-1 ring-blue-300"
+            }`}
+          >
+            {controlledPlaying ? (
+              <Pause className="w-5 h-5" />
+            ) : (
+              <Play className="w-5 h-5" />
+            )}
+          </motion.button>
+
+          <motion.button
+            onClick={handleNext}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            aria-label="Next track"
+            className={`p-2 rounded-lg shadow-sm transition-all ${
+              darkMode
+                ? "bg-[#1d2942] border-[#2a3f5f] text-gray-300 hover:bg-[#253548]"
+                : "bg-white border border-border text-gray-600 hover:bg-gray-50"
+            }`}
+          >
+            <SkipForward className="w-5 h-5" />
+          </motion.button>
         </div>
       </div>
     </motion.div>

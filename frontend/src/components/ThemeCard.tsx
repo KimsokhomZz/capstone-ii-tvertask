@@ -1,3 +1,5 @@
+import { useTheme } from "@/context/ThemeContext";
+
 type ThemeCardProps = {
   onOpenGallery?: () => void;
   className?: string;
@@ -7,17 +9,23 @@ export default function ThemeCard({
   onOpenGallery,
   className,
 }: ThemeCardProps) {
+  const { darkMode } = useTheme();
+
   return (
     <div
-      className={`bg-card rounded-2xl border border-border p-3 flex items-center gap-2 ${
-        className ?? ""
-      }`}
+      className={`rounded-2xl p-3 flex items-center gap-2 transition-colors ${
+        darkMode ? "bg-[#101828]" : "bg-card border-border"
+      } ${className ?? ""}`}
     >
       {onOpenGallery && (
         <button
           type="button"
           onClick={onOpenGallery}
-          className="group inline-flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-semibold border-2 transition-all duration-200 bg-linear-to-r from-purple-50 to-pink-50 hover:from-purple-100 hover:to-pink-100 border-yellow-200 hover:border-yellow-300 text-yellow-400 hover:text-yellow-500 shadow-sm hover:shadow-md transform hover:scale-105 active:scale-95"
+          className={`group inline-flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-semibold border-2 transition-all duration-200 transform hover:scale-105 active:scale-95 ${
+            darkMode
+              ? "bg-[#101828] hover:bg-[#1a2332] border-white/30 text-white hover:text-white shadow-sm hover:shadow-md"
+              : "bg-linear-to-r from-purple-50 to-pink-50 hover:from-purple-100 hover:to-pink-100 border-yellow-200 hover:border-yellow-300 text-yellow-400 hover:text-yellow-500 shadow-sm hover:shadow-md"
+          }`}
           title="Choose a background theme for the page"
         >
           {/* Icon */}
