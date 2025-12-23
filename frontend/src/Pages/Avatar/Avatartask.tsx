@@ -322,6 +322,12 @@ const Avatar: React.FC = () => {
         localStorage.setItem(key, JSON.stringify({ ...obj, [k]: v }));
       }
     } catch {}
+    // notify same-window listeners that avatar customization changed
+    try {
+      window.dispatchEvent(
+        new CustomEvent("avatar-custom-updated", { detail: { id: selId } })
+      );
+    } catch {}
     if (mode === "play" && (k === "hat" || k === "glasses"))
       setMsg(["Wow!", "Cool!", "Stylish!"].sort(() => 0.5 - Math.random())[0]);
   };
@@ -336,6 +342,7 @@ const Avatar: React.FC = () => {
       : EggEmotion.NEUTRAL;
   // load persisted mood on mount
   useEffect(() => {
+    // restore persisted mood & selected avatar
     const s = localStorage.getItem("selectedMood");
     if (s && Object.keys(MOODS).includes(s)) {
       setMood(s as Mood);
@@ -347,6 +354,28 @@ const Avatar: React.FC = () => {
       const id = Number(last);
       if (!Number.isNaN(id)) setSelId(id);
     }
+
+    // load persisted per-avatar customization into avatars state
+    try {
+      setAvatars((prev) =>
+        prev.map((a) => {
+          try {
+            const raw = localStorage.getItem(`avatar-custom-${a.id}`);
+            if (raw) {
+              const parsed = JSON.parse(raw);
+              return {
+                ...a,
+                customization: {
+                  ...(a.customization || DEFAULT_CUSTOM),
+                  ...parsed,
+                },
+              };
+            }
+          } catch {}
+          return a;
+        })
+      );
+    } catch {}
   }, []);
 
   // persist selected avatar when changed

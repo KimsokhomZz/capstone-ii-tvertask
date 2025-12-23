@@ -112,6 +112,19 @@ export default function AvatarPreview() {
       }
     };
 
+    const onCustomUpdated = (ev: Event) => {
+      try {
+        const id = (ev as CustomEvent).detail?.id;
+        if (!id) return;
+        // if the updated id matches current selectedAvatar, reload its customization
+        if (Number(id) === Number(selectedAvatarId)) {
+          const raw = localStorage.getItem(`avatar-custom-${id}`);
+          if (raw) setCustom(JSON.parse(raw));
+          else setCustom(undefined);
+        }
+      } catch {}
+    };
+
     const onAvatarSelected = (ev: Event) => {
       try {
         const detail = (ev as CustomEvent).detail;
@@ -140,12 +153,20 @@ export default function AvatarPreview() {
       "avatar-selected",
       onAvatarSelected as EventListener
     );
+    window.addEventListener(
+      "avatar-custom-updated",
+      onCustomUpdated as EventListener
+    );
 
     return () => {
       window.removeEventListener("storage", onStorage);
       window.removeEventListener(
         "avatar-selected",
         onAvatarSelected as EventListener
+      );
+      window.removeEventListener(
+        "avatar-custom-updated",
+        onCustomUpdated as EventListener
       );
     };
   }, []);
