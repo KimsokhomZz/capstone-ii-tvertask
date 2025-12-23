@@ -313,6 +313,15 @@ const Avatar: React.FC = () => {
           : a
       )
     );
+    // persist customization for the currently selected avatar so shared preview can read it
+    try {
+      if (selId !== null && typeof selId !== "undefined") {
+        const key = `avatar-custom-${selId}`;
+        const existing = localStorage.getItem(key);
+        const obj = existing ? JSON.parse(existing) : {};
+        localStorage.setItem(key, JSON.stringify({ ...obj, [k]: v }));
+      }
+    } catch {}
     if (mode === "play" && (k === "hat" || k === "glasses"))
       setMsg(["Wow!", "Cool!", "Stylish!"].sort(() => 0.5 - Math.random())[0]);
   };

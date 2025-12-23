@@ -3,9 +3,9 @@ import FaceComponent from "@/Pages/Avatar/FaceComponent";
 import { useTheme } from "@/context/ThemeContext";
 
 const DEFAULT_PREVIEW_SCALE = 0.75;
+const CENTER_HANDLE_RADIUS = 40; // px - radius of center area that starts drag
 
 export default function AvatarPreview() {
-  const { darkMode } = useTheme();
   const previewRef = useRef<HTMLDivElement | null>(null);
   const dragRef = useRef<{ x: number; y: number } | null>(null);
   const animRef = useRef<number | null>(null);
@@ -36,6 +36,55 @@ export default function AvatarPreview() {
       return "HAPPY";
     }
   });
+  const [custom, setCustom] = useState<any | undefined>(undefined);
+  const [selectedAvatarId, setSelectedAvatarId] = useState<number | null>(
+    () => {
+      try {
+        const s = localStorage.getItem("selectedAvatar");
+        return s ? Number(s) : null;
+      } catch {
+        return null;
+      }
+    }
+  );
+
+  // load customization for current selectedAvatar
+  useEffect(() => {
+    const loadCustom = () => {
+      try {
+        const id = Number(localStorage.getItem("selectedAvatar"));
+        if (!Number.isNaN(id)) {
+          setSelectedAvatarId(id);
+          const raw = localStorage.getItem(`avatar-custom-${id}`);
+          if (raw) setCustom(JSON.parse(raw));
+          else setCustom(undefined);
+        } else {
+          setSelectedAvatarId(null);
+          setCustom(undefined);
+        }
+      } catch {
+        setCustom(undefined);
+      }
+    };
+    loadCustom();
+    const onStorage = (e: StorageEvent) => {
+      if (
+        e.key === "selectedAvatar" ||
+        (e.key && e.key.startsWith("avatar-custom-"))
+      ) {
+        loadCustom();
+      }
+      // keep mood sync too (existing behavior)
+      if (e.key === "selectedMood") {
+        try {
+          const s = localStorage.getItem("selectedMood");
+          if (s) setMood(s);
+        } catch {}
+      }
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
 
   useEffect(() => {
     lastPos.current = { x: previewPos.x, y: previewPos.y };
@@ -88,18 +137,6 @@ export default function AvatarPreview() {
     };
   }, []); // eslint-disable-line
 
-  // keep mood in sync if changed elsewhere
-  useEffect(() => {
-    const onStorage = () => {
-      try {
-        const s = localStorage.getItem("selectedMood");
-        if (s) setMood(s);
-      } catch {}
-    };
-    window.addEventListener("storage", onStorage);
-    return () => window.removeEventListener("storage", onStorage);
-  }, []);
-
   return (
     <div
       ref={previewRef}
@@ -120,8 +157,26 @@ export default function AvatarPreview() {
         style={{ width: "84%", height: "84%", transform: "scale(1)" }}
         className="m-auto pointer-events-none"
       >
-        <FaceComponent mood={(mood as any) || "HAPPY"} custom={undefined} />
+        {/* pass persisted customization (if any) so preview reflects cosplay changes */}
+        <FaceComponent mood={(mood as any) || "HAPPY"} custom={custom} />
       </div>
+
+      {/* visual center handle hint (non-intrusive) */}
+      <div
+        aria-hidden
+        style={{
+          position: "absolute",
+          left: "50%",
+          top: "50%",
+          transform: "translate(-50%,-50%)",
+          width: CENTER_HANDLE_RADIUS * 2,
+          height: CENTER_HANDLE_RADIUS * 2,
+          borderRadius: CENTER_HANDLE_RADIUS,
+          pointerEvents: "none",
+          boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.06)",
+          opacity: 0.06,
+        }}
+      />
 
       {/* overlay to capture pointer/wheel/doubleclick */}
       <div
@@ -134,18 +189,32 @@ export default function AvatarPreview() {
           touchAction: "none",
         }}
         onPointerDown={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
+          // Only start drag if pointer down is within the central handle radius
           const rect = previewRef.current?.getBoundingClientRect();
-          const offsetX = e.clientX - (rect?.left ?? 0);
-          const offsetY = e.clientY - (rect?.top ?? 0);
-          dragRef.current = { x: offsetX, y: offsetY };
-          pointerIdRef.current = e.pointerId;
-          setDragging(true);
-          (e.currentTarget as Element).setPointerCapture?.(e.pointerId);
+          if (!rect) return;
+          const offsetX = e.clientX - rect.left;
+          const offsetY = e.clientY - rect.top;
+          const centerX = rect.width / 2;
+          const centerY = rect.height / 2;
+          const dx = offsetX - centerX;
+          const dy = offsetY - centerY;
+          const dist = Math.hypot(dx, dy);
+
+          if (dist <= CENTER_HANDLE_RADIUS) {
+            e.preventDefault();
+            e.stopPropagation();
+            dragRef.current = { x: offsetX, y: offsetY };
+            pointerIdRef.current = e.pointerId;
+            setDragging(true);
+            (e.currentTarget as Element).setPointerCapture?.(e.pointerId);
+          }
+          // if outside handle area -> ignore (no drag start)
         }}
         onPointerUp={(e) => {
-          if (pointerIdRef.current !== e.pointerId) return;
+          if (pointerIdRef.current !== e.pointerId) {
+            // If we never captured this pointer (didn't start drag), ignore
+            return;
+          }
           pointerIdRef.current = null;
           setDragging(false);
           dragRef.current = null;
