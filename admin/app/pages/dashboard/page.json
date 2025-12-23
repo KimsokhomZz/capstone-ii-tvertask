@@ -57,6 +57,7 @@
         ],
         "dataKeyAlias": "date",
         "title": "Number of Users",
+<<<<<<< Updated upstream
         "sqlQuery": "SELECT DATE(createdAt) as date, COUNT(*) as user_count FROM users WHERE createdAt BETWEEN :period_start_date AND :period_end_date GROUP BY DATE(createdAt) ORDER BY date",
         "span": "6"
       },
@@ -78,6 +79,10 @@
         "dataKeyAlias": "date",
         "title": "Pomodoro Complete",
         "sqlQuery": "SELECT DATE(createdAt) as date, SUM(completed = 1) as total_completed, SUM(completed = 0) as total_uncompleted FROM PomodoroSessions WHERE createdAt BETWEEN :period_start_date AND :period_end_date GROUP BY DATE(createdAt) ORDER BY date"
+=======
+        "sqlQuery": "SELECT * FROM `users` ",
+        "span": "8"
+>>>>>>> Stashed changes
       }
     ]
   }

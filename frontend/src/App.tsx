@@ -90,7 +90,8 @@ function App() {
               <Route path="/analytics" element={<AnalyticsPage />} />
               <Route path="/notifications" element={<NotificationsPage />} />
               <Route path="/settings" element={<SettingsPage />} />
-              <Route path="/support" element={<Support />} />
+              {/* <Route path="/support" element={<Support />} /> */}
+              <Route path="/sopport" element={<Support />} />
               <Route
                 path="/profile"
                 element={

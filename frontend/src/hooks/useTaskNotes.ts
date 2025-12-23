@@ -6,7 +6,7 @@ import {
   deleteNote,
 } from "../api/taskNoteApi";
 
-type Note = { id: number; text: string; editing?: boolean };
+type Note = { id: number; text: string; tag?: string; editing?: boolean };
 
 export default function useTaskNotes(taskId?: number) {
   const [notes, setNotes] = useState<Note[]>([]);
@@ -23,7 +23,13 @@ export default function useTaskNotes(taskId?: number) {
     getNotesByTask(taskId)
       .then((remote) => {
         if (!mounted) return;
-        setNotes(remote.map((n: any) => ({ id: n.id, text: n.text })));
+        setNotes(
+          remote.map((n: any) => ({
+            id: n.id,
+            text: n.text,
+            tag: n.tag,
+          }))
+        );
       })
       .catch((e) => mounted && setError(e?.message || "Failed to load notes"))
       .finally(() => mounted && setLoading(false));
@@ -32,18 +38,25 @@ export default function useTaskNotes(taskId?: number) {
     };
   }, [taskId]);
 
-
-  const addNote = async (text: string, taskIdOverride?: number) => {
+  const addNote = async (
+    text: string,
+    taskIdOverride?: number,
+    tag?: string
+  ) => {
     const idToUse = taskIdOverride ?? taskId;
     if (!idToUse) throw new Error("Missing taskId");
-    const created = await createNote({ task_id: idToUse, text });
+    const created = await createNote({
+      task_id: idToUse,
+      text,
+      tag,
+    });
     return created;
   };
 
-  const saveNote = async (id: number, text: string) => {
-    await updateNote(id, { text });
+  const saveNote = async (id: number, text: string, tag?: string) => {
+    await updateNote(id, { text, tag });
     setNotes((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, text, editing: false } : n))
+      prev.map((n) => (n.id === id ? { ...n, text, tag, editing: false } : n))
     );
   };
 

@@ -47,7 +47,12 @@ export default function PomodoroTimerCard({
   >("popular");
   const { darkMode } = useTheme();
 
+  // NEW: Cooldown state for Complete button
+  const [completeCooldown, setCompleteCooldown] = useState(0);
+  const cooldownRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
   const CLAIM_XP_AMOUNT = 20;
+  const COMPLETE_COOLDOWN_SECONDS = 30;
 
   const presets = [
     { key: "baby" as const, label: "Baby step", focus: 10, short: 5, long: 10 },
@@ -84,13 +89,68 @@ export default function PomodoroTimerCard({
     setTimeLeft((isBreak ? breakLen : selectedFocus) * 60);
   };
 
-  // --- ORIGINAL timer useEffect (kept intact) ---
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Initialize audio on component mount
+  useEffect(() => {
+    audioRef.current = new Audio("/sounds/alarm.mp3"); // Add your alarm sound file
+    audioRef.current.volume = 0.5; // Set volume (0.0 to 1.0)
+
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, []);
+
+  const playAlarm = () => {
+    if (audioRef.current) {
+      audioRef.current.currentTime = 0;
+      audioRef.current.play().catch((err) => {
+        console.error("Failed to play alarm:", err);
+
+        // Fallback: Create beep sounds using Web Audio API
+        try {
+          const context = new AudioContext();
+          // Create 3 beeps
+          for (let i = 0; i < 8; i++) {
+            const oscillator = context.createOscillator();
+            const gainNode = context.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(context.destination);
+
+            oscillator.frequency.value = 800; // Frequency in Hz
+            oscillator.type = "sine";
+
+            gainNode.gain.setValueAtTime(0.3, context.currentTime + i * 0.4);
+            gainNode.gain.exponentialRampToValueAtTime(
+              0.01,
+              context.currentTime + i * 0.4 + 0.3
+            );
+
+            oscillator.start(context.currentTime + i * 0.4);
+            oscillator.stop(context.currentTime + i * 0.4 + 0.3);
+          }
+        } catch (audioErr) {
+          console.error("Fallback audio also failed:", audioErr);
+        }
+      });
+    }
+  };
+
+  // --- ORIGINAL timer useEffect (modified to play alarm) ---
   useEffect(() => {
     if (!isRunning) return;
     timerRef.current = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
           if (timerRef.current) clearInterval(timerRef.current);
+
+          // Play alarm sound
+          playAlarm();
+
           if (!isBreak) {
             setCompletedPomodoros((v) => v + 1);
             onComplete?.();
@@ -99,7 +159,7 @@ export default function PomodoroTimerCard({
             setIsBreak(true);
             const isLong = shortsSinceLong === 4;
             setTimeLeft((isLong ? longBreak : shortBreak) * 60);
-            return 0; // show 00:00 until user picks claim / later
+            return 0;
           } else {
             const wasLong = shortsSinceLong === 4;
             if (wasLong) {
@@ -120,7 +180,6 @@ export default function PomodoroTimerCard({
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-    // dependencies kept same as original
   }, [
     isRunning,
     isBreak,
@@ -179,6 +238,32 @@ export default function PomodoroTimerCard({
   const radius = 80;
   const circumference = 2 * Math.PI * radius;
 
+  // NEW: Cooldown timer effect
+  useEffect(() => {
+    if (completeCooldown > 0) {
+      cooldownRef.current = setInterval(() => {
+        setCompleteCooldown((prev) => {
+          if (prev <= 1) {
+            if (cooldownRef.current) clearInterval(cooldownRef.current);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+
+      return () => {
+        if (cooldownRef.current) clearInterval(cooldownRef.current);
+      };
+    }
+  }, [completeCooldown]);
+
+  // Cleanup cooldown timer on unmount
+  useEffect(() => {
+    return () => {
+      if (cooldownRef.current) clearInterval(cooldownRef.current);
+    };
+  }, []);
+
   return (
     <div
       ref={cardRef}
@@ -211,7 +296,11 @@ export default function PomodoroTimerCard({
           isFullscreen ? "max-w-4xl mx-4 my-8" : ""
         }`}
         style={
-          themeBackground && themeBackground.includes("url")
+          isFullscreen
+            ? {
+                backgroundColor: "transparent",
+              }
+            : themeBackground && themeBackground.includes("url")
             ? {
                 backgroundColor: darkMode
                   ? "rgba(16, 24, 40, 0.3)"
@@ -859,6 +948,8 @@ export default function PomodoroTimerCard({
             )}
             <button
               onClick={() => {
+                if (completeCooldown > 0) return; // Prevent action during cooldown
+
                 if (!isBreak) {
                   setCompletedPomodoros((v) => v + 1);
                   setIsRunning(false);
@@ -872,7 +963,9 @@ export default function PomodoroTimerCard({
                   const isLong = shortsSinceLong === 4;
                   setTimeLeft((isLong ? longBreak : shortBreak) * 60);
                   onComplete?.();
-                  return 0;
+
+                  // Start cooldown
+                  setCompleteCooldown(COMPLETE_COOLDOWN_SECONDS);
                 } else {
                   const wasLong = shortsSinceLong === 4;
                   if (wasLong) {
@@ -885,15 +978,30 @@ export default function PomodoroTimerCard({
                   setIsBreak(false);
                   setIsRunning(false);
                   setTimeLeft(selectedFocus * 60);
+
+                  // Start cooldown
+                  setCompleteCooldown(COMPLETE_COOLDOWN_SECONDS);
                 }
               }}
-              className={`px-4 py-2 rounded-xl border cursor-pointer transition-colors ${
-                darkMode
-                  ? "bg-[#1d2942] border-[#2a3f5f] text-white hover:bg-[#253548]"
-                  : "bg-secondary border-border text-black hover:bg-accent"
+              disabled={completeCooldown > 0}
+              className={`px-4 py-2 rounded-xl border transition-all relative ${
+                completeCooldown > 0
+                  ? darkMode
+                    ? "bg-gray-700/50 border-gray-600 text-gray-500 cursor-not-allowed"
+                    : "bg-gray-200 border-gray-300 text-gray-400 cursor-not-allowed"
+                  : darkMode
+                  ? "bg-[#1d2942] border-[#2a3f5f] text-white hover:bg-[#253548] cursor-pointer"
+                  : "bg-secondary border-border text-black hover:bg-accent cursor-pointer"
               }`}
             >
-              Complete
+              {completeCooldown > 0 ? (
+                <span className="flex items-center gap-2">
+                  <span className="text-xs">⏱️</span>
+                  <span>{completeCooldown}s</span>
+                </span>
+              ) : (
+                "Complete"
+              )}
             </button>
             <button
               onClick={resetTimer}

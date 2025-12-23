@@ -6,6 +6,7 @@ import { awardXp } from "../../api/userXpApi";
 import { toast } from "react-toastify";
 import { moods } from "@/utils/moods";
 import { useTheme } from "@/context/ThemeContext";
+import "./DashboardBottomSection.css";
 
 interface DashboardBottomSectionProps {
   // Remove these props since we're managing mood internally
@@ -172,12 +173,16 @@ const DashboardBottomSection: React.FC<DashboardBottomSectionProps> = () => {
             Take a moment to check in with yourself
           </p>
 
-          <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+          <div
+            className={`grid grid-cols-3 sm:grid-cols-4 gap-2 max-h-[340px] p-2 overflow-y-auto mood-grid-scroll ${
+              darkMode ? "dark" : ""
+            }`}
+          >
             {moods.map((mood, index) => (
               <button
                 key={index}
                 onClick={() => handleMoodSelect(index)}
-                className={`p-3 sm:p-4 rounded-2xl border-2 transition-all ${
+                className={`w-23 h-23 p-3 sm:p-4 rounded-2xl border-2 transition-all ${
                   selectedMood === index
                     ? `border-purple-400 ${
                         darkMode ? "bg-purple-500/30" : "bg-purple-50"

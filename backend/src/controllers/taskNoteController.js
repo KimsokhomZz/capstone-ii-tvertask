@@ -41,7 +41,7 @@ exports.createNote = async (req, res) => {
 
 /**
  * PUT /api/notes/:id
- * body: { text }
+ * body: { text?, tag? }
  */
 exports.updateNote = async (req, res) => {
     try {
@@ -56,6 +56,7 @@ exports.updateNote = async (req, res) => {
 
         const updates = {};
         if (req.body.text !== undefined) updates.text = req.body.text;
+        if (req.body.tag !== undefined) updates.tag = req.body.tag;
 
         await note.update(updates);
         return res.json(note);

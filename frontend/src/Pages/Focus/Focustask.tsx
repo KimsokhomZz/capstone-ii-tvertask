@@ -121,9 +121,11 @@ export default function Focustask() {
       return;
     }
 
+    const selectedTag = tags.length > 0 ? tags[0] : undefined;
     const tempId = -Date.now();
-    setNotes((prev) => [{ id: tempId, text }, ...prev]);
+    setNotes((prev) => [{ id: tempId, text, tag: selectedTag }, ...prev]);
     setDraft("");
+    setTags([]);
 
     if (!taskId) {
       toastify.info("Note saved locally (no task selected). 📝");
@@ -131,11 +133,13 @@ export default function Focustask() {
     }
 
     try {
-      // pass explicit taskId number to avoid hook closure missing id
-      const created = await addNote(text, Number(taskId));
+      // pass explicit taskId number and tag to avoid hook closure missing id
+      const created = await addNote(text, Number(taskId), selectedTag);
       setNotes((prev) =>
         prev.map((n) =>
-          n.id === tempId ? { id: created.id, text: created.text } : n
+          n.id === tempId
+            ? { id: created.id, text: created.text, tag: created.tag }
+            : n
         )
       );
       // Award 5 XP to user
@@ -150,8 +154,12 @@ export default function Focustask() {
     }
   };
 
-  const handleUpdateRemoteNote = async (id: number, text: string) => {
-    await saveNote(id, text);
+  const handleUpdateRemoteNote = async (
+    id: number,
+    text: string,
+    tag?: string
+  ) => {
+    await saveNote(id, text, tag);
   };
 
   const handleDeleteRemoteNote = async (id: number) => {

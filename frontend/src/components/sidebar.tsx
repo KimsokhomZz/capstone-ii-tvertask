@@ -164,7 +164,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
             {
               label: "Support",
               icon: <HelpCircle size={18} />,
-              path: "/support",
+              path: "/sopport",
             },
           ].map(({ label, icon, path }) => {
             const isActive = location.pathname === path;
