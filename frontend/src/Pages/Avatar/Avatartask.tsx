@@ -353,8 +353,13 @@ const Avatar: React.FC = () => {
   useEffect(() => {
     if (typeof selId !== "undefined" && selId !== null) {
       localStorage.setItem("selectedAvatar", String(selId));
+      // also persist the avatar type so external preview can render matching component
+      try {
+        const t = sel?.type ?? "";
+        localStorage.setItem("selectedAvatarType", String(t));
+      } catch {}
     }
-  }, [selId]);
+  }, [selId, sel]);
 
   const moodAct = (m: Mood) => {
     setMood(m);

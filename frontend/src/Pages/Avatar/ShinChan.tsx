@@ -139,7 +139,7 @@ const ShinChan: React.FC<{
           <div className="absolute -top-10 left-1/2 -translate-x-1/2 z-50 animate-bounce whitespace-nowrap">
             <div className="bg-white border-4 border-black px-6 py-3 rounded-2xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] relative">
               <span className="text-2xl font-black text-red-600 tracking-widest uppercase">
-                KDM AH THAI !!!
+                CHOB TV !!!
               </span>
               <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-6 h-6 bg-white border-b-4 border-r-4 border-black rotate-45"></div>
             </div>

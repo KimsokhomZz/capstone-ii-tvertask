@@ -1,5 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import FaceComponent from "@/Pages/Avatar/FaceComponent";
+import ShinChan from "@/Pages/Avatar/ShinChan";
+import Doraemon from "@/Pages/Avatar/Doraemon";
+import Egg, { Emotion as EggEmotion } from "@/Pages/Avatar/Egg";
 import { useTheme } from "@/context/ThemeContext";
 
 const DEFAULT_PREVIEW_SCALE = 0.75;
@@ -47,6 +50,15 @@ export default function AvatarPreview() {
       }
     }
   );
+  const [selectedAvatarType, setSelectedAvatarType] = useState<string | null>(
+    () => {
+      try {
+        return localStorage.getItem("selectedAvatarType") || null;
+      } catch {
+        return null;
+      }
+    }
+  );
 
   // load customization for current selectedAvatar
   useEffect(() => {
@@ -62,6 +74,13 @@ export default function AvatarPreview() {
           setSelectedAvatarId(null);
           setCustom(undefined);
         }
+        // load avatar type too (so preview can switch component)
+        try {
+          const t = localStorage.getItem("selectedAvatarType");
+          setSelectedAvatarType(t || null);
+        } catch {
+          setSelectedAvatarType(null);
+        }
       } catch {
         setCustom(undefined);
       }
@@ -73,6 +92,15 @@ export default function AvatarPreview() {
         (e.key && e.key.startsWith("avatar-custom-"))
       ) {
         loadCustom();
+      }
+      if (e.key === "selectedAvatarType") {
+        try {
+          setSelectedAvatarType(
+            localStorage.getItem("selectedAvatarType") || null
+          );
+        } catch {
+          setSelectedAvatarType(null);
+        }
       }
       // keep mood sync too (existing behavior)
       if (e.key === "selectedMood") {
@@ -157,8 +185,34 @@ export default function AvatarPreview() {
         style={{ width: "84%", height: "84%", transform: "scale(1)" }}
         className="m-auto pointer-events-none"
       >
-        {/* pass persisted customization (if any) so preview reflects cosplay changes */}
-        <FaceComponent mood={(mood as any) || "HAPPY"} custom={custom} />
+        {/* render component matching selected avatar type */}
+        {selectedAvatarType === "shinchan" ? (
+          <ShinChan
+            showControls={false}
+            persistKey={`avatar-${selectedAvatarId}`}
+          />
+        ) : selectedAvatarType === "doraemon" ? (
+          <Doraemon
+            showControls={false}
+            persistKey={`avatar-${selectedAvatarId}`}
+          />
+        ) : selectedAvatarType === "egg" ? (
+          <Egg
+            emotion={
+              mood === "ANGRY"
+                ? EggEmotion.ANGRY
+                : mood === "SAD"
+                ? EggEmotion.SAD
+                : mood === "LOVE"
+                ? EggEmotion.LOVE
+                : EggEmotion.NEUTRAL
+            }
+            showControls={false}
+            persistKey={`avatar-${selectedAvatarId}`}
+          />
+        ) : (
+          <FaceComponent mood={(mood as any) || "HAPPY"} custom={custom} />
+        )}
       </div>
 
       {/* visual center handle hint (non-intrusive) */}
