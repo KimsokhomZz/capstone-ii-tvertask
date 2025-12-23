@@ -86,6 +86,7 @@ export default function AvatarPreview() {
       }
     };
     loadCustom();
+
     const onStorage = (e: StorageEvent) => {
       if (
         e.key === "selectedAvatar" ||
@@ -110,8 +111,43 @@ export default function AvatarPreview() {
         } catch {}
       }
     };
+
+    const onAvatarSelected = (ev: Event) => {
+      try {
+        const detail = (ev as CustomEvent).detail;
+        if (detail?.type !== undefined) setSelectedAvatarType(detail.type);
+        if (detail?.id !== undefined) {
+          const id = Number(detail.id);
+          if (!Number.isNaN(id)) {
+            setSelectedAvatarId(id);
+            try {
+              const raw = localStorage.getItem(`avatar-custom-${id}`);
+              if (raw) setCustom(JSON.parse(raw));
+              else setCustom(undefined);
+            } catch {
+              setCustom(undefined);
+            }
+          } else {
+            setSelectedAvatarId(null);
+            setCustom(undefined);
+          }
+        }
+      } catch {}
+    };
+
     window.addEventListener("storage", onStorage);
-    return () => window.removeEventListener("storage", onStorage);
+    window.addEventListener(
+      "avatar-selected",
+      onAvatarSelected as EventListener
+    );
+
+    return () => {
+      window.removeEventListener("storage", onStorage);
+      window.removeEventListener(
+        "avatar-selected",
+        onAvatarSelected as EventListener
+      );
+    };
   }, []);
 
   useEffect(() => {
@@ -248,74 +284,64 @@ export default function AvatarPreview() {
         }}
       />
 
-      {/* overlay to capture pointer/wheel/doubleclick */}
+      {/* full-size transparent overlay so click-hold anywhere on avatar starts immediate drag */}
       <div
-        // centered square capture handle (bigger, per-avatar offsets)
-        className="absolute pointer-events-auto"
+        className="absolute inset-0 pointer-events-auto"
         style={{
           zIndex: 80,
           cursor: dragging ? "grabbing" : "grab",
           background: "transparent",
           touchAction: "none",
-          left: handleLayout.left,
-          top: handleLayout.top,
-          transform: "translate(-50%,-50%)",
-          // make it larger and square (tweak multiplier as needed)
-          width: handleLayout.size * 2.6,
-          height: handleLayout.size * 2.6,
-          borderRadius: 12,
-          border: `2px solid rgba(34,197,94,${dragging ? 0.95 : 0.6})`,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
         }}
         onPointerDown={(e) => {
-          // Only start drag if pointer down is within the central handle radius
           const rect = previewRef.current?.getBoundingClientRect();
           if (!rect) return;
           const offsetX = e.clientX - rect.left;
           const offsetY = e.clientY - rect.top;
-          const centerX = rect.width / 2;
-          const centerY = rect.height / 2;
-          const dx = offsetX - centerX;
-          const dy = offsetY - centerY;
-          // compute distance using the larger square's effective radius
-          const overlayRadius = (handleLayout.size * 1.6) / 2;
-          const dist = Math.hypot(dx, dy);
 
-          if (dist <= Math.max(overlayRadius, CENTER_HANDLE_RADIUS)) {
-            e.preventDefault();
-            e.stopPropagation();
-            dragRef.current = { x: offsetX, y: offsetY };
-            pointerIdRef.current = e.pointerId;
-            setDragging(true);
-            (e.currentTarget as Element).setPointerCapture?.(e.pointerId);
-          }
-          // if outside handle area -> ignore (no drag start)
-        }}
-        onPointerUp={(e) => {
-          if (pointerIdRef.current !== e.pointerId) {
-            // If we never captured this pointer (didn't start drag), ignore
-            return;
-          }
-          pointerIdRef.current = null;
-          setDragging(false);
-          dragRef.current = null;
-          setPreviewPos({ ...lastPos.current });
-          try {
-            localStorage.setItem(
-              "avatarPreviewPos",
-              JSON.stringify(lastPos.current)
-            );
-          } catch {}
-          (e.currentTarget as Element).releasePointerCapture?.(e.pointerId);
+          e.preventDefault();
+          e.stopPropagation();
+          dragRef.current = { x: offsetX, y: offsetY };
+          pointerIdRef.current = e.pointerId;
+          setDragging(true);
+          (e.currentTarget as Element).setPointerCapture?.(e.pointerId);
+
+          const onMove = (ev: PointerEvent) => {
+            if (pointerIdRef.current !== ev.pointerId) return;
+            if (!dragRef.current) return;
+            const x = ev.clientX - dragRef.current.x;
+            const y = ev.clientY - dragRef.current.y;
+            targetPos.current = { x, y };
+          };
+
+          const onUp = (ev: PointerEvent) => {
+            if (pointerIdRef.current !== ev.pointerId) return;
+            pointerIdRef.current = null;
+            setDragging(false);
+            dragRef.current = null;
+            setPreviewPos({ ...targetPos.current });
+            try {
+              localStorage.setItem(
+                "avatarPreviewPos",
+                JSON.stringify(targetPos.current)
+              );
+            } catch {}
+            (e.currentTarget as Element).releasePointerCapture?.(ev.pointerId);
+            window.removeEventListener("pointermove", onMove);
+            window.removeEventListener("pointerup", onUp);
+          };
+
+          window.addEventListener("pointermove", onMove, { passive: false });
+          window.addEventListener("pointerup", onUp, { passive: false });
         }}
         onPointerCancel={(e) => {
           if (pointerIdRef.current !== e.pointerId) return;
           pointerIdRef.current = null;
           setDragging(false);
           dragRef.current = null;
-          (e.currentTarget as Element).releasePointerCapture?.(e.pointerId);
         }}
         onWheel={(e) => {
           e.preventDefault();
@@ -323,9 +349,6 @@ export default function AvatarPreview() {
           const factor = 1 + Math.sign(delta) * 0.08;
           let ns = Math.min(Math.max(previewScale * factor, 0.4), 1.2);
           setPreviewScale(ns);
-          if (previewRef.current) {
-            previewRef.current.style.transform = `translate3d(${lastPos.current.x}px, ${lastPos.current.y}px, 0) scale(${ns})`;
-          }
         }}
         onDoubleClick={() => {
           const reset = {
@@ -334,15 +357,25 @@ export default function AvatarPreview() {
             y: 24,
           };
           lastPos.current = { ...reset };
+          targetPos.current = { ...reset };
           setPreviewPos(reset);
-          if (previewRef.current) {
-            previewRef.current.style.transform = `translate3d(${reset.x}px, ${reset.y}px, 0) scale(${previewScale})`;
-          }
           try {
             localStorage.setItem("avatarPreviewPos", JSON.stringify(reset));
           } catch {}
         }}
-      />
+      >
+        {/* visual square handle centered */}
+        <div
+          aria-hidden
+          style={{
+            width: handleLayout.size * 1.6,
+            height: handleLayout.size * 1.6,
+            borderRadius: 12,
+            border: `2px solid rgba(34,197,94,${dragging ? 0.95 : 0.6})`,
+            pointerEvents: "none",
+          }}
+        />
+      </div>
     </div>
   );
 }

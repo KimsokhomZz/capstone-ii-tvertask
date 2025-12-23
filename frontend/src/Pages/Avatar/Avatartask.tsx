@@ -352,11 +352,18 @@ const Avatar: React.FC = () => {
   // persist selected avatar when changed
   useEffect(() => {
     if (typeof selId !== "undefined" && selId !== null) {
-      localStorage.setItem("selectedAvatar", String(selId));
-      // also persist the avatar type so external preview can render matching component
       try {
+        localStorage.setItem("selectedAvatar", String(selId));
         const t = sel?.type ?? "";
         localStorage.setItem("selectedAvatarType", String(t));
+      } catch {}
+      // notify same-window listeners (storage event won't fire in same tab)
+      try {
+        window.dispatchEvent(
+          new CustomEvent("avatar-selected", {
+            detail: { id: selId, type: sel?.type ?? null },
+          })
+        );
       } catch {}
     }
   }, [selId, sel]);
