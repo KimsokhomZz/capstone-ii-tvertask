@@ -165,6 +165,22 @@ export default function AvatarPreview() {
     };
   }, []); // eslint-disable-line
 
+  const handleLayout = (() => {
+    // map types -> overlay position/size offsets (tweak numbers if needed)
+    const map: Record<string, { top: string; left: string; size: number }> = {
+      // force true center for face & shinchan (Doraemon/Egg keep existing offsets)
+      face: { left: "120%", top: "120%", size: CENTER_HANDLE_RADIUS * 2 },
+      shinchan: {
+        left: "140%",
+        top: "50%",
+        size: CENTER_HANDLE_RADIUS * 2 + 8,
+      },
+      doraemon: { left: "50%", top: "52%", size: CENTER_HANDLE_RADIUS * 2 + 6 },
+      egg: { left: "50%", top: "52%", size: CENTER_HANDLE_RADIUS * 2 + 6 },
+    };
+    return map[(selectedAvatarType || "face").toLowerCase()] || map.face;
+  })();
+
   return (
     <div
       ref={previewRef}
@@ -234,13 +250,24 @@ export default function AvatarPreview() {
 
       {/* overlay to capture pointer/wheel/doubleclick */}
       <div
-        className="absolute inset-0 rounded-xl"
+        // centered square capture handle (bigger, per-avatar offsets)
+        className="absolute pointer-events-auto"
         style={{
-          zIndex: 60,
+          zIndex: 80,
           cursor: dragging ? "grabbing" : "grab",
-          pointerEvents: "auto",
           background: "transparent",
           touchAction: "none",
+          left: handleLayout.left,
+          top: handleLayout.top,
+          transform: "translate(-50%,-50%)",
+          // make it larger and square (tweak multiplier as needed)
+          width: handleLayout.size * 2.6,
+          height: handleLayout.size * 2.6,
+          borderRadius: 12,
+          border: `2px solid rgba(34,197,94,${dragging ? 0.95 : 0.6})`,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
         }}
         onPointerDown={(e) => {
           // Only start drag if pointer down is within the central handle radius
@@ -252,9 +279,11 @@ export default function AvatarPreview() {
           const centerY = rect.height / 2;
           const dx = offsetX - centerX;
           const dy = offsetY - centerY;
+          // compute distance using the larger square's effective radius
+          const overlayRadius = (handleLayout.size * 1.6) / 2;
           const dist = Math.hypot(dx, dy);
 
-          if (dist <= CENTER_HANDLE_RADIUS) {
+          if (dist <= Math.max(overlayRadius, CENTER_HANDLE_RADIUS)) {
             e.preventDefault();
             e.stopPropagation();
             dragRef.current = { x: offsetX, y: offsetY };
