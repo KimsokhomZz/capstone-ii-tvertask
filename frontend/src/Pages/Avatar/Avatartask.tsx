@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import { motion, AnimatePresence, easeOut } from "framer-motion";
 import ShinChan from "./ShinChan";
 import Doraemon from "./Doraemon";
@@ -8,6 +8,7 @@ import { getStatus, getXp } from "../../api/userXpApi";
 import { fetchUserStreak } from "../../api/streakApi";
 import AuthContext from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext"; // Make sure this import exists
+import AvatarPreview from "@/components/AvatarPreview";
 
 // --- Types & Data Structures (Ready for Backend) ---
 const Mood = {
@@ -138,7 +139,9 @@ const INIT_AVATARS: AvatarItem[] = [
 
 const Avatar: React.FC = () => {
   const [avatars, setAvatars] = useState<AvatarItem[]>(INIT_AVATARS);
-  const [selId, setSelId] = useState<number>(1);
+  const [selId, setSelId] = useState<number | null>(null);
+  // tick to force thumbnail remount so previews re-read persisted state after play view changes
+  const [previewTick, setPreviewTick] = useState(0);
   const [mood, setMood] = useState<Mood>(Mood.HAPPY);
   const [mode, setMode] = useState<"dashboard" | "play">("dashboard");
   const [msg, setMsg] = useState<string>("");
@@ -151,6 +154,8 @@ const Avatar: React.FC = () => {
     loading: boolean;
     error?: string;
   }>({ level: "--", achievements: 0, streak: "--", loading: true });
+  // prevent runtime error in loadStats (setIsLoading was used but not declared)
+  const [isLoading, setIsLoading] = useState(false);
 
   const { user } = useContext(
     AuthContext
@@ -158,18 +163,82 @@ const Avatar: React.FC = () => {
 
   const { darkMode } = useTheme();
 
-  const [isLoading, setIsLoading] = useState(true);
+  // draggable preview state & refs
+  const previewRef = useRef<HTMLDivElement | null>(null);
+  const dragRef = useRef<{ x: number; y: number } | null>(null);
+  const animRef = useRef<number | null>(null);
+  const lastPos = useRef<{ x: number; y: number }>({
+    x: typeof window !== "undefined" ? window.innerWidth - 120 : 24,
+    y: 24,
+  });
+  const pointerIdRef = useRef<number | null>(null);
+  const [previewScale, setPreviewScale] = useState<number>(0.75);
+  const [dragging, setDragging] = useState(false);
+  const defaultPreviewPos = {
+    x: typeof window !== "undefined" ? window.innerWidth - 120 : 24,
+    y: 24,
+  };
+  const [previewPos, setPreviewPos] = useState<{ x: number; y: number }>(() => {
+    try {
+      const s = localStorage.getItem("avatarPreviewPos");
+      if (s) return JSON.parse(s);
+    } catch {}
+    return defaultPreviewPos;
+  });
 
   useEffect(() => {
-    if (mode === "play") return;
-    const seq = [Mood.HAPPY, Mood.ANGRY, Mood.HAPPY, Mood.SAD];
-    let i = 0;
-    const t = setInterval(() => {
-      i = (i + 1) % seq.length;
-      setMood(seq[i]);
-    }, 5000);
-    return () => clearInterval(t);
-  }, [mode]);
+    // seed lastPos and initial transform
+    lastPos.current = { x: previewPos.x, y: previewPos.y };
+    if (previewRef.current) {
+      previewRef.current.style.transform = `translate3d(${previewPos.x}px, ${previewPos.y}px, 0) scale(${previewScale})`;
+    }
+
+    const onMove = (e: PointerEvent) => {
+      if (!dragRef.current) return;
+      const nx = e.clientX - dragRef.current.x;
+      const ny = e.clientY - dragRef.current.y;
+      const w = previewRef.current?.offsetWidth ?? 140;
+      const h = previewRef.current?.offsetHeight ?? 120;
+      const clampedX = Math.min(Math.max(nx, 8), window.innerWidth - w - 8);
+      const clampedY = Math.min(Math.max(ny, 8), window.innerHeight - h - 8);
+      lastPos.current = { x: clampedX, y: clampedY };
+
+      // update transform on next animation frame for smoothness (no React re-render)
+      if (animRef.current) cancelAnimationFrame(animRef.current);
+      animRef.current = requestAnimationFrame(() => {
+        if (previewRef.current) {
+          previewRef.current.style.transform = `translate3d(${lastPos.current.x}px, ${lastPos.current.y}px, 0) scale(${previewScale})`;
+        }
+      });
+    };
+
+    const onUp = () => {
+      if (dragRef.current) {
+        setDragging(false);
+        dragRef.current = null;
+        // persist final position (use lastPos)
+        setPreviewPos({ ...lastPos.current });
+        try {
+          localStorage.setItem(
+            "avatarPreviewPos",
+            JSON.stringify(lastPos.current)
+          );
+        } catch {}
+      }
+      if (animRef.current) {
+        cancelAnimationFrame(animRef.current);
+        animRef.current = null;
+      }
+    };
+
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+    return () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+      if (animRef.current) cancelAnimationFrame(animRef.current);
+    };
+  }, []); // run once
 
   useEffect(() => {
     if (mode === "play") {
@@ -244,6 +313,21 @@ const Avatar: React.FC = () => {
           : a
       )
     );
+    // persist customization for the currently selected avatar so shared preview can read it
+    try {
+      if (selId !== null && typeof selId !== "undefined") {
+        const key = `avatar-custom-${selId}`;
+        const existing = localStorage.getItem(key);
+        const obj = existing ? JSON.parse(existing) : {};
+        localStorage.setItem(key, JSON.stringify({ ...obj, [k]: v }));
+      }
+    } catch {}
+    // notify same-window listeners that avatar customization changed
+    try {
+      window.dispatchEvent(
+        new CustomEvent("avatar-custom-updated", { detail: { id: selId } })
+      );
+    } catch {}
     if (mode === "play" && (k === "hat" || k === "glasses"))
       setMsg(["Wow!", "Cool!", "Stylish!"].sort(() => 0.5 - Math.random())[0]);
   };
@@ -256,10 +340,67 @@ const Avatar: React.FC = () => {
       : m === Mood.LOVE
       ? EggEmotion.LOVE
       : EggEmotion.NEUTRAL;
+  // load persisted mood on mount
+  useEffect(() => {
+    // restore persisted mood & selected avatar
+    const s = localStorage.getItem("selectedMood");
+    if (s && Object.keys(MOODS).includes(s)) {
+      setMood(s as Mood);
+    }
+
+    // restore last selected avatar (so dashboard shows last-viewed Anime/avatar)
+    const last = localStorage.getItem("selectedAvatar");
+    if (last) {
+      const id = Number(last);
+      if (!Number.isNaN(id)) setSelId(id);
+    }
+
+    // load persisted per-avatar customization into avatars state
+    try {
+      setAvatars((prev) =>
+        prev.map((a) => {
+          try {
+            const raw = localStorage.getItem(`avatar-custom-${a.id}`);
+            if (raw) {
+              const parsed = JSON.parse(raw);
+              return {
+                ...a,
+                customization: {
+                  ...(a.customization || DEFAULT_CUSTOM),
+                  ...parsed,
+                },
+              };
+            }
+          } catch {}
+          return a;
+        })
+      );
+    } catch {}
+  }, []);
+
+  // persist selected avatar when changed
+  useEffect(() => {
+    if (typeof selId !== "undefined" && selId !== null) {
+      try {
+        localStorage.setItem("selectedAvatar", String(selId));
+        const t = sel?.type ?? "";
+        localStorage.setItem("selectedAvatarType", String(t));
+      } catch {}
+      // notify same-window listeners (storage event won't fire in same tab)
+      try {
+        window.dispatchEvent(
+          new CustomEvent("avatar-selected", {
+            detail: { id: selId, type: sel?.type ?? null },
+          })
+        );
+      } catch {}
+    }
+  }, [selId, sel]);
+
   const moodAct = (m: Mood) => {
     setMood(m);
-    if (m === Mood.EATING || m === Mood.LOVE)
-      setTimeout(() => setMood(Mood.HAPPY), m === Mood.LOVE ? 5000 : 2500);
+    // persist selected mood string so Dashboard shows the last-picked mood
+    localStorage.setItem("selectedMood", m);
   };
 
   // Animation variants
@@ -292,10 +433,22 @@ const Avatar: React.FC = () => {
     },
   };
 
-  const RenderContent = ({ scale = 1, controls = false }) => {
+  const RenderContent = ({
+    scale = 1,
+    controls = false,
+    noAnim = false,
+  }: {
+    scale?: number;
+    controls?: boolean;
+    noAnim?: boolean;
+  }) => {
     const s = `transform scale-[${scale}] transition-transform duration-500`;
     if (sel.type === "face")
-      return (
+      return noAnim ? (
+        <div className={s}>
+          <FaceComponent mood={mood} custom={custom} />
+        </div>
+      ) : (
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -313,7 +466,8 @@ const Avatar: React.FC = () => {
           transition={{ duration: 0.5 }}
           className={s}
         >
-          <ShinChan showControls={controls} />
+          {/* pass persistKey so ShinChan will persist/load its last state */}
+          <ShinChan showControls={controls} persistKey={`avatar-${sel.id}`} />
         </motion.div>
       );
     if (sel.type === "doraemon")
@@ -324,7 +478,7 @@ const Avatar: React.FC = () => {
           transition={{ duration: 0.5 }}
           className={s}
         >
-          <Doraemon showControls={controls} />
+          <Doraemon showControls={controls} persistKey={`avatar-${sel.id}`} />
         </motion.div>
       );
     if (sel.type === "egg")
@@ -335,7 +489,11 @@ const Avatar: React.FC = () => {
           transition={{ duration: 0.5, type: "spring" }}
           className={s}
         >
-          <Egg emotion={getEggEm(mood)} showControls={controls} />
+          <Egg
+            emotion={getEggEm(mood)}
+            showControls={controls}
+            persistKey={`avatar-${sel.id}`}
+          />
         </motion.div>
       );
     return <img src={sel.image} className="w-full h-full object-cover" />;
@@ -345,7 +503,7 @@ const Avatar: React.FC = () => {
     const cfg = MOODS[mood];
     return (
       <motion.div
-        key={`mode-play-${mood}`} // force remount when entering/exiting play
+        key={`mode-play`} // keep mounted while mood changes
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -381,9 +539,10 @@ const Avatar: React.FC = () => {
           onClick={() => {
             // ensure dashboard UI state is restored immediately
             setMode("dashboard");
-            setMood(Mood.HAPPY);
+            // keep the selected avatar (do NOT reset selId) so Dashboard shows the last-viewed
             setTab("gear"); // reset sidebar tab (optional)
-            setSelId(1); // reset selection (optional)
+            // bump tick so grid thumbnails remount and re-read persisted avatar state
+            setPreviewTick((t) => t + 1);
             window.scrollTo(0, 0); // restore scroll if overlay changed it
           }}
           className={`absolute top-4 left-4 sm:top-6 sm:left-6 md:top-8 md:left-8 px-3 py-2 sm:px-4 sm:py-2.5 md:px-5 md:py-2.5 rounded-xl md:rounded-2xl font-bold shadow-sm z-50 flex justify-center items-center gap-2 text-sm md:text-base ${
@@ -448,10 +607,15 @@ const Avatar: React.FC = () => {
                   const btn = MOODS[m];
                   return (
                     <motion.button
+                      type="button"
                       key={m}
                       whileHover={{ scale: 1.1, rotate: 5 }}
                       whileTap={{ scale: 0.9 }}
-                      onClick={() => moodAct(m)}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        moodAct(m);
+                      }}
                       className={`w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-xl md:rounded-2xl text-2xl sm:text-3xl transition-all hover:-translate-y-1 active:scale-95 ${
                         mood === m
                           ? btn.cls + " text-white scale-110 shadow-lg"
@@ -593,6 +757,9 @@ const Avatar: React.FC = () => {
           </p>
         </motion.div>
 
+        {/* Reusable draggable avatar preview (shared with Dashboard) */}
+        <AvatarPreview />
+
         {/* Main Hero Section */}
         <motion.div
           variants={itemVariants}
@@ -663,12 +830,19 @@ const Avatar: React.FC = () => {
 
               {/* View Button */}
               <motion.button
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setMode("play")}
-                className="absolute bottom-4 sm:bottom-6 right-4 sm:right-6 bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-full sm:rounded-2xl font-bold flex items-center gap-2 shadow-2xl z-20 hover:from-yellow-500 hover:to-orange-600 transition-all duration-300"
+                aria-label="View avatar"
+                className={`absolute bottom-4 right-4 px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl md:rounded-2xl font-bold shadow-sm z-20 flex items-center gap-2 text-sm md:text-base ${
+                  darkMode
+                    ? "bg-white/60 hover:bg-white/90 text-black"
+                    : "bg-white/60 hover:bg-white/90 text-black"
+                }`}
               >
-                <i className="fa-solid fa-play text-sm sm:text-base"></i>
+                <i className="fa-solid fa-play"></i>
                 <span className="hidden sm:inline">View</span>
               </motion.button>
             </div>
@@ -872,12 +1046,16 @@ const Avatar: React.FC = () => {
                 )
                 .map((a, idx) => (
                   <motion.div
-                    key={a.id}
+                    key={`${a.id}-${previewTick}`}
                     variants={cardVariants}
                     custom={idx}
                     whileHover={{ scale: 1.05, rotate: 1 }}
                     whileTap={{ scale: 0.95 }}
-                    onClick={() => !a.locked && setSelId(a.id)}
+                    onClick={() => {
+                      if (a.locked) return;
+                      setSelId(a.id);
+                      // localStorage persistence handled by effect above
+                    }}
                     className={`relative aspect-square bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl sm:rounded-2xl flex items-center justify-center overflow-hidden border-4 cursor-pointer transition-all duration-300 ${
                       selId === a.id
                         ? "border-green-500 shadow-2xl scale-105 ring-4 ring-green-200"
@@ -892,11 +1070,21 @@ const Avatar: React.FC = () => {
                       {a.type === "face" ? (
                         <FaceComponent mood={mood} custom={a.customization} />
                       ) : a.type === "shinchan" ? (
-                        <ShinChan showControls={false} />
+                        <ShinChan
+                          showControls={false}
+                          persistKey={`avatar-${a.id}`}
+                        />
                       ) : a.type === "doraemon" ? (
-                        <Doraemon showControls={false} />
+                        <Doraemon
+                          showControls={false}
+                          persistKey={`avatar-${a.id}`}
+                        />
                       ) : (
-                        <Egg emotion={getEggEm(mood)} />
+                        <Egg
+                          emotion={getEggEm(mood)}
+                          showControls={false}
+                          persistKey={`avatar-${a.id}`}
+                        />
                       )}
                     </div>
 

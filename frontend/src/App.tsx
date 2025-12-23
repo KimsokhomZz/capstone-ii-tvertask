@@ -32,7 +32,16 @@ import { Navigate } from "react-router-dom";
 import AvatarTask from "./Pages/Avatar/Avatartask.tsx"; // add or adjust path/casing if needed
 import AnalyticsPage from "./Pages/Analytics/analytic.tsx";
 import NotificationsPageComponent from "./Pages/Notifications/Notifications.tsx";
-import Support from "./Pages/Spport/Support.tsx";
+// import Support from "./Pages/Support/Support.tsx";
+// import Welcome from "./Pages/Welcome/Welcome.tsx";
+// import Privacy from "./Pages/Privacy/Privacy.tsx";
+// import Terms from "./Pages/Terms/Terms.tsx";
+// import ScrollToTop from "./components/ScrollToTop.tsx";
+import Support  from "../src/Pages/Support/Support/Support.tsx";
+import Welcome  from "../src/Pages/Welcome/Welcome/Welcome.tsx";
+import Privacy  from "../src/Pages/Privacy/Privacy/Privacy.tsx";
+import Terms  from "../src/Pages/Terms/Terms/Terms.tsx";
+import ScrollToTop  from "../src/Components/ScrollToTop.tsx";
 
 function DashboardPage() {
   return <DashboardTask />;
@@ -64,8 +73,13 @@ function App() {
     <AuthProvider>
       <NotificationProvider>
         <Router>
+          <ScrollToTop />
           <Routes>
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/" element={<Welcome />} />
+            <Route path="/welcome" element={<Welcome />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/support" element={<Support />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<SignUp />} />
             <Route path="/forgot-password" element={<ForgetPassword />} />

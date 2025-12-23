@@ -19,6 +19,7 @@ import { fetchUserStreak } from "../../api/streakApi";
 import { getStatus } from "../../api/userXpApi";
 import { exportToPDF } from "./exportPDF";
 import { useTheme } from "../../context/ThemeContext";
+import AvatarPreview from "@/components/AvatarPreview";
 
 const Dashboard: React.FC = () => {
   const { darkMode } = useTheme();
@@ -355,6 +356,8 @@ const Dashboard: React.FC = () => {
       variants={containerVariants}
     >
       <div className="mx-auto max-w-7xl">
+        {/* Persistent draggable avatar preview (shared) */}
+        <AvatarPreview />
         {/* Header */}
         <motion.div
           className="flex items-center justify-between mb-6"

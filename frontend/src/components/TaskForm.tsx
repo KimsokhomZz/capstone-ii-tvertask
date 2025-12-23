@@ -73,29 +73,29 @@ export default function TaskForm({
         </div>
       )}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1">
           Task title
         </label>
         <input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="e.g. Input Task"
-          className="w-full rounded-xl border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-200"
+          className="w-full rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#1d2942] text-gray-900 dark:text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-200 dark:focus:ring-yellow-600"
         />
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1">
           Description
         </label>
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           placeholder="Optional details..."
-          className="w-full h-28 rounded-xl border border-gray-300 px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-yellow-200"
+          className="w-full h-28 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#1d2942] text-gray-900 dark:text-white px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-yellow-200 dark:focus:ring-yellow-600"
         />
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-gray-700 dark:text-white mb-2">
           Timer presets
         </label>
         <div className="grid grid-cols-2 gap-2">
@@ -113,21 +113,21 @@ export default function TaskForm({
                 }}
                 className={`px-3 py-2 rounded-xl border text-left text-sm cursor-pointer transition-colors hover:shadow-md ${
                   active
-                    ? "border-yellow-300 bg-yellow-50 text-yellow-800"
-                    : "border-gray-200 bg-white text-gray-700 hover:bg-yellow-50"
+                    ? "border-yellow-300 bg-yellow-50 dark:bg-yellow-600/20 text-yellow-800 dark:text-yellow-300"
+                    : "border-gray-200 bg-white dark:bg-[#1d2942] text-gray-700 dark:text-white dark:border-gray-600 dark:hover:bg-yellow-600/10 hover:bg-yellow-50"
                 }`}
               >
                 <div className="flex items-center justify-between">
                   <span
-                    className={`${
+                    className={`dark:text-white ${
                       p.key === "baby" || p.key === "popular"
-                        ? "text-black"
+                        ? "text-black dark:text-white"
                         : ""
                     }`}
                   >
                     {p.label}
                   </span>
-                  <span className="text-xs text-gray-500">
+                  <span className="text-xs text-gray-500 dark:text-gray-300">
                     {p.focus} • {p.short} • {p.long} min
                   </span>
                 </div>
@@ -141,14 +141,14 @@ export default function TaskForm({
           <button
             type="button"
             onClick={onCancel}
-            className="px-4 py-2 rounded-xl bg-gray-100 border border-gray-200 hover:bg-yellow-50 hover:shadow-md text-gray-800 cursor-pointer transition-colors"
+            className="px-4 py-2 rounded-xl bg-gray-100 dark:bg-transparent border border-gray-200 dark:border-gray-600 hover:bg-yellow-50 dark:hover:bg-yellow-600/10 hover:shadow-md text-gray-800 dark:text-gray-300 cursor-pointer transition-colors"
           >
             Cancel
           </button>
         )}
         <button
           type="submit"
-          className="px-4 py-2 rounded-xl bg-yellow-400 border border-gray-200 hover:bg-yellow-500 hover:shadow-md text-white cursor-pointer transition-colors"
+          className="px-4 py-2 rounded-xl bg-yellow-400 border border-gray-200 hover:bg-yellow-500 hover:shadow-md text-white dark:text-black cursor-pointer transition-colors"
         >
           Create Task
         </button>

@@ -16,6 +16,7 @@ import type { ActivityStats, WeeklyStats } from "@/api/activityApi";
 import AuthContext from "@/context/AuthContext";
 import { moods } from "@/utils/moods";
 import { motion } from "framer-motion";
+import { useTheme } from "@/context/ThemeContext";
 
 interface StatCardProps {
   label: string;
@@ -48,6 +49,7 @@ function StatCard({ label, value, subLabel, icon }: StatCardProps) {
 }
 
 export default function AnalyticsOverviewTab() {
+  const { darkMode } = useTheme();
   const [stats, setStats] = useState<{
     level: number | string;
     xp: number | string;
@@ -319,23 +321,29 @@ export default function AnalyticsOverviewTab() {
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-2xl shadow-sm border border-gray-100 px-5 py-4 flex flex-col gap-2"
+            className={`rounded-2xl shadow-sm px-5 py-4 flex flex-col gap-2 ${
+              darkMode
+                ? "bg-[#1d2942] border-transparent text-white"
+                : "bg-white border border-gray-100 text-gray-900"
+            }`}
           >
             <div className="flex items-center gap-2">
               <div className="h-7 w-7 rounded-full bg-pink-50 flex items-center justify-center text-[15px]">
                 <Heart className="w-4 h-4 text-pink-500" />
               </div>
-              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+              <p className="text-xs font-medium text-gray-500 dark:text-white uppercase tracking-wide">
                 Mood Today
               </p>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-2xl">{moods[selectedMood].emoji}</span>
-              <span className="text-2xl font-semibold text-gray-900">
+              <span className="text-2xl font-semibold text-gray-900 dark:text-white">
                 {moods[selectedMood].label}
               </span>
             </div>
-            <p className="text-xs text-gray-400">Current Mood</p>
+            <p className="text-xs text-gray-400 dark:text-gray-400">
+              Current Mood
+            </p>
           </motion.div>
         ) : (
           <StatCard

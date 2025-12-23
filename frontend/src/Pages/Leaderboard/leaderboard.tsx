@@ -3,6 +3,7 @@ import { Crown } from "lucide-react";
 import { fetchLeaderboard } from "@/api/leaderboardApi";
 import { useTheme } from "@/context/ThemeContext";
 import type { LeaderboardData } from "@/api/leaderboardApi";
+import AvatarPreview from "@/components/AvatarPreview";
 
 const FocusSessionLeaderboard = () => {
   const { darkMode } = useTheme();
@@ -78,6 +79,8 @@ const FocusSessionLeaderboard = () => {
         darkMode ? "bg-[#101828]" : "bg-white"
       }`}
     >
+      {/* Persistent draggable avatar preview (shared) */}
+      <AvatarPreview />
       <style>{`
         @keyframes float-fly { 0%,100%{transform:translateY(0px) rotate(5deg);} 50%{transform:translateY(-30px) rotate(-5deg);} }
         .animate-float { animation: float-fly 2s infinite ease-in-out; }

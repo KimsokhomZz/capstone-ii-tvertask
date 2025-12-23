@@ -5,11 +5,11 @@ export default function CreateTaskModal({
   show,
   onClose,
   onSubmit,
-//   user,
+}: //   user,
 //   showToast,
 //   setTasks,
 //   createTask,
-}: any) {
+any) {
   return (
     <AnimatePresence>
       {show && (
@@ -21,19 +21,19 @@ export default function CreateTaskModal({
         >
           <div className="absolute inset-0 bg-black/30" onClick={onClose} />
           <motion.div
-            className="relative bg-white rounded-2xl shadow-2xl border border-gray-100 w-full max-w-lg p-6"
+            className="relative bg-white dark:bg-[#1d2942] rounded-2xl shadow-2xl border border-gray-100 dark:border-transparent w-full max-w-lg p-6"
             initial={{ scale: 0.85, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.85, opacity: 0 }}
             transition={{ type: "spring", stiffness: 300, damping: 25 }}
           >
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-lg font-semibold text-gray-900">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                 Create Task
               </h3>
               <button
                 onClick={onClose}
-                className="text-gray-500 hover:bg-yellow-50 rounded-md px-1 cursor-pointer"
+                className="text-gray-500 dark:text-gray-300 hover:bg-yellow-50 dark:hover:bg-yellow-600/10 rounded-md px-1 cursor-pointer"
               >
                 ✕
               </button>
