@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import { motion, AnimatePresence, easeOut } from "framer-motion";
 import ShinChan from "./ShinChan";
 import Doraemon from "./Doraemon";
@@ -153,6 +153,8 @@ const Avatar: React.FC = () => {
     loading: boolean;
     error?: string;
   }>({ level: "--", achievements: 0, streak: "--", loading: true });
+  // prevent runtime error in loadStats (setIsLoading was used but not declared)
+  const [isLoading, setIsLoading] = useState(false);
 
   const { user } = useContext(
     AuthContext
@@ -160,7 +162,82 @@ const Avatar: React.FC = () => {
 
   const { darkMode } = useTheme();
 
-  const [isLoading, setIsLoading] = useState(true);
+  // draggable preview state & refs
+  const previewRef = useRef<HTMLDivElement | null>(null);
+  const dragRef = useRef<{ x: number; y: number } | null>(null);
+  const animRef = useRef<number | null>(null);
+  const lastPos = useRef<{ x: number; y: number }>({
+    x: typeof window !== "undefined" ? window.innerWidth - 120 : 24,
+    y: 24,
+  });
+  const pointerIdRef = useRef<number | null>(null);
+  const [previewScale, setPreviewScale] = useState<number>(0.75);
+  const [dragging, setDragging] = useState(false);
+  const defaultPreviewPos = {
+    x: typeof window !== "undefined" ? window.innerWidth - 120 : 24,
+    y: 24,
+  };
+  const [previewPos, setPreviewPos] = useState<{ x: number; y: number }>(() => {
+    try {
+      const s = localStorage.getItem("avatarPreviewPos");
+      if (s) return JSON.parse(s);
+    } catch {}
+    return defaultPreviewPos;
+  });
+
+  useEffect(() => {
+    // seed lastPos and initial transform
+    lastPos.current = { x: previewPos.x, y: previewPos.y };
+    if (previewRef.current) {
+      previewRef.current.style.transform = `translate3d(${previewPos.x}px, ${previewPos.y}px, 0) scale(${previewScale})`;
+    }
+
+    const onMove = (e: PointerEvent) => {
+      if (!dragRef.current) return;
+      const nx = e.clientX - dragRef.current.x;
+      const ny = e.clientY - dragRef.current.y;
+      const w = previewRef.current?.offsetWidth ?? 140;
+      const h = previewRef.current?.offsetHeight ?? 120;
+      const clampedX = Math.min(Math.max(nx, 8), window.innerWidth - w - 8);
+      const clampedY = Math.min(Math.max(ny, 8), window.innerHeight - h - 8);
+      lastPos.current = { x: clampedX, y: clampedY };
+
+      // update transform on next animation frame for smoothness (no React re-render)
+      if (animRef.current) cancelAnimationFrame(animRef.current);
+      animRef.current = requestAnimationFrame(() => {
+        if (previewRef.current) {
+          previewRef.current.style.transform = `translate3d(${lastPos.current.x}px, ${lastPos.current.y}px, 0) scale(${previewScale})`;
+        }
+      });
+    };
+
+    const onUp = () => {
+      if (dragRef.current) {
+        setDragging(false);
+        dragRef.current = null;
+        // persist final position (use lastPos)
+        setPreviewPos({ ...lastPos.current });
+        try {
+          localStorage.setItem(
+            "avatarPreviewPos",
+            JSON.stringify(lastPos.current)
+          );
+        } catch {}
+      }
+      if (animRef.current) {
+        cancelAnimationFrame(animRef.current);
+        animRef.current = null;
+      }
+    };
+
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+    return () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+      if (animRef.current) cancelAnimationFrame(animRef.current);
+    };
+  }, []); // run once
 
   useEffect(() => {
     if (mode === "play") {
@@ -305,10 +382,22 @@ const Avatar: React.FC = () => {
     },
   };
 
-  const RenderContent = ({ scale = 1, controls = false }) => {
+  const RenderContent = ({
+    scale = 1,
+    controls = false,
+    noAnim = false,
+  }: {
+    scale?: number;
+    controls?: boolean;
+    noAnim?: boolean;
+  }) => {
     const s = `transform scale-[${scale}] transition-transform duration-500`;
     if (sel.type === "face")
-      return (
+      return noAnim ? (
+        <div className={s}>
+          <FaceComponent mood={mood} custom={custom} />
+        </div>
+      ) : (
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -616,6 +705,117 @@ const Avatar: React.FC = () => {
             Customize and interact with your avatars
           </p>
         </motion.div>
+
+        {/* Draggable Floating Face Preview (dashboard only) */}
+        {sel.type === "face" && (
+          <div
+            ref={previewRef}
+            className="fixed z-50 block rounded-xl p-1 w-24 h-24 sm:w-28 sm:h-28"
+            style={{
+              left: 0,
+              top: 0,
+              transform: `translate3d(${previewPos.x}px, ${previewPos.y}px, 0) scale(${previewScale})`,
+              touchAction: "none",
+              willChange: "transform",
+              WebkitBackfaceVisibility: "hidden",
+              userSelect: "none",
+              transition: dragging ? "none" : "transform 140ms ease-out",
+            }}
+          >
+            {/* Render visual face first */}
+            <div
+              className="w-full h-full flex items-center justify-center"
+              style={{
+                pointerEvents: "none",
+                WebkitTapHighlightColor: "transparent",
+              }}
+            >
+              <div
+                style={{ width: "84%", height: "84%", transform: "scale(1)" }}
+              >
+                <RenderContent scale={1} noAnim />
+              </div>
+            </div>
+
+            {/* Drag overlay placed AFTER visual so it is on top and captures all pointer events */}
+            <div
+              className="absolute inset-0 rounded-xl"
+              style={{
+                zIndex: 60,
+                cursor: dragging ? "grabbing" : "grab",
+                pointerEvents: "auto",
+                background: "transparent",
+                touchAction: "none",
+              }}
+              onPointerDown={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const rect = previewRef.current?.getBoundingClientRect();
+                const offsetX = e.clientX - (rect?.left ?? 0);
+                const offsetY = e.clientY - (rect?.top ?? 0);
+                dragRef.current = { x: offsetX, y: offsetY };
+                pointerIdRef.current = e.pointerId;
+                setDragging(true);
+                (e.currentTarget as Element).setPointerCapture?.(e.pointerId);
+              }}
+              onPointerUp={(e) => {
+                if (pointerIdRef.current !== e.pointerId) return;
+                pointerIdRef.current = null;
+                setDragging(false);
+                dragRef.current = null;
+                setPreviewPos({ ...lastPos.current });
+                try {
+                  localStorage.setItem(
+                    "avatarPreviewPos",
+                    JSON.stringify(lastPos.current)
+                  );
+                } catch {}
+                (e.currentTarget as Element).releasePointerCapture?.(
+                  e.pointerId
+                );
+              }}
+              onPointerCancel={(e) => {
+                if (pointerIdRef.current !== e.pointerId) return;
+                pointerIdRef.current = null;
+                setDragging(false);
+                dragRef.current = null;
+                (e.currentTarget as Element).releasePointerCapture?.(
+                  e.pointerId
+                );
+              }}
+              onWheel={(e) => {
+                e.preventDefault();
+                const delta = -e.deltaY;
+                const factor = 1 + Math.sign(delta) * 0.08;
+                let ns = Math.min(Math.max(previewScale * factor, 0.4), 1.2);
+                setPreviewScale(ns);
+                if (previewRef.current) {
+                  previewRef.current.style.transform = `translate3d(${lastPos.current.x}px, ${lastPos.current.y}px, 0) scale(${ns})`;
+                }
+              }}
+              onDoubleClick={() => {
+                const reset = {
+                  x:
+                    window.innerWidth -
+                    (previewRef.current?.offsetWidth ?? 160) -
+                    16,
+                  y: 24,
+                };
+                lastPos.current = { ...reset };
+                setPreviewPos(reset);
+                if (previewRef.current) {
+                  previewRef.current.style.transform = `translate3d(${reset.x}px, ${reset.y}px, 0) scale(${previewScale})`;
+                }
+                try {
+                  localStorage.setItem(
+                    "avatarPreviewPos",
+                    JSON.stringify(reset)
+                  );
+                } catch {}
+              }}
+            />
+          </div>
+        )}
 
         {/* Main Hero Section */}
         <motion.div
