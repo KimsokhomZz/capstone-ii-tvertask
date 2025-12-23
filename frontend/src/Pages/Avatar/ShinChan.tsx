@@ -56,18 +56,39 @@ const CONTROLS = [
   { id: AnimationState.EAT, icon: "🍪", label: "Eat", cls: "bg-orange-400" },
 ];
 
-const ShinChan: React.FC<{ showControls?: boolean; className?: string }> = ({
-  showControls = true,
-  className = "",
-}) => {
+const ShinChan: React.FC<{
+  showControls?: boolean;
+  className?: string;
+  persistKey?: string;
+}> = ({ showControls = true, className = "", persistKey }) => {
   const [state, setState] = useState<AnimationState>(AnimationState.IDLE);
 
+  // load persisted state
   useEffect(() => {
-    if (state !== AnimationState.IDLE) {
+    if (!persistKey) return;
+    const v = localStorage.getItem(persistKey);
+    if (v !== null) {
+      try {
+        const parsed = JSON.parse(v);
+        setState(parsed as AnimationState);
+      } catch {
+        /* ignore */
+      }
+    }
+  }, [persistKey]);
+
+  // only auto-reset to IDLE when not persisted (persisted state should stick)
+  useEffect(() => {
+    if (state !== AnimationState.IDLE && !persistKey) {
       const timer = setTimeout(() => setState(AnimationState.IDLE), 2500);
       return () => clearTimeout(timer);
     }
-  }, [state]);
+  }, [state, persistKey]);
+
+  const persistSetState = (s: AnimationState) => {
+    setState(s);
+    if (persistKey) localStorage.setItem(persistKey, JSON.stringify(s));
+  };
 
   const s = (check: AnimationState) => state === check;
   const animClass = s(AnimationState.WIGGLE)
@@ -458,7 +479,7 @@ const ShinChan: React.FC<{ showControls?: boolean; className?: string }> = ({
           {CONTROLS.map((c) => (
             <button
               key={c.id}
-              onClick={() => setState(c.id)}
+              onClick={() => persistSetState(c.id)}
               className={`flex-shrink-0 p-3 ${c.cls} border-2 border-black hover:opacity-90 rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-y-1 active:shadow-none flex flex-col items-center min-w-[80px]`}
             >
               <span className="text-3xl">{c.icon}</span>

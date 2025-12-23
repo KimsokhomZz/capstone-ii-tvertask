@@ -24,12 +24,41 @@ const CONTROLS = [
   { id: Emotion.SAD, icon: "😢", label: "Sad", cls: "bg-blue-300 text-white" },
 ];
 
-const Egg: React.FC<{ emotion?: Emotion; showControls?: boolean }> = ({
-  emotion = Emotion.NEUTRAL,
-  showControls = false,
-}) => {
+const Egg: React.FC<{
+  emotion?: Emotion;
+  showControls?: boolean;
+  persistKey?: string;
+}> = ({ emotion = Emotion.NEUTRAL, showControls = false, persistKey }) => {
   const [curr, setCurr] = useState<Emotion>(emotion);
-  useEffect(() => setCurr(emotion), [emotion]);
+
+  // load persisted emotion if persistKey set
+  useEffect(() => {
+    if (!persistKey) {
+      setCurr(emotion);
+      return;
+    }
+    const raw = localStorage.getItem(persistKey);
+    if (!raw) {
+      setCurr(emotion);
+      return;
+    }
+    try {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === "object" && parsed.emotion)
+        setCurr(parsed.emotion as Emotion);
+      else if (typeof parsed === "string") setCurr(parsed as Emotion);
+    } catch {
+      setCurr(raw as Emotion);
+    }
+  }, [emotion, persistKey]);
+
+  // persist curr when it changes
+  useEffect(() => {
+    if (!persistKey) return;
+    try {
+      localStorage.setItem(persistKey, JSON.stringify({ emotion: curr }));
+    } catch {}
+  }, [curr, persistKey]);
 
   const anim = {
     [Emotion.DANCE]: "animate-dance",

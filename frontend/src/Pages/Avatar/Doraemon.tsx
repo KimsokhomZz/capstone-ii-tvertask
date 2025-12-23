@@ -52,9 +52,10 @@ const BUTTONS = [
   },
 ];
 
-const Doraemon: React.FC<{ showControls?: boolean }> = ({
-  showControls = true,
-}) => {
+const Doraemon: React.FC<{
+  showControls?: boolean;
+  persistKey?: string;
+}> = ({ showControls = true, persistKey }) => {
   const [face, setFace] = useState<FaceState>(FaceState.IDLE);
   const [opts, setOpts] = useState({
     copter: false,
@@ -65,12 +66,39 @@ const Doraemon: React.FC<{ showControls?: boolean }> = ({
   const [drag, setDrag] = useState(false);
   const ref = useRef({ x: 0, y: 0 });
 
+  // load persisted full state (face + opts + pos) if persistKey provided
   useEffect(() => {
-    if (face !== FaceState.IDLE && face !== FaceState.SLEEP) {
+    if (!persistKey) return;
+    const raw = localStorage.getItem(persistKey);
+    if (!raw) return;
+    try {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === "object") {
+        if (parsed.face) setFace(parsed.face as FaceState);
+        if (parsed.opts) setOpts(parsed.opts);
+        if (parsed.pos) setPos(parsed.pos);
+      }
+    } catch {
+      // legacy string-only face
+      setFace(raw as FaceState);
+    }
+  }, [persistKey]);
+
+  // do not auto-reset face when persisted (behave like ShinChan)
+  useEffect(() => {
+    if (face !== FaceState.IDLE && face !== FaceState.SLEEP && !persistKey) {
       const t = setTimeout(() => setFace(FaceState.IDLE), 2500);
       return () => clearTimeout(t);
     }
-  }, [face]);
+  }, [face, persistKey]);
+
+  // persist full Doraemon state whenever it changes
+  useEffect(() => {
+    if (!persistKey) return;
+    try {
+      localStorage.setItem(persistKey, JSON.stringify({ face, opts, pos }));
+    } catch {}
+  }, [face, opts, pos, persistKey]);
 
   useEffect(() => {
     if (!opts.flying) setPos({ x: 0, y: 0 });
@@ -99,10 +127,18 @@ const Doraemon: React.FC<{ showControls?: boolean }> = ({
   }, [drag]);
 
   const toggle = (k: keyof typeof opts) => {
-    if (k === "flying" && !opts.copter) return;
-    if (k === "copter" && opts.copter)
-      setOpts((p) => ({ ...p, copter: false, flying: false }));
-    else setOpts((p) => ({ ...p, [k]: !p[k] }));
+    setOpts((p) => {
+      if (k === "flying" && !p.copter) return p;
+      if (k === "copter" && p.copter)
+        return { ...p, copter: false, flying: false };
+      return { ...p, [k]: !p[k] } as typeof p;
+    });
+    // saved via effect
+  };
+
+  const persistSetFace = (f: FaceState) => {
+    setFace(f);
+    // saved via effect
   };
 
   const msg =
@@ -519,7 +555,7 @@ const Doraemon: React.FC<{ showControls?: boolean }> = ({
             return (
               <button
                 key={i}
-                onClick={() => setFace(b.id as FaceState)}
+                onClick={() => persistSetFace(b.id as FaceState)}
                 className={`flex-shrink-0 p-3 ${b.cls} border-2 border-black rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-y-1 active:shadow-none flex flex-col items-center min-w-[80px]`}
               >
                 <span className="text-3xl">{b.icon}</span>

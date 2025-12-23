@@ -138,7 +138,9 @@ const INIT_AVATARS: AvatarItem[] = [
 
 const Avatar: React.FC = () => {
   const [avatars, setAvatars] = useState<AvatarItem[]>(INIT_AVATARS);
-  const [selId, setSelId] = useState<number>(1);
+  const [selId, setSelId] = useState<number | null>(null);
+  // tick to force thumbnail remount so previews re-read persisted state after play view changes
+  const [previewTick, setPreviewTick] = useState(0);
   const [mood, setMood] = useState<Mood>(Mood.HAPPY);
   const [mode, setMode] = useState<"dashboard" | "play">("dashboard");
   const [msg, setMsg] = useState<string>("");
@@ -159,17 +161,6 @@ const Avatar: React.FC = () => {
   const { darkMode } = useTheme();
 
   const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    if (mode === "play") return;
-    const seq = [Mood.HAPPY, Mood.ANGRY, Mood.HAPPY, Mood.SAD];
-    let i = 0;
-    const t = setInterval(() => {
-      i = (i + 1) % seq.length;
-      setMood(seq[i]);
-    }, 5000);
-    return () => clearInterval(t);
-  }, [mode]);
 
   useEffect(() => {
     if (mode === "play") {
@@ -256,10 +247,32 @@ const Avatar: React.FC = () => {
       : m === Mood.LOVE
       ? EggEmotion.LOVE
       : EggEmotion.NEUTRAL;
+  // load persisted mood on mount
+  useEffect(() => {
+    const s = localStorage.getItem("selectedMood");
+    if (s && Object.keys(MOODS).includes(s)) {
+      setMood(s as Mood);
+    }
+
+    // restore last selected avatar (so dashboard shows last-viewed Anime/avatar)
+    const last = localStorage.getItem("selectedAvatar");
+    if (last) {
+      const id = Number(last);
+      if (!Number.isNaN(id)) setSelId(id);
+    }
+  }, []);
+
+  // persist selected avatar when changed
+  useEffect(() => {
+    if (typeof selId !== "undefined" && selId !== null) {
+      localStorage.setItem("selectedAvatar", String(selId));
+    }
+  }, [selId]);
+
   const moodAct = (m: Mood) => {
     setMood(m);
-    if (m === Mood.EATING || m === Mood.LOVE)
-      setTimeout(() => setMood(Mood.HAPPY), m === Mood.LOVE ? 5000 : 2500);
+    // persist selected mood string so Dashboard shows the last-picked mood
+    localStorage.setItem("selectedMood", m);
   };
 
   // Animation variants
@@ -313,7 +326,8 @@ const Avatar: React.FC = () => {
           transition={{ duration: 0.5 }}
           className={s}
         >
-          <ShinChan showControls={controls} />
+          {/* pass persistKey so ShinChan will persist/load its last state */}
+          <ShinChan showControls={controls} persistKey={`avatar-${sel.id}`} />
         </motion.div>
       );
     if (sel.type === "doraemon")
@@ -324,7 +338,7 @@ const Avatar: React.FC = () => {
           transition={{ duration: 0.5 }}
           className={s}
         >
-          <Doraemon showControls={controls} />
+          <Doraemon showControls={controls} persistKey={`avatar-${sel.id}`} />
         </motion.div>
       );
     if (sel.type === "egg")
@@ -335,7 +349,11 @@ const Avatar: React.FC = () => {
           transition={{ duration: 0.5, type: "spring" }}
           className={s}
         >
-          <Egg emotion={getEggEm(mood)} showControls={controls} />
+          <Egg
+            emotion={getEggEm(mood)}
+            showControls={controls}
+            persistKey={`avatar-${sel.id}`}
+          />
         </motion.div>
       );
     return <img src={sel.image} className="w-full h-full object-cover" />;
@@ -345,7 +363,7 @@ const Avatar: React.FC = () => {
     const cfg = MOODS[mood];
     return (
       <motion.div
-        key={`mode-play-${mood}`} // force remount when entering/exiting play
+        key={`mode-play`} // keep mounted while mood changes
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -381,9 +399,10 @@ const Avatar: React.FC = () => {
           onClick={() => {
             // ensure dashboard UI state is restored immediately
             setMode("dashboard");
-            setMood(Mood.HAPPY);
+            // keep the selected avatar (do NOT reset selId) so Dashboard shows the last-viewed
             setTab("gear"); // reset sidebar tab (optional)
-            setSelId(1); // reset selection (optional)
+            // bump tick so grid thumbnails remount and re-read persisted avatar state
+            setPreviewTick((t) => t + 1);
             window.scrollTo(0, 0); // restore scroll if overlay changed it
           }}
           className={`absolute top-4 left-4 sm:top-6 sm:left-6 md:top-8 md:left-8 px-3 py-2 sm:px-4 sm:py-2.5 md:px-5 md:py-2.5 rounded-xl md:rounded-2xl font-bold shadow-sm z-50 flex justify-center items-center gap-2 text-sm md:text-base ${
@@ -448,10 +467,15 @@ const Avatar: React.FC = () => {
                   const btn = MOODS[m];
                   return (
                     <motion.button
+                      type="button"
                       key={m}
                       whileHover={{ scale: 1.1, rotate: 5 }}
                       whileTap={{ scale: 0.9 }}
-                      onClick={() => moodAct(m)}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        moodAct(m);
+                      }}
                       className={`w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-xl md:rounded-2xl text-2xl sm:text-3xl transition-all hover:-translate-y-1 active:scale-95 ${
                         mood === m
                           ? btn.cls + " text-white scale-110 shadow-lg"
@@ -663,12 +687,19 @@ const Avatar: React.FC = () => {
 
               {/* View Button */}
               <motion.button
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setMode("play")}
-                className="absolute bottom-4 sm:bottom-6 right-4 sm:right-6 bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-full sm:rounded-2xl font-bold flex items-center gap-2 shadow-2xl z-20 hover:from-yellow-500 hover:to-orange-600 transition-all duration-300"
+                aria-label="View avatar"
+                className={`absolute bottom-4 right-4 px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl md:rounded-2xl font-bold shadow-sm z-20 flex items-center gap-2 text-sm md:text-base ${
+                  darkMode
+                    ? "bg-white/60 hover:bg-white/90 text-black"
+                    : "bg-white/60 hover:bg-white/90 text-black"
+                }`}
               >
-                <i className="fa-solid fa-play text-sm sm:text-base"></i>
+                <i className="fa-solid fa-play"></i>
                 <span className="hidden sm:inline">View</span>
               </motion.button>
             </div>
@@ -872,12 +903,16 @@ const Avatar: React.FC = () => {
                 )
                 .map((a, idx) => (
                   <motion.div
-                    key={a.id}
+                    key={`${a.id}-${previewTick}`}
                     variants={cardVariants}
                     custom={idx}
                     whileHover={{ scale: 1.05, rotate: 1 }}
                     whileTap={{ scale: 0.95 }}
-                    onClick={() => !a.locked && setSelId(a.id)}
+                    onClick={() => {
+                      if (a.locked) return;
+                      setSelId(a.id);
+                      // localStorage persistence handled by effect above
+                    }}
                     className={`relative aspect-square bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl sm:rounded-2xl flex items-center justify-center overflow-hidden border-4 cursor-pointer transition-all duration-300 ${
                       selId === a.id
                         ? "border-green-500 shadow-2xl scale-105 ring-4 ring-green-200"
@@ -892,11 +927,21 @@ const Avatar: React.FC = () => {
                       {a.type === "face" ? (
                         <FaceComponent mood={mood} custom={a.customization} />
                       ) : a.type === "shinchan" ? (
-                        <ShinChan showControls={false} />
+                        <ShinChan
+                          showControls={false}
+                          persistKey={`avatar-${a.id}`}
+                        />
                       ) : a.type === "doraemon" ? (
-                        <Doraemon showControls={false} />
+                        <Doraemon
+                          showControls={false}
+                          persistKey={`avatar-${a.id}`}
+                        />
                       ) : (
-                        <Egg emotion={getEggEm(mood)} />
+                        <Egg
+                          emotion={getEggEm(mood)}
+                          showControls={false}
+                          persistKey={`avatar-${a.id}`}
+                        />
                       )}
                     </div>
 
