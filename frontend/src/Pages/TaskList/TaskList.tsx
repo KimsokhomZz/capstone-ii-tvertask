@@ -17,6 +17,7 @@ import EditTaskModal from "./components/EditTaskModal";
 import ConfirmCompleteModal from "./components/ConfirmCompleteModal";
 import { toast as showToastify } from "react-toastify";
 import { useTheme } from "@/context/ThemeContext";
+import AvatarPreview from "@/components/AvatarPreview";
 import "react-toastify/dist/ReactToastify.css";
 
 // Use the Task type from your API if possible, otherwise define here:
@@ -133,6 +134,8 @@ export default function TodoList() {
         darkMode ? "bg-[#101828] border-[#2a3f5f]" : "bg-white border-gray-100"
       }`}
     >
+      {/* Persistent draggable avatar preview (shared) */}
+      <AvatarPreview />
       {/* Header */}
       <motion.div
         initial={{ y: -20, opacity: 0 }}

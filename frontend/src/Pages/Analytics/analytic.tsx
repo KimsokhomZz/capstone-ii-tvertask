@@ -4,6 +4,7 @@ import AnalyticsOverviewTab from "./OverviewTab";
 import LevelSystemTab from "./LevelSystemTab";
 import AnalyticTab from "./AnalyticTab";
 import { useTheme } from "../../context/ThemeContext";
+import AvatarPreview from "@/components/AvatarPreview";
 
 type AnalyticsTab = "overview" | "level" | "analytic";
 
@@ -114,6 +115,8 @@ export default function AnalyticsPage() {
       animate="visible"
       variants={containerVariants}
     >
+      {/* Persistent draggable avatar preview (shared) */}
+      <AvatarPreview />
       {/* Header */}
       <motion.div
         className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between"

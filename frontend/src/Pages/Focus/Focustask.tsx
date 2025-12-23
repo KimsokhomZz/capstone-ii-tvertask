@@ -14,6 +14,7 @@ import { awardXp } from "../../api/userXpApi";
 import useTaskNotes from "../../hooks/useTaskNotes";
 import { toast as toastify } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import AvatarPreview from "@/components/AvatarPreview";
 
 // type Note = { id: number; text: string; editing?: boolean };
 
@@ -165,6 +166,8 @@ export default function Focustask() {
       } ${selectedBg}`}
     >
       <div className="max-w-4xl mx-auto space-y-4">
+        {/* Persistent draggable avatar preview (shared) */}
+        <AvatarPreview />
         <div className="flex items-center justify-between">
           <Link
             to="/focus"

@@ -8,6 +8,7 @@ import { getStatus, getXp } from "../../api/userXpApi";
 import { fetchUserStreak } from "../../api/streakApi";
 import AuthContext from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext"; // Make sure this import exists
+import AvatarPreview from "@/components/AvatarPreview";
 
 // --- Types & Data Structures (Ready for Backend) ---
 const Mood = {
@@ -706,116 +707,8 @@ const Avatar: React.FC = () => {
           </p>
         </motion.div>
 
-        {/* Draggable Floating Face Preview (dashboard only) */}
-        {sel.type === "face" && (
-          <div
-            ref={previewRef}
-            className="fixed z-50 block rounded-xl p-1 w-24 h-24 sm:w-28 sm:h-28"
-            style={{
-              left: 0,
-              top: 0,
-              transform: `translate3d(${previewPos.x}px, ${previewPos.y}px, 0) scale(${previewScale})`,
-              touchAction: "none",
-              willChange: "transform",
-              WebkitBackfaceVisibility: "hidden",
-              userSelect: "none",
-              transition: dragging ? "none" : "transform 140ms ease-out",
-            }}
-          >
-            {/* Render visual face first */}
-            <div
-              className="w-full h-full flex items-center justify-center"
-              style={{
-                pointerEvents: "none",
-                WebkitTapHighlightColor: "transparent",
-              }}
-            >
-              <div
-                style={{ width: "84%", height: "84%", transform: "scale(1)" }}
-              >
-                <RenderContent scale={1} noAnim />
-              </div>
-            </div>
-
-            {/* Drag overlay placed AFTER visual so it is on top and captures all pointer events */}
-            <div
-              className="absolute inset-0 rounded-xl"
-              style={{
-                zIndex: 60,
-                cursor: dragging ? "grabbing" : "grab",
-                pointerEvents: "auto",
-                background: "transparent",
-                touchAction: "none",
-              }}
-              onPointerDown={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                const rect = previewRef.current?.getBoundingClientRect();
-                const offsetX = e.clientX - (rect?.left ?? 0);
-                const offsetY = e.clientY - (rect?.top ?? 0);
-                dragRef.current = { x: offsetX, y: offsetY };
-                pointerIdRef.current = e.pointerId;
-                setDragging(true);
-                (e.currentTarget as Element).setPointerCapture?.(e.pointerId);
-              }}
-              onPointerUp={(e) => {
-                if (pointerIdRef.current !== e.pointerId) return;
-                pointerIdRef.current = null;
-                setDragging(false);
-                dragRef.current = null;
-                setPreviewPos({ ...lastPos.current });
-                try {
-                  localStorage.setItem(
-                    "avatarPreviewPos",
-                    JSON.stringify(lastPos.current)
-                  );
-                } catch {}
-                (e.currentTarget as Element).releasePointerCapture?.(
-                  e.pointerId
-                );
-              }}
-              onPointerCancel={(e) => {
-                if (pointerIdRef.current !== e.pointerId) return;
-                pointerIdRef.current = null;
-                setDragging(false);
-                dragRef.current = null;
-                (e.currentTarget as Element).releasePointerCapture?.(
-                  e.pointerId
-                );
-              }}
-              onWheel={(e) => {
-                e.preventDefault();
-                const delta = -e.deltaY;
-                const factor = 1 + Math.sign(delta) * 0.08;
-                let ns = Math.min(Math.max(previewScale * factor, 0.4), 1.2);
-                setPreviewScale(ns);
-                if (previewRef.current) {
-                  previewRef.current.style.transform = `translate3d(${lastPos.current.x}px, ${lastPos.current.y}px, 0) scale(${ns})`;
-                }
-              }}
-              onDoubleClick={() => {
-                const reset = {
-                  x:
-                    window.innerWidth -
-                    (previewRef.current?.offsetWidth ?? 160) -
-                    16,
-                  y: 24,
-                };
-                lastPos.current = { ...reset };
-                setPreviewPos(reset);
-                if (previewRef.current) {
-                  previewRef.current.style.transform = `translate3d(${reset.x}px, ${reset.y}px, 0) scale(${previewScale})`;
-                }
-                try {
-                  localStorage.setItem(
-                    "avatarPreviewPos",
-                    JSON.stringify(reset)
-                  );
-                } catch {}
-              }}
-            />
-          </div>
-        )}
+        {/* Reusable draggable avatar preview (shared with Dashboard) */}
+        <AvatarPreview />
 
         {/* Main Hero Section */}
         <motion.div
