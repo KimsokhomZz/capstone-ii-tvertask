@@ -6,6 +6,7 @@ import { awardXp } from "../../api/userXpApi";
 import { toast } from "react-toastify";
 import { moods } from "@/utils/moods";
 import { useTheme } from "@/context/ThemeContext";
+import { useAuth } from "@/context/AuthContext"; // { changed code }
 
 interface DashboardBottomSectionProps {
   // Remove these props since we're managing mood internally
@@ -26,6 +27,7 @@ interface Quest {
 
 const DashboardBottomSection: React.FC<DashboardBottomSectionProps> = () => {
   const { darkMode } = useTheme();
+  const { refreshUserData } = useAuth(); // { changed code }
   const [selectedMood, setSelectedMood] = useState<number | null>(() => {
     const stored = localStorage.getItem("selectedMood");
     return stored !== null ? Number(stored) : null;
@@ -105,6 +107,7 @@ const DashboardBottomSection: React.FC<DashboardBottomSectionProps> = () => {
   };
 
   const handleClaimQuest = async (questId: string) => {
+    // { changed code }
     const quest = quests.find((q) => q.id === questId);
     if (!quest || quest.claimed) return;
 
@@ -115,19 +118,50 @@ const DashboardBottomSection: React.FC<DashboardBottomSectionProps> = () => {
     }
 
     try {
-      // Award XP to user
+      // Award XP to user (API)
       await awardXp(userId, quest.xp, `quest-${questId}`);
 
-      // Update quest status
+      // Update quest status locally (optimistic UI)
       setQuests((prev) =>
         prev.map((q) => (q.id === questId ? { ...q, claimed: true } : q))
       );
 
+      // Update local stored user XP so localStorage is consistent
+      try {
+        const json = localStorage.getItem("user");
+        if (json) {
+          const u = JSON.parse(json);
+          if (typeof u.xp === "number") u.xp += quest.xp;
+          else if (typeof u.totalXp === "number") u.totalXp += quest.xp;
+          else if (typeof u.xpEarned === "number") u.xpEarned += quest.xp;
+          else u.xp = (u.xp || 0) + quest.xp;
+          localStorage.setItem("user", JSON.stringify(u));
+        }
+      } catch (e) {
+        console.warn("Could not update local user xp:", e);
+      }
+
+      // Refresh AuthContext so components reading context update immediately
+      try {
+        if (typeof refreshUserData === "function") {
+          await refreshUserData();
+        }
+      } catch (e) {
+        console.warn(
+          "refreshUserData failed, UI may still need manual refresh:",
+          e
+        );
+      }
+
+      // Notify other components (optional)
+      window.dispatchEvent(
+        new CustomEvent("userXpUpdated", {
+          detail: { added: quest.xp, questId },
+        })
+      );
+
       // Show celebration
-      setCelebrationData({
-        questName: quest.name,
-        xpAwarded: quest.xp,
-      });
+      setCelebrationData({ questName: quest.name, xpAwarded: quest.xp });
       setCelebrationOpen(true);
 
       toast.success(`Quest claimed! You earned ${quest.xp} XP! 🎉`);
@@ -135,7 +169,7 @@ const DashboardBottomSection: React.FC<DashboardBottomSectionProps> = () => {
       console.error("Failed to claim quest", error);
       toast.error("Failed to claim quest. Please try again. 🚨");
     }
-  };
+  }; // { changed code }
 
   const handleMoodSelect = (index: number) => {
     setSelectedMood(index);

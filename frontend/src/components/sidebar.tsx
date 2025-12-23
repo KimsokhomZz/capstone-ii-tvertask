@@ -9,6 +9,7 @@ import {
   Settings,
   HelpCircle,
   LogOut,
+  AlertTriangle,
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -84,6 +85,37 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
     }
   };
 
+  // Logout modal state
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [logoutPending, setLogoutPending] = useState(false);
+  const [countdown, setCountdown] = useState(5);
+
+  useEffect(() => {
+    let interval: ReturnType<typeof setInterval> | null = null;
+    let timeout: ReturnType<typeof setTimeout> | null = null;
+    if (logoutPending) {
+      setCountdown(5);
+      interval = setInterval(() => {
+        setCountdown((c) => c - 1);
+      }, 1000);
+      timeout = setTimeout(async () => {
+        // finalize logout after 5s
+        try {
+          await logout();
+          if (onLogout) onLogout();
+          navigate("/login");
+        } catch {
+          // ignore
+        }
+      }, 5000);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+      if (timeout) clearTimeout(timeout);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [logoutPending]);
+
   const menuItems = [
     { name: "Dashboard", icon: <Home size={20} />, path: "/dashboard" },
     { name: "Focus", icon: <Target size={20} />, path: "/focus" },
@@ -111,7 +143,9 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
             } pb-4 flex justify-center items-center`}
           >
             <img
-              src="../src/assets/Tver.svg"
+              src={
+                darkMode ? "../src/assets/Tver.svg" : "../src/assets/Logo1.svg"
+              }
               alt="TverTask Logo"
               className="w-48 object-contain rounded-2xl"
             />
@@ -265,7 +299,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
-          onClick={handleLogout}
+          onClick={() => setShowLogoutModal(true)}
           className={`flex items-center gap-3 w-full py-3 px-3 rounded-2xl transition-all border shadow-sm hover:shadow-md ${
             darkMode
               ? "bg-[#1a2f42] hover:bg-[#253548] border-yellow-600 hover:border-yellow-500"
@@ -292,6 +326,113 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
             </div>
           </div>
         </motion.button>
+      </div>
+
+      {/* Logout confirmation modal (modernized) */}
+      <div
+        className={`fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm transition-opacity ${
+          showLogoutModal
+            ? "opacity-100 pointer-events-auto"
+            : "opacity-0 pointer-events-none"
+        }`}
+        onClick={(e) => {
+          if (e.target === e.currentTarget && !logoutPending)
+            setShowLogoutModal(false);
+        }}
+      >
+        <div
+          className={`rounded-2xl p-6 w-96 shadow-2xl transform transition-all ${
+            showLogoutModal
+              ? "scale-100 opacity-100 translate-y-0"
+              : "scale-95 opacity-0 -translate-y-2"
+          } ${
+            darkMode
+              ? "bg-[#1d2942] text-white border border-[#253548]"
+              : "bg-white text-black"
+          }`}
+        >
+          <div className="flex items-start gap-4">
+            <div className="flex-shrink-0">
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br from-yellow-400 to-orange-500 text-white shadow-md">
+                <AlertTriangle size={20} />
+              </div>
+            </div>
+            <div className="flex-1">
+              <h3
+                className={`text-lg font-semibold ${
+                  darkMode ? "text-white" : "text-gray-900"
+                }`}
+              >
+                Confirm Logout
+              </h3>
+              <p
+                className={`mt-1 text-sm ${
+                  darkMode ? "text-yellow-200/80" : "text-gray-500"
+                }`}
+              >
+                You're about to sign out. Confirm to end your session and return
+                to the login screen.
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-6">
+            <div
+              className={`mb-4 text-sm ${
+                darkMode ? "text-yellow-200/70" : "text-gray-500"
+              }`}
+            >
+              This action will not delete any data. You can cancel now to stay
+              signed in.
+            </div>
+
+            <div className="flex items-center justify-end gap-3">
+              <button
+                onClick={() => {
+                  if (!logoutPending) setShowLogoutModal(false);
+                }}
+                className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors ${
+                  darkMode
+                    ? "bg-transparent border-[#2a3f5f] text-yellow-200 hover:bg-[#253548]"
+                    : "bg-transparent border-gray-200 text-gray-700 hover:bg-gray-50"
+                }`}
+                disabled={logoutPending}
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={() => setLogoutPending(true)}
+                className="px-4 py-2 rounded-lg bg-gradient-to-r from-yellow-500 to-orange-500 text-white text-sm font-semibold shadow-md hover:scale-[1.01] transition-transform disabled:opacity-60"
+                disabled={logoutPending}
+              >
+                {logoutPending ? (
+                  <span className="flex items-center gap-2">
+                    <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24">
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="white"
+                        strokeWidth="4"
+                        fill="none"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="white"
+                        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                      ></path>
+                    </svg>
+                    Confirming... ({countdown}s)
+                  </span>
+                ) : (
+                  "Confirm"
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </aside>
   );

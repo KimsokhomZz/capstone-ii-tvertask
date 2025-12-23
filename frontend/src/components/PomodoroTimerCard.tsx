@@ -935,7 +935,11 @@ export default function PomodoroTimerCard({
             if (e.target === e.currentTarget) setIsMusicOpen(false);
           }}
         >
-          <div className="bg-white rounded-2xl p-4 md:p-6 relative shadow-xl w-[944px] h-auto max-h-[90vh] overflow-auto">
+          <div
+            className={`rounded-2xl p-4 md:p-6 relative shadow-xl w-[944px] h-auto max-h-[90vh] overflow-auto ${
+              darkMode ? "bg-[#101828] text-white" : "bg-white"
+            }`}
+          >
             <FocusMusicApp embedded={true} />
           </div>
         </div>
